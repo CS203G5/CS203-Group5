@@ -1,14 +1,12 @@
 package com.example.tournament;
 
-import java.util.List;
+import java.util.*;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-
 
 @Transactional
 @Service
@@ -62,8 +60,12 @@ public class TournamentServiceImpl implements TournamentService {
         }).orElse(null);
     }
 
-    public void deleteById(Long tid) {
-        tournamentRepository.deleteById(tid);
+    public void deleteById(List<Long> deleteList) {
+        for (Long tid : deleteList) {
+            if (!tournamentRepository.existsById(tid)) {
+                throw new IllegalArgumentException("Tournament with id " + tid + " does not exist");
+            }
+            tournamentRepository.deleteById(tid);
+        }
     }
-
 }

@@ -49,7 +49,8 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:8080/tournament/1
+DELETE http://localhost:8080/tournament
+[1, 2, 3]
 
 
 ######### Duel REST API #########
@@ -94,4 +95,3 @@ Content-Type: application/json
 
 ###
 DELETE http://localhost:8080/duel/3
-

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/tournament")
@@ -65,18 +66,20 @@ public class TournamentController {
     }
     
 
-    @PostMapping("/tournament")
+    @PostMapping()
     public Tournament addTournament(@Valid @RequestBody Tournament tournament) {
+        tournament.setModifiedAt(LocalDateTime.now());
         return ts.save(tournament);
     }
 
     @PutMapping("/{tid}")
     public Tournament updateTournament(@PathVariable Long tid, @Valid @RequestBody Tournament tournament) {
+        tournament.setModifiedAt(LocalDateTime.now());
         return ts.update(tid, tournament);
     }
 
-    @DeleteMapping("/{tid}")
-    public void deleteTournament(@PathVariable Long tid) {
-        ts.deleteById(tid);
+    @DeleteMapping()
+    public void deleteTournament(@Valid @RequestBody List<Long> deleteList) {
+        ts.deleteById(deleteList);
     }
 }

@@ -13,6 +13,5 @@ public interface TournamentService {
     List<Tournament> getTournamentByMatchingAlgo(Boolean isRandom);
     Tournament save(Tournament tournament);
     Tournament update(Long tid,Tournament tournament);
-    void deleteById(Long tid);
-
+    void deleteById(List<Long> deleteList);
 }
