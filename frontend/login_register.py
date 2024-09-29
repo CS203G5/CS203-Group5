@@ -13,6 +13,7 @@ AWS_REGION = os.getenv('AWS_REGION')
 # Set up AWS Cognito client
 client = boto3.client('cognito-idp', region_name=AWS_REGION)
 
+# Function to log in user with AWS Cognito
 def login_user():
     st.title('Login')
 
@@ -62,6 +63,7 @@ def login_user():
         except ClientError as e:
             st.error(f"Login failed: {e.response['Error']['Message']}")
 
+# Function to register user with AWS Cognito
 def register_user():
     st.title('Register')
 
@@ -86,13 +88,17 @@ def register_user():
                 ]
             )
             st.success("Registration successful! Please check your email for verification.")
-            st.session_state['username'] = username 
+            st.session_state['username'] = username
+            st.session_state['registered'] = True  # Flag to indicate that the user just registered
         except ClientError as e:
             st.error(f"Registration failed: {e.response['Error']['Message']}")
 
-def confirm_registration():
-    st.title('Confirm Registration')
+    # Show confirmation form if registration is successful
+    if st.session_state.get('registered', False):
+        confirm_registration()  # Display confirmation form right after registration
 
+# Function to confirm user registration (using the verification code sent to email)
+def confirm_registration():
     if 'username' in st.session_state:
         username = st.session_state['username']
     else:
@@ -109,5 +115,6 @@ def confirm_registration():
                 ConfirmationCode=verification_code,
             )
             st.success("Email verification successful! You can now log in.")
+            st.session_state['registered'] = False  # Reset the registration flag
         except ClientError as e:
             st.error(f"Verification failed: {e.response['Error']['Message']}")
