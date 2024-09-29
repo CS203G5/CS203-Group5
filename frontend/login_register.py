@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
 COGNITO_CLIENT_ID = os.getenv('AWS_COGNITO_CLIENT_ID')
 COGNITO_USER_POOL_ID = os.getenv('AWS_COGNITO_USER_POOL_ID') 
 AWS_REGION = os.getenv('AWS_REGION')
@@ -13,7 +12,7 @@ AWS_REGION = os.getenv('AWS_REGION')
 # Set up AWS Cognito client
 client = boto3.client('cognito-idp', region_name=AWS_REGION)
 
-# Function to log in user with AWS Cognito
+
 def login_user():
     st.title('Login')
 
@@ -51,28 +50,38 @@ def login_user():
                         )
                         token = mfa_response['AuthenticationResult']['IdToken']
                         st.session_state['jwt_token'] = token
-                        st.success('Login successful with MFA! JWT Token received.')
+                        st.success('Login with MFA successful.')
                     except ClientError as e:
                         st.error(f"MFA verification failed: {e.response['Error']['Message']}")
             else:
                 # No MFA, regular login
                 token = response['AuthenticationResult']['IdToken']
                 st.session_state['jwt_token'] = token
-                st.success('Login successful! JWT Token received.')
+                st.success('Login successful.')
 
         except ClientError as e:
             st.error(f"Login failed: {e.response['Error']['Message']}")
 
-# Function to register user with AWS Cognito
+
 def register_user():
     st.title('Register')
 
-    name = st.text_input('Name')
-    username = st.text_input('Username') 
-    email = st.text_input('Email')
-    password = st.text_input('Password', type='password')
-    gender = st.text_input('Gender')
-    country = st.text_input('Country') 
+    country_options = [
+        'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Singapore',
+        'India', 'China', 'Japan', 'Brazil', 'Mexico', 'South Africa', 'Netherlands', 'Italy',
+        'Spain', 'Sweden', 'Norway', 'Russia', 'South Korea', 'New Zealand'
+    ]
+
+    col1, col2 = st.columns(2)
+    with col1:
+        name = st.text_input('Name')
+        email = st.text_input('Email')
+        gender = st.selectbox('Gender', ['Male', 'Female'])  
+
+    with col2:
+        username = st.text_input('Username') 
+        password = st.text_input('Password', type='password')
+        country = st.selectbox('Country', country_options) 
 
     if st.button('Register'):
         try:
@@ -89,15 +98,14 @@ def register_user():
             )
             st.success("Registration successful! Please check your email for verification.")
             st.session_state['username'] = username
-            st.session_state['registered'] = True  # Flag to indicate that the user just registered
+            st.session_state['registered'] = True  
         except ClientError as e:
             st.error(f"Registration failed: {e.response['Error']['Message']}")
 
-    # Show confirmation form if registration is successful
     if st.session_state.get('registered', False):
-        confirm_registration()  # Display confirmation form right after registration
+        confirm_registration()
 
-# Function to confirm user registration (using the verification code sent to email)
+
 def confirm_registration():
     if 'username' in st.session_state:
         username = st.session_state['username']
@@ -115,6 +123,6 @@ def confirm_registration():
                 ConfirmationCode=verification_code,
             )
             st.success("Email verification successful! You can now log in.")
-            st.session_state['registered'] = False  # Reset the registration flag
+            st.session_state['registered'] = False 
         except ClientError as e:
             st.error(f"Verification failed: {e.response['Error']['Message']}")
