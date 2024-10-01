@@ -1,0 +1,97 @@
+######### Tournament REST API #########
+GET http://localhost:8080/tournament
+
+###
+GET http://localhost:8080/tournament/3
+
+###
+GET http://localhost:8080/tournament/organizer/1
+
+###
+GET http://localhost:8080/tournament/search?searchTerm=olympics
+
+###
+GET http://localhost:8080/tournament/filter?startDate=2024-08-01&endDate=2024-10-31
+
+###
+GET http://localhost:8080/tournament/matching?isRandom=true
+
+###
+GET http://localhost:8080/tournament/sorted?sortBy=name&order=desc
+# GET http://localhost:8080/tournament/sorted?sortBy=date&order=desc
+
+###
+POST http://localhost:8080/tournament
+Content-Type: application/json
+# Authorization: Basic admin goodpassword
+{
+    "name": "Summer Games",
+    "location": "Stadium A",
+    "date": "2024-07-01",
+    "time": "10:00",
+    "description": "Annual summer tournament.",
+    "isRandom": true,
+    "organizer_id": 1
+}
+
+###
+PUT http://localhost:8080/tournament/1
+Content-Type: application/json
+
+{
+    "name": "Winter Games",
+    "location": "Stadium B",
+    "date": "2024-12-01",
+    "time": "19:00",
+    "description": "Annual winter tournament.",
+    "isRandom": false,
+    "organizer_id": 1
+}
+
+###
+DELETE http://localhost:8080/tournament
+[1, 2, 3]
+
+
+######### Duel REST API #########
+###
+GET http://localhost:8080/duel
+
+###
+GET http://localhost:8080/duel?tid=2
+
+###
+GET http://localhost:8080/duel/3
+
+###
+GET http://localhost:8080/duel/player?pid=5
+
+###
+POST http://localhost:8080/duel
+Content-Type: application/json
+Authorization: Basic admin goodpassword
+{
+    "pid1": 1,
+    "pid2": 2,
+    "roundName": "Qualifiers",
+    "winner": 1,
+    "tournament": {
+        "tournament_id": 2
+    }
+}
+
+###
+PUT http://localhost:8080/duel/4
+Content-Type: application/json
+{
+    "pid1": 123,
+    "pid2": 456,
+    "roundName": "Final",
+    "winner": 123,
+    "tournament": {
+        "tournament_id": 2
+    }
+}
+
+###
+DELETE http://localhost:8080/duel/3
