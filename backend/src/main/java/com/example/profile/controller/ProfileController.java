@@ -5,6 +5,8 @@ import com.example.profile.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/profile")
 public class ProfileController {
@@ -12,15 +14,15 @@ public class ProfileController {
     @Autowired
     private ProfileService profileService;
 
-    // Get profile details
+    // Get profile by username (passed as query parameter)
     @GetMapping
-    public Profile getProfile() {
-        return profileService.getProfile();
+    public Profile getProfile(@RequestParam String username) {
+        return profileService.getProfile(username);
     }
 
-    // Update profile details
+    // Update profile details with validation
     @PutMapping
-    public Profile updateProfile(@RequestBody Profile profile) {
+    public Profile updateProfile(@Valid @RequestBody Profile profile) {
         return profileService.updateProfile(profile);
     }
 }

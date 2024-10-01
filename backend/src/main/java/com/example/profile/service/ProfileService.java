@@ -1,24 +1,29 @@
 package com.example.profile.service;
 
 import com.example.profile.model.Profile;
+import com.example.profile.repository.ProfileRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
 
-    private Profile profile = new Profile("user123", "user@example.com", "Bio text", "Public");
+    @Autowired
+    private ProfileRepository profileRepository;
 
-    // Fetch the profile
-    public Profile getProfile() {
-        return profile;
+    public Profile getProfile(String username) {
+        return profileRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
     }
 
-    // Update the profile
     public Profile updateProfile(Profile newProfile) {
-        profile.setUsername(newProfile.getUsername());
-        profile.setEmail(newProfile.getEmail());
-        profile.setBio(newProfile.getBio());
-        profile.setPrivacySettings(newProfile.getPrivacySettings());
-        return profile;
+        Profile existingProfile = profileRepository.findByUsername(newProfile.getUsername())
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+        
+        existingProfile.setEmail(newProfile.getEmail());
+        existingProfile.setBio(newProfile.getBio());
+        existingProfile.setPrivacySettings(newProfile.getPrivacySettings());
+
+        return profileRepository.save(existingProfile);
     }
 }
