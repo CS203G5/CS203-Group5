@@ -34,6 +34,10 @@ public class Tournament {
     @JsonIgnore
     private List<Duel> duels;
 
+    public Tournament(String name){
+        this.name = name;
+    }
+
     public boolean getIsRandom() {
         return isRandom;
     }
