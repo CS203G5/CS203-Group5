@@ -56,6 +56,7 @@ public class SpeedClimberUnitTests {
         verify(tournamentRepo).getTournamentByOrganizer(organizerId);
     }
 
+    @Test
     public void testGetDuelsByTournament() {
         // Given
         Long tournamentId = 1L;

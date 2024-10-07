@@ -18,4 +18,8 @@ public class Duel {
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false)
     private Tournament tournament;
+
+    public Tournament getTournament(){
+        return tournament;
+    }
 }
