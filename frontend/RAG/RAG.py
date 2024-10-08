@@ -39,7 +39,7 @@ def get_session_history(persona_name: str):
 # Define personas and their corresponding prompts
 PERSONAS = {
     f"Base Model: {model}": "",
-    "Friendly Fast2Market Specialist": "Hi, I'm here to help with any technical issues. What seems to be the problem?"
+    "Friendly Speed Climbing Specialist": "Hi, I'm here to help with any technical issues. What seems to be the problem?"
 }
 
 def get_persona_prompt(persona_name):
@@ -107,9 +107,9 @@ def get_response(user_input, conversation_history, persona_name):
     
     return response, []  # Placeholder for source_documents (not used in this case)
 
-# Streamlit UI for Fast2Market assistant
+# Streamlit UI for AI assistant
 def show_rag_assistant():
-    st.header("Fast2Market: Your AI assistant here to guide you!")
+    st.header("Your AI assistant here to guide you! Ask me anything.")
 
     # Initialize session state for storing messages and knowledge base
     if "messages" not in st.session_state:
@@ -125,9 +125,9 @@ def show_rag_assistant():
         response, sourced_texts = get_response(
             prompt, 
             [(msg["role"], msg["content"]) for msg in st.session_state.messages if msg["role"] == "user" or msg["role"] == "assistant"], 
-            "Friendly Fast2Market Specialist"
+            "Friendly Speed Climbing Specialist"
         )
-        responses.append({"role": "assistant", "content": response, "persona": "Friendly Fast2Market Specialist", "sourced_texts": sourced_texts})
+        responses.append({"role": "assistant", "content": response, "persona": "Friendly Speed Climbing Specialist", "sourced_texts": sourced_texts})
         st.session_state.messages.extend(responses)
 
     # Display the conversation history

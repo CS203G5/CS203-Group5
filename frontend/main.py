@@ -1,17 +1,17 @@
 import streamlit as st
 from login_register import login_user, register_user
-from RAG import show_rag_assistant  # Import the RAG Assistant function
+from frontend.RAG.RAG import show_rag_assistant 
 
 def main():
     st.sidebar.title("Navigation")
-    choice = st.sidebar.radio("Choose an option", ["Login", "Register", "RAG Assistant"])  # Add RAG Assistant option
+    choice = st.sidebar.radio("Choose an option", ["Login", "Register", "AI Assistant"]) 
 
     if choice == "Login":
         login_user()
     elif choice == "Register":
         register_user()
-    elif choice == "RAG Assistant":
-        show_rag_assistant()  # Call the RAG Assistant function from RAG.py
+    elif choice == "AI Assistant":
+        show_rag_assistant() 
 
 if __name__ == "__main__":
     main()
