@@ -9,25 +9,23 @@ from langchain.docstore import InMemoryDocstore
 from dotenv import load_dotenv
 import os
 
-load_dotenv()  # Load environment variables from .env
-openai.api_key = os.getenv('OPENAI_API_KEY')  # Set OpenAI API key
+load_dotenv()  
+openai.api_key = os.getenv('OPENAI_API_KEY') 
 
+model = "gpt-4o-mini" 
 store = {}
 
-# Define OpenAI model to use
-model = "gpt-4o-mini" 
 
-# Define function for generating OpenAI responses
-def generate_openai_response(system_prompt, user_prompt, max_tokens=1024, temperature=0.2, top_p=0.7):
+def generate_openai_response(system_prompt, user_prompt):
     response = openai.ChatCompletion.create(
         model=model,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        temperature=temperature,
-        top_p=top_p,
-        max_tokens=max_tokens,
+        temperature=0.2,
+        top_p=0.7,
+        max_tokens=1024,
     )
     return response.choices[0].message.content
 
@@ -36,7 +34,6 @@ def get_session_history(persona_name: str):
         store[persona_name] = []
     return store[persona_name]
 
-# Define personas and their corresponding prompts
 PERSONAS = {
     f"Base Model: {model}": "",
     "Friendly Speed Climbing Specialist": "Hi, I'm here to help with any technical issues. What seems to be the problem?"
@@ -102,7 +99,6 @@ def get_response(user_input, conversation_history, persona_name):
     else:
         vectorstore = st.session_state.knowledge_base[persona_name]
 
-    # Use OpenAI to generate a response
     response = generate_openai_response(system_prompt, user_input)
     
     return response, []  # Placeholder for source_documents (not used in this case)
@@ -111,14 +107,12 @@ def get_response(user_input, conversation_history, persona_name):
 def show_rag_assistant():
     st.header("Your AI assistant here to guide you! Ask me anything.")
 
-    # Initialize session state for storing messages and knowledge base
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
     if "knowledge_base" not in st.session_state:
         st.session_state.knowledge_base = {}
 
-    # Handle user input and generate responses
     if prompt := st.chat_input("Ask any question, like 'How do I match with a new player?'"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         responses = []
@@ -130,7 +124,6 @@ def show_rag_assistant():
         responses.append({"role": "assistant", "content": response, "persona": "Friendly Speed Climbing Specialist", "sourced_texts": sourced_texts})
         st.session_state.messages.extend(responses)
 
-    # Display the conversation history
     for message in st.session_state.messages:
         if message["role"] == "user":
             with st.chat_message("user"):
@@ -139,6 +132,5 @@ def show_rag_assistant():
             with st.chat_message("assistant"):
                 st.markdown(message["content"])
 
-    # Summary button for summarizing the latest responses
     if "latest_responses" in st.session_state and st.button("Summarize Latest Responses", use_container_width=True):
         st.success("Summary:  \n\n" + get_summary(" ".join([msg["content"] for msg in st.session_state.messages])))
