@@ -4,3 +4,6 @@ datetime
 pandas
 requests
 streamlit
+langchain
+langchain-community
+faiss-cpu
