@@ -4,3 +4,7 @@ datetime
 pandas
 requests
 streamlit
+langchain
+langchain-community
+faiss-cpu
+openai==0.28
