@@ -1,18 +1,9 @@
 import openai
 import streamlit as st
-import numpy as np
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.chains import create_history_aware_retriever
-from langchain_core.prompts import MessagesPlaceholder
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.runnables.history import RunnableWithMessageHistory
 from faiss import IndexFlatL2
 from langchain.docstore import InMemoryDocstore
 from dotenv import load_dotenv
@@ -40,9 +31,9 @@ def generate_openai_response(system_prompt, user_prompt, max_tokens=1024, temper
     )
     return response['choices'][0]['message']['content']
 
-def get_session_history(persona_name: str) -> BaseChatMessageHistory:
+def get_session_history(persona_name: str):
     if persona_name not in store:
-        store[persona_name] = ChatMessageHistory()
+        store[persona_name] = []
     return store[persona_name]
 
 # Define personas and their corresponding prompts
@@ -50,8 +41,6 @@ PERSONAS = {
     f"Base Model: {model}": "",
     "Friendly Fast2Market Specialist": "Hi, I'm here to help with any technical issues. What seems to be the problem?"
 }
-
-#######################################
 
 def get_persona_prompt(persona_name):
     """Returns the prompt for the selected persona."""
@@ -76,7 +65,6 @@ def format_sources(list_of_referenced_documents):
 
 def get_response(user_input, conversation_history, persona_name):
     """Generates a response based on the selected persona and conversation history."""
-    # Get the persona's system prompt
     system_prompt = get_persona_prompt(persona_name)
 
     # Build the conversation context
@@ -114,41 +102,43 @@ def get_response(user_input, conversation_history, persona_name):
     else:
         vectorstore = st.session_state.knowledge_base[persona_name]
 
-    # Set up retriever
-    retriever = vectorstore.as_retriever()
-
     # Use OpenAI to generate a response
     response = generate_openai_response(system_prompt, user_input)
     
     return response, []  # Placeholder for source_documents (not used in this case)
 
 # Streamlit UI for Fast2Market assistant
-st.header("Fast2Market: Your AI assistant here to guide you!", divider="rainbow")
+def show_rag_assistant():
+    st.header("Fast2Market: Your AI assistant here to guide you!")
 
-# Initialize session state for storing messages and knowledge base
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+    # Initialize session state for storing messages and knowledge base
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-if "knowledge_base" not in st.session_state:
-    st.session_state.knowledge_base = {}
+    if "knowledge_base" not in st.session_state:
+        st.session_state.knowledge_base = {}
 
-# Handle user input and generate responses
-if prompt := st.chat_input("Ask any question, like 'How do I submit an instrument request?'"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    responses = []
-    response, sourced_texts = get_response(prompt, [(msg["role"], msg["content"]) for msg in st.session_state.messages if msg["role"] == "user" or msg["role"] == "assistant"], "Friendly Fast2Market Specialist")
-    responses.append({"role": "assistant", "content": response, "persona": "Friendly Fast2Market Specialist", "sourced_texts": sourced_texts})
-    st.session_state.messages.extend(responses)
+    # Handle user input and generate responses
+    if prompt := st.chat_input("Ask any question, like 'How do I submit an instrument request?'"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        responses = []
+        response, sourced_texts = get_response(
+            prompt, 
+            [(msg["role"], msg["content"]) for msg in st.session_state.messages if msg["role"] == "user" or msg["role"] == "assistant"], 
+            "Friendly Fast2Market Specialist"
+        )
+        responses.append({"role": "assistant", "content": response, "persona": "Friendly Fast2Market Specialist", "sourced_texts": sourced_texts})
+        st.session_state.messages.extend(responses)
 
-# Display the conversation history
-for message in st.session_state.messages:
-    if message["role"] == "user":
-        with st.chat_message("user"):
-            st.markdown(message["content"])
-    else:
-        with st.chat_message("assistant"):
-            st.markdown(message["content"])
+    # Display the conversation history
+    for message in st.session_state.messages:
+        if message["role"] == "user":
+            with st.chat_message("user"):
+                st.markdown(message["content"])
+        else:
+            with st.chat_message("assistant"):
+                st.markdown(message["content"])
 
-# Summary button for summarizing the latest responses
-if "latest_responses" in st.session_state and st.button("Summarize Latest Responses", use_container_width=True):
-    st.success("Summary:  \n\n" + get_summary(" ".join([msg["content"] for msg in st.session_state.messages])))
+    # Summary button for summarizing the latest responses
+    if "latest_responses" in st.session_state and st.button("Summarize Latest Responses", use_container_width=True):
+        st.success("Summary:  \n\n" + get_summary(" ".join([msg["content"] for msg in st.session_state.messages])))
