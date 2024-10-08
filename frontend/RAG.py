@@ -29,7 +29,7 @@ def generate_openai_response(system_prompt, user_prompt, max_tokens=1024, temper
         top_p=top_p,
         max_tokens=max_tokens,
     )
-    return response['choices'][0]['message']['content']
+    return response.choices[0].message.content
 
 def get_session_history(persona_name: str):
     if persona_name not in store:
@@ -119,7 +119,7 @@ def show_rag_assistant():
         st.session_state.knowledge_base = {}
 
     # Handle user input and generate responses
-    if prompt := st.chat_input("Ask any question, like 'How do I submit an instrument request?'"):
+    if prompt := st.chat_input("Ask any question, like 'How do I match with a new player?'"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         responses = []
         response, sourced_texts = get_response(

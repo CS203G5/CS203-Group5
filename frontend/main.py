@@ -1,6 +1,6 @@
 import streamlit as st
 from login_register import login_user, register_user
-from frontend.RAG.RAG import show_rag_assistant 
+from RAG import show_rag_assistant 
 
 def main():
     st.sidebar.title("Navigation")
