@@ -1,7 +1,9 @@
 package com.example.tournament;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,17 @@ public class TournamentServiceImpl implements TournamentService {
 
     public Tournament findById(Long tid) {
         return tournamentRepository.findById(tid).orElse(null);
+    }
+
+    public List<Tournament> getOngoingTournaments() {
+        java.time.LocalDate today = java.time.LocalDate.now();
+    
+    return tournamentRepository.findAll().stream()
+        .filter(t -> {
+            java.time.LocalDate tournamentDate = t.getDate().toLocalDate(); 
+            return tournamentDate.isBefore(today.plusDays(1)) && tournamentDate.isAfter(today.minusDays(1));
+        })
+        .collect(Collectors.toList());
     }
 
     public List<Tournament> getTournamentByOrganizer(Long aid) {
