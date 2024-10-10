@@ -1,5 +1,5 @@
 import streamlit as st
-import boto3
+import os, boto3, requests
 from botocore.exceptions import ClientError
 import os
 from dotenv import load_dotenv
@@ -51,6 +51,9 @@ def login_user():
                         token = mfa_response['AuthenticationResult']['IdToken']
                         st.session_state['jwt_token'] = token
                         st.success('Login with MFA successful.')
+
+                        make_authenticated_request()
+
                     except ClientError as e:
                         st.error(f"MFA verification failed: {e.response['Error']['Message']}")
             else:
@@ -59,7 +62,8 @@ def login_user():
                 st.session_state['jwt_token'] = token
                 st.session_state['username'] = username
                 st.success('Login successful.')
-                st.rerun()
+                
+                make_authenticated_request()
 
         except ClientError as e:
             st.error(f"Login failed: {e.response['Error']['Message']}")
@@ -128,3 +132,21 @@ def confirm_registration():
             st.session_state['registered'] = False 
         except ClientError as e:
             st.error(f"Verification failed: {e.response['Error']['Message']}")
+
+def make_authenticated_request():
+    if 'jwt_token' in st.session_state:
+        headers = {
+            'Authorization': f"Bearer {st.session_state['jwt_token']}"
+        }
+        response = requests.get('http://localhost:8khairy080/tournament', headers=headers)
+
+        # DEBUG REMOVE
+        st.write(st.session_state['jwt_token'])
+        
+        # DEBUG - REMOVE
+        if response.status_code == 200:
+            st.write(response.json())  # Display the JSON response in the Streamlit app
+        else:
+            st.error(f"Request failed with status code: {response.status_code}")
+    else:
+        st.warning('You must log in first to make an authenticated request.')
