@@ -4,6 +4,8 @@ from profile import profile_page
 from matchmaking import matchmaking_page
 from tournament import tournament_page
 from tournaments_avail import tournaments_avail_page
+from scoreboard_websocket import live_scoreboard, update_scoreboard
+
 from RAG import show_rag_assistant
 
 def main():
@@ -16,7 +18,7 @@ def main():
             register_user()
     else:
         st.sidebar.success(f"Logged in as {st.session_state['username']}")
-        page_choice = st.sidebar.radio("Choose an option", ["Profile", "Matchmaking", "Tournament", "Available Tournaments", "AI Assistant", "Logout"])
+        page_choice = st.sidebar.radio("Choose an option", ["Profile", "Matchmaking", "Tournament", "Available Tournaments", "Update Scoreboard", "Scoreboard", "AI Assistant", "Logout"])
 
         if page_choice == "Profile":
             profile_page()
@@ -26,12 +28,16 @@ def main():
             tournament_page()
         elif page_choice == "Available Tournaments":
             tournaments_avail_page()
+        elif page_choice == "Update Scoreboard":
+            update_scoreboard()
+        elif page_choice == "Scoreboard":
+            live_scoreboard()
         elif page_choice == "AI Assistant":
             show_rag_assistant()
         elif page_choice == "Logout":
             st.session_state.clear()
             st.success("Logged out!")
-            st.experimental_rerun()
+            st.rerun()
 
 if __name__ == "__main__":
     main()
