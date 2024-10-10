@@ -19,7 +19,21 @@ public class Duel {
     @JoinColumn(name = "tournament_id", nullable = false)
     private Tournament tournament;
 
+    public void setTournament(Tournament tournament){
+        this.tournament = tournament;
+    }
+
     public Tournament getTournament(){
         return tournament;
     }
+
+    public void setPid1 (Long pid1){
+        this.pid1 = pid1;
+    }
+
+    public void setPid2 (Long pid2){
+        this.pid2 = pid2;
+    }
+
+    
 }

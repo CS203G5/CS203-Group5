@@ -54,7 +54,13 @@ public class Tournament {
         this.organizer_id = organizer_id;
     }
 
-    public void getTournamentId(Long tournament_id){
+    public Long getTournamentId(Long tournament_id){
+        return tournament_id;
+    }
+
+    public void setTournamentId (Long tournament_id){
         this.tournament_id = tournament_id;
     }
+
+
 }
