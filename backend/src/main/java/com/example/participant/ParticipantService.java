@@ -19,7 +19,11 @@ public class ParticipantService {
         return participantRepository.findById(userId).orElse(null);
     }
 
-    public Participant createParticipant(Participant participant) {
+    public List<Participant> getParticipantsByTournamentId(int tournamentId) {
+        return participantRepository.findByTournamentId(tournamentId);
+    }
+
+    public Participant saveParticipant(Participant participant) {
         return participantRepository.save(participant);
     }
 
