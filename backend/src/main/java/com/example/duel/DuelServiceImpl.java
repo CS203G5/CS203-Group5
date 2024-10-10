@@ -53,9 +53,9 @@ public class DuelServiceImpl implements DuelService{
     public Duel updateDuelResult(Long did, DuelResult result) {
         return duelRepository.findById(did).map(duel -> {
             duel.setResult(result);
-            if (result.getplayer1Time() > result.getplayer2Time()) {
+            if (result.getplayer1Time() < result.getplayer2Time()) {
                 duel.setWinner(duel.getPid1());
-            } else if (result.getplayer1Time() < result.getplayer2Time()) {
+            } else if (result.getplayer1Time() > result.getplayer2Time()) {
                 duel.setWinner(duel.getPid2());
             } else {
                 duel.setWinner(null);
