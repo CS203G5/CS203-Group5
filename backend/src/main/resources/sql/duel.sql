@@ -4,7 +4,8 @@
 USE cs203_db;
 
 DROP PROCEDURE IF EXISTS getDuelsByTournament;
-DROP PROCEDURE IF EXISTS getByPlayer;
+DROP PROCEDURE IF EXISTS getDuelsByRoundName;
+DROP PROCEDURE IF EXISTS getDuelsByPlayer;
 DROP PROCEDURE IF EXISTS deleteDuel;
 
 DELIMITER $$
@@ -13,6 +14,11 @@ DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getDuelsByTournament`(IN p_tournament_id BIGINT)
 BEGIN
 	SELECT * FROM Duel WHERE tournament_id = p_tournament_id;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getDuelsByRoundName`(IN p_round_name VARCHAR(255))
+BEGIN
+	SELECT * FROM Duel WHERE round_name = p_round_name;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getByPlayer`(IN p_pid BIGINT)

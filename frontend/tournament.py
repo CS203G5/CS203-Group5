@@ -13,11 +13,13 @@ if "show_update_form" not in st.session_state:
     st.session_state["selected_tournament_id"] = None
 
 # Mock logged in user
-def get_logged_in_user():
-    return {"name": "John Doe", "id": 3}
-logged_in_user = get_logged_in_user()
-
-
+# def get_logged_in_user():
+#     return {"name": "John Doe", "id": 3}
+# logged_in_user = get_logged_in_user()
+def get_headers():
+    return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
+    
+    
 def toggle_create_tournament():
     st.session_state["show_create_form"] = not st.session_state["show_create_form"]
 
@@ -30,7 +32,8 @@ def toggle_update_tournament(tournament_id):
 def fetch_tournaments_by_admin(organizer_id):
     try:
         url = f"http://localhost:8080/tournament/organizer/{organizer_id}"
-        response = requests.get(url)
+        headers = get_headers()
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -39,8 +42,9 @@ def fetch_tournaments_by_admin(organizer_id):
     
 def fetch_tournament(tournament_id):
     try:
-        url = f"http://localhost:8080/tournament/{tournament_id}"
-        response = requests.get(url)
+        url = f"http://localhost:8080/tournament/{tournament_id}"   
+        headers = get_headers()
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -49,7 +53,8 @@ def fetch_tournament(tournament_id):
     
 def create_tournament(payload):
     try:
-        response = requests.post(f"http://localhost:8080/tournament", json=payload)
+        headers = get_headers()
+        response = requests.post(f"http://localhost:8080/tournament", json=payload, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -58,7 +63,8 @@ def create_tournament(payload):
 
 def update_tournament(tournament_id, payload):
     try:
-        response = requests.put(f"http://localhost:8080/tournament/{tournament_id}", json=payload)
+        headers = get_headers()
+        response = requests.put(f"http://localhost:8080/tournament/{tournament_id}", json=payload, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -67,7 +73,8 @@ def update_tournament(tournament_id, payload):
 
 def delete_tournaments(tournament_ids):
     try:
-        response = requests.delete(f"http://localhost:8080/tournament", json=tournament_ids)
+        headers = get_headers()
+        response = requests.delete(f"http://localhost:8080/tournament", json=tournament_ids, headers=headers)
         if response.status_code == 200:
             return True
     except requests.exceptions.RequestException as e:
