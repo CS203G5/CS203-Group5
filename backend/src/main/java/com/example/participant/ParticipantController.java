@@ -17,18 +17,23 @@ public class ParticipantController {
 
     private final ParticipantService participantService;
     private final TournamentService tournamentService;
-    private final DuelService dualService;
+    private final DuelService duelService;
 
     @Autowired
-    public ParticipantController(ParticipantService participantService, TournamentService tournamentService, DuelService dualService) {
+    public ParticipantController(ParticipantService participantService, TournamentService tournamentService, DuelService duelService) {
         this.participantService = participantService;
         this.tournamentService = tournamentService;
-        this.dualService = dualService;
+        this.duelService = duelService;
     }
 
     @GetMapping
     public List<Participant> getAllParticipants() {
         return participantService.getAllParticipants();
+    }
+
+    @GetMapping("/tournament/{tournamentId}")
+    public List<Participant> getParticipantsByTournamentId(@PathVariable int tournamentId) {
+        return participantService.getParticipantsByTournamentId(tournamentId);
     }
 
     @GetMapping("/{userId}")
@@ -41,9 +46,9 @@ public class ParticipantController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/duel")
-    public Duel createDuel(@RequestBody Duel duel) {
-        return dualService.createDuel(duel);
+    @PostMapping("/register")
+    public Participant registerParticipant(@RequestBody Participant participant) {
+        return participantService.saveParticipant(participant);
     }
 
     @DeleteMapping("/{userId}")
