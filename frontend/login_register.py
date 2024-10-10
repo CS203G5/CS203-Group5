@@ -57,7 +57,9 @@ def login_user():
                 # No MFA, regular login
                 token = response['AuthenticationResult']['IdToken']
                 st.session_state['jwt_token'] = token
+                st.session_state['username'] = username
                 st.success('Login successful.')
+                st.rerun()
 
         except ClientError as e:
             st.error(f"Login failed: {e.response['Error']['Message']}")
