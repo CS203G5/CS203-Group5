@@ -31,20 +31,20 @@
 //         "/duel/player/**"
 //     };
     
-//     @Bean
-//     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//         http
-//             // Authorize HTTP requests using the new authorizeHttpRequests method
-//             .authorizeHttpRequests(auth -> auth
-//                 .requestMatchers("/auth/register", "/auth/login").permitAll()
-//                 .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
-//                 .requestMatchers(ADMIN_MATCHERS).hasRole("ADMIN")     
-//                 .anyRequest().authenticated()
-//             )
-//             // Enable OAuth2 Resource Server and configure JWT validation
-//             .oauth2ResourceServer(oauth2 -> oauth2
-//                 .jwt(Customizer.withDefaults())
-//             );
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            // Authorize HTTP requests using the new authorizeHttpRequests method
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/register", "/auth/login").permitAll()
+                .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
+                .requestMatchers(ADMIN_MATCHERS).permitAll()   
+                .anyRequest().authenticated()
+            )
+            // Enable OAuth2 Resource Server and configure JWT validation
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(Customizer.withDefaults())
+            );
 
 //         return http.build();
 //     }
