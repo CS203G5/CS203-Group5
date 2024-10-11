@@ -29,6 +29,11 @@ public class TournamentController {
         return ts.getTournamentByOrganizer(aid);
     }
 
+    @GetMapping("/ongoing")
+    public List<Tournament> getOngoingTournaments() {
+        return ts.getOngoingTournaments();
+    }
+
     @GetMapping("/search")
     public List<Tournament> fuzzySearchTournament(@RequestParam(required = false) String searchTerm) {
         if (searchTerm == null) {

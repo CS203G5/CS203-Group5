@@ -1,9 +1,10 @@
+
 package com.example.profile;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,22 +19,31 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    @Transactional
+    public List<Profile> searchProfiles(String searchTerm) {
+        return profileRepository.findByUsernameContainingIgnoreCase(searchTerm);
+    }
+
+    @Override
+    public Profile saveProfile(Profile profile) {
+        return profileRepository.save(profile);
+    }
+
+    @Override
     public Profile updateProfile(Long profileId, Profile updatedProfile) {
-        Profile existingProfile = profileRepository.findById(profileId).orElseThrow(() -> new RuntimeException("Profile not found"));
-        
-        // Update fields with validation logic
-        if (!existingProfile.getEmail().equals(updatedProfile.getEmail())) {
-            if (profileRepository.findByEmail(updatedProfile.getEmail()).isPresent()) {
-                throw new RuntimeException("Email is already in use.");
-            }
+        return profileRepository.findById(profileId).map(profile -> {
+            profile.setUsername(updatedProfile.getUsername());
+            profile.setEmail(updatedProfile.getEmail());
+            profile.setBio(updatedProfile.getBio());
+            profile.setPrivacySettings(updatedProfile.getPrivacySettings());
+            return profileRepository.save(profile);
+        }).orElse(null);
+    }
+
+    @Override
+    public void deleteProfile(Long profileId) {
+        if (!profileRepository.existsById(profileId)) {
+            throw new IllegalArgumentException("Profile with id " + profileId + " does not exist");
         }
-
-        existingProfile.setUsername(updatedProfile.getUsername());
-        existingProfile.setEmail(updatedProfile.getEmail());
-        existingProfile.setBio(updatedProfile.getBio());
-        existingProfile.setPrivacySettings(updatedProfile.getPrivacySettings());
-
-        return profileRepository.save(existingProfile);
+        profileRepository.deleteById(profileId);
     }
 }

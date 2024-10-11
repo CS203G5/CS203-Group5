@@ -1,11 +1,21 @@
 import streamlit as st
 import requests
 
-API_URL = "http://localhost:8080/api/profile"
+API_URL = "http://localhost:8080/profile"
+
+# Initialize the profile ID if it's not already in session state
+if 'profile_id' not in st.session_state:
+    st.session_state['profile_id'] = 1  # Default profile ID
+
+if 'jwt_token' not in st.session_state:
+    st.session_state['jwt_token'] = ""  # or provide a default token if available
+
+if 'username' not in st.session_state:
+    st.session_state['username'] = "Guest"  # Default username
 
 def get_profile():
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.get(API_URL, headers=headers)
+    response = requests.get(f"{API_URL}/{st.session_state['profile_id']}", headers=headers)
     if response.status_code == 200:
         return response.json()
     else:
@@ -20,14 +30,15 @@ def update_profile(username, email, bio, privacy_settings):
         "privacySettings": privacy_settings
     }
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.put(API_URL, json=data, headers=headers)
+    response = requests.put(f"{API_URL}/{st.session_state['profile_id']}", json=data, headers=headers)
     if response.status_code == 200:
         st.success("Profile updated successfully.")
     else:
-        st.error("Failed to update profile.")
+        st.error(f"Failed to update profile. Status code: {response.status_code}, Response: {response.text}")
 
 def profile_page():
     st.title("Player Profile")
+    st.write(st.session_state['jwt_token'])
 
     # Fetch the username from session state
     username = st.session_state.get('username', 'Guest')
@@ -36,6 +47,7 @@ def profile_page():
     default_email = "email@example.com"
     default_bio = "This is a default bio."
     default_privacy_settings = "Public"
+
 
     # Create the profile form using the username and default values for other fields
     with st.form("profile_form"):
@@ -55,5 +67,5 @@ def profile_page():
 
         # Handle form submission
         if submitted:
-            st.success(f"Profile updated for {username_input}!")
-            update_profile()
+            update_profile(username, email_input, bio_input, privacy_settings_input)
+
