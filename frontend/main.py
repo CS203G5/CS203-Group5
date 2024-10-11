@@ -8,7 +8,19 @@ from scoreboard_websocket import live_scoreboard, update_scoreboard
 
 from RAG import show_rag_assistant
 
+def initialize_session_state():
+#     if "username" not in st.session_state:
+#         st.session_state["username"] = None
+    if "show_create_form" not in st.session_state:
+        st.session_state["show_create_form"] = False
+    if "show_update_form" not in st.session_state:
+        st.session_state["show_update_form"] = False
+    if "selected_tournament_id" not in st.session_state:
+        st.session_state["selected_tournament_id"] = None
+
 def main():
+    initialize_session_state()
+    
     if 'jwt_token' not in st.session_state:
         st.sidebar.title("Authentication")
         auth_choice = st.sidebar.radio("Choose an option", ["Login", "Register"])

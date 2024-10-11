@@ -38,7 +38,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
-                .requestMatchers(ADMIN_MATCHERS).hasRole("ADMIN")     
+                .requestMatchers(ADMIN_MATCHERS).permitAll()   
                 .anyRequest().authenticated()
             )
             // Enable OAuth2 Resource Server and configure JWT validation

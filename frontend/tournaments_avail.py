@@ -2,8 +2,12 @@ import streamlit as st
 import requests
 from datetime import datetime
 
+headers = {
+    "Authorization": f"Bearer {st.session_state['jwt_token']}"
+}
+
 # Fetch tournaments data from the API
-response = requests.get('http://localhost:8080/tournament')
+response = requests.get('http://localhost:8080/tournament', headers=headers)
 if response.status_code == 200:
     tournaments = response.json()
 else:
@@ -11,14 +15,13 @@ else:
     tournaments = []
 
 # Fetch the list of tournaments the current user has signed up for
-participant_response = requests.get(f'http://localhost:8080/participants/3')
-if participant_response.status_code == 200:
-    signed_up_tournaments = participant_response.json()
-    print(signed_up_tournaments)
-    
-else:
-    st.error("Failed to fetch participant data")
-    signed_up_tournaments = []
+# try: 
+#     participant_response = requests.get(f'http://localhost:8080/participants/3', headers=headers)
+#     if participant_response.status_code == 200:
+#         signed_up_tournaments = participant_response.json()
+#         print(signed_up_tournaments)
+# except requests.exceptions.RequestException as e:
+#     st.error(e)
 
 # Function to check if the tournament date is still valid for sign-up
 def is_sign_up_open(tournament_date):
@@ -43,19 +46,21 @@ def tournaments_avail_page():
                         return
 
                     payload = {
-                        'tournamentId': tournament['tournament_id'],
-                        'userId': user_id,
+                        'tournament_id': tournament['tournament_id'],
+                        'user_id': user_id,
                         'lose': 0,
                         'win': 0,
                         'score': 0.0
                     }
 
-                    register_response = requests.post('http://localhost:8080/participants/register', json=payload)
-                    if register_response.status_code == 201:
-                        st.success(f"Signed up for {tournament['name']}!")
-                    else:
-                        # st.error("Failed to sign up for the tournament")
-                        st.error(register_response)
+                    try:
+                        register_response = requests.post('http://localhost:8080/participants/register', json=payload, headers=headers)
+                        if register_response.status_code == 201:
+                            st.success(f"Signed up for {tournament['name']}!")
+                        else:
+                            st.error(register_response)
+                    except requests.exceptions.RequestException as e:
+                        st.error(register_response, e)
 
             else:
                 st.warning("Sign-up closed for this tournament")
