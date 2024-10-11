@@ -9,7 +9,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/tournament")
+@RequestMapping("/api/tournament")
 public class TournamentController {
     @Autowired
     TournamentService ts;

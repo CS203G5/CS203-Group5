@@ -1,5 +1,5 @@
 ######### Tournament REST API #########
-GET http://localhost:8080/tournament
+GET http://localhost:8080/api/tournament
 
 ###
 GET http://localhost:8080/tournament/3

@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.Customizer;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +33,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.disable())  // Disable CSRF for stateless APIs
             // Authorize HTTP requests using the new authorizeHttpRequests method
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
@@ -43,7 +43,9 @@ public class SecurityConfig {
             )
             // Enable OAuth2 Resource Server and configure JWT validation
             .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(Customizer.withDefaults())
+                .jwt(jwtConfigurer -> jwtConfigurer
+                    .jwkSetUri("https://cognito-idp.us-east-1.amazonaws.com/us-east-1_ZbMFSqvjF/.well-known/jwks.json")
+                )
             );
 
         return http.build();

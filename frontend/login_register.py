@@ -135,17 +135,22 @@ def confirm_registration():
 
 def make_authenticated_request():
     if 'jwt_token' in st.session_state:
+
+        # DEBUG REMOVE
+        st.success(st.session_state['jwt_token'])
+
         headers = {
             'Authorization': f"Bearer {st.session_state['jwt_token']}"
         }
-        response = requests.get('http://localhost:8khairy080/tournament', headers=headers)
 
         # DEBUG REMOVE
-        st.write(st.session_state['jwt_token'])
+        st.success(headers)
+
+        response = requests.get('http://localhost:8080/tournament', headers=headers)
         
         # DEBUG - REMOVE
         if response.status_code == 200:
-            st.write(response.json())  # Display the JSON response in the Streamlit app
+            st.write(response)  # Display the JSON response in the Streamlit app
         else:
             st.error(f"Request failed with status code: {response.status_code}")
     else:
