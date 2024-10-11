@@ -13,6 +13,7 @@ public class Duel {
     private Long pid1;
     private Long pid2;
     private String roundName;
+    @Embedded private DuelResult result;
     private Long winner;
 
     @ManyToOne
