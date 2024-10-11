@@ -1,11 +1,16 @@
 import streamlit as st
 import requests
 
-API_URL = "http://localhost:8080/api/profile"
+API_URL = "http://localhost:8080/profile"
+
+# Initialize the profile ID if it's not already in session state
+if 'profile_id' not in st.session_state:
+    # You might fetch the real profile ID from the backend or another source
+    st.session_state['profile_id'] = 1  # Set to some default or fetched value
 
 def get_profile():
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.get(API_URL, headers=headers)
+    response = requests.get(f"{API_URL}/{st.session_state['profile_id']}", headers=headers)
     if response.status_code == 200:
         return response.json()
     else:
@@ -20,11 +25,11 @@ def update_profile(username, email, bio, privacy_settings):
         "privacySettings": privacy_settings
     }
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.put(API_URL, json=data, headers=headers)
+    response = requests.put(f"{API_URL}/{st.session_state['profile_id']}", json=data, headers=headers)
     if response.status_code == 200:
         st.success("Profile updated successfully.")
     else:
-        st.error("Failed to update profile.")
+        st.error(f"Failed to update profile. Status code: {response.status_code}, Response: {response.text}")
 
 def profile_page():
     st.title("Player Profile")
@@ -55,5 +60,5 @@ def profile_page():
 
         # Handle form submission
         if submitted:
-            st.success(f"Profile updated for {username_input}!")
-            update_profile()
+            update_profile(username, email_input, bio_input, privacy_settings_input)
+
