@@ -5,8 +5,13 @@ API_URL = "http://localhost:8080/profile"
 
 # Initialize the profile ID if it's not already in session state
 if 'profile_id' not in st.session_state:
-    # You might fetch the real profile ID from the backend or another source
-    st.session_state['profile_id'] = 1  # Set to some default or fetched value
+    st.session_state['profile_id'] = 1  # Default profile ID
+
+if 'jwt_token' not in st.session_state:
+    st.session_state['jwt_token'] = ""  # or provide a default token if available
+
+if 'username' not in st.session_state:
+    st.session_state['username'] = "Guest"  # Default username
 
 def get_profile():
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -33,6 +38,7 @@ def update_profile(username, email, bio, privacy_settings):
 
 def profile_page():
     st.title("Player Profile")
+    st.write(st.session_state['jwt_token'])
 
     # Fetch the username from session state
     username = st.session_state.get('username', 'Guest')
@@ -41,6 +47,7 @@ def profile_page():
     default_email = "email@example.com"
     default_bio = "This is a default bio."
     default_privacy_settings = "Public"
+
 
     # Create the profile form using the username and default values for other fields
     with st.form("profile_form"):
