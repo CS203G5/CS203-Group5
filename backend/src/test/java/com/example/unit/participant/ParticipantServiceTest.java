@@ -9,6 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.example.participant.Participant;
+import com.example.participant.ParticipantRepository;
+import com.example.participant.ParticipantService;
+
 import java.util.Optional;
 
 public class ParticipantServiceTest {
