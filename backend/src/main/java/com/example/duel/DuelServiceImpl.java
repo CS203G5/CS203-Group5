@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -22,12 +23,16 @@ public class DuelServiceImpl implements DuelService{
         return duelRepository.getDuelsByTournament(tid);
     }
 
+    public List<Duel> getDuelsByRoundName(String roundName) {
+        return duelRepository.getDuelsByRoundName(roundName);
+    }
+    
     public Duel getDuelById(Long did) {
         return duelRepository.findById(did).orElse(null);
     }
 
-    public List<Duel> getByPlayer(Long pid) {
-        return duelRepository.getByPlayer(pid);
+    public List<Duel> getDuelsByPlayer(Long pid) {
+        return duelRepository.getDuelsByPlayer(pid);
     }
 
     public Duel createDuel(Duel duel) {
@@ -41,12 +46,29 @@ public class DuelServiceImpl implements DuelService{
             duel.setPid1(newDuel.getPid1());
             duel.setPid2(newDuel.getPid2());
             duel.setRoundName(newDuel.getRoundName());
-            duel.setWinner(newDuel.getWinner());
             return duelRepository.save(duel);
-        }).orElse(null);
+        }).orElseThrow(() -> new EntityNotFoundException("Duel not found with id: " + did));
+    }
+
+    public Duel updateDuelResult(Long did, DuelResult result) {
+        return duelRepository.findById(did).map(duel -> {
+            duel.setResult(result);
+            if (result.getplayer1Time() < result.getplayer2Time()) {
+                duel.setWinner(duel.getPid1());
+            } else if (result.getplayer1Time() > result.getplayer2Time()) {
+                duel.setWinner(duel.getPid2());
+            } else {
+                duel.setWinner(null);
+            }
+            return duelRepository.save(duel);
+        }).orElseThrow(() -> new EntityNotFoundException("Duel not found with id: " + did));
     }
 
     public void deleteDuel(Long did) {
-        duelRepository.deleteDuel(did);
-    }    
+        try{
+            duelRepository.deleteById(did);
+        } catch (Exception e) {
+            System.out.println("Duel not found with id: " + did);
+        }
+    }  
 }

@@ -8,3 +8,5 @@ langchain
 langchain-community
 faiss-cpu
 openai==0.28
+websocket-client
+threading

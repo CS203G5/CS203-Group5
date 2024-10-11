@@ -1,51 +1,48 @@
 import streamlit as st
-import requests
-import pandas as pd
+import websocket
+import json
+import random
+import stomper
 
-# Fetch ongoing tournaments from the backend
-def fetch_ongoing_tournaments():
-    try:
-        response = requests.get("http://localhost:8080/tournaments/ongoing") 
-        if response.status_code == 200:
-            return response.json()  # Returns a list of ongoing tournaments
-        else:
-            st.error("Failed to fetch ongoing tournaments.")
-            return []
-    except Exception as e:
-        st.error(f"Error fetching ongoing tournaments: {e}")
-        return []
+def on_message(ws, message):
+    score_update = json.loads(message)
+    # Update your Streamlit UI with the new score
+    st.session_state.scores[score_update['matchId']] = score_update['score']
+    st.experimental_rerun()  # Rerun the app to reflect the changes
 
-# Function to display scoreboard for a specific tournament
-def show_scoreboard(tournament):
-    st.title(f"Scoreboard for {tournament['name']}")
+def on_error(ws, error):
+    print(f"Error: {error}")
+
+def on_close(ws):
+    print("Connection closed")
+
+def on_open(ws):
+    # Optionally send a message when the connection opens
+    pass
+
+if __name__ == "__main__":
+    st.title("Live Scoreboard")
     
-    # Fetch players and their scores (mocking the players for now)
-    players = tournament.get("players", [])
-    if players:
-        player_data = pd.DataFrame(players)
-        player_data = player_data.sort_values(by=['score'], ascending=False)
-        player_data['rank'] = range(1, len(player_data) + 1)
-        st.table(player_data[['rank', 'name', 'wins', 'losses', 'score']])
-    else:
-        st.write("No player data available for this tournament.")
+    if 'scores' not in st.session_state:
+        st.session_state.scores = {}
 
-# Main function to allow user to select an ongoing tournament and view the scoreboard
-def scoreboard_page():
-    st.title("Ongoing Tournaments")
+    websocket.enableTrace(True)
+    # Connecting to websocket
+    ws = websocket.create_connection("ws://localhost:8080/ws")
 
-    # Fetch the list of ongoing tournaments
-    tournaments = fetch_ongoing_tournaments()
+    # Subscribing to topic
+    client_id = str(random.randint(0, 1000))
+    sub = stomper.subscribe("/topic/scoreboard", client_id, ack='auto')
+    ws.send(sub)
 
-    if not tournaments:
-        st.write("No ongoing tournaments available.")
-        return
+    # Sending some message
+    score_update = {
+        "matchId": "match_123",
+        "score": 10
+    }
+    ws.send(stomper.send("/app/scoreboard/update", score_update))
 
-    # Tournament selection
-    tournament_options = {t["name"]: t for t in tournaments}
-    selected_tournament_name = st.selectbox("Select Tournament", list(tournament_options.keys()))
-
-    # Show the scoreboard for the selected tournament
-    if selected_tournament_name:
-        selected_tournament = tournament_options[selected_tournament_name]
-        show_scoreboard(selected_tournament)
-
+    while True:
+        print("Receiving data: ")
+        d = ws.recv()
+        print(d)
