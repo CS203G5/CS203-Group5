@@ -34,6 +34,10 @@ public class Tournament {
     @JsonIgnore
     private List<Duel> duels;
 
+    public Tournament(String name){
+        this.name = name;
+    }
+
     public boolean getIsRandom() {
         return isRandom;
     }
@@ -49,4 +53,14 @@ public class Tournament {
     public void setOrganizer(Long organizer_id) {
         this.organizer_id = organizer_id;
     }
+
+    public Long getTournamentId(Long tournament_id){
+        return tournament_id;
+    }
+
+    public void setTournamentId (Long tournament_id){
+        this.tournament_id = tournament_id;
+    }
+
+
 }
