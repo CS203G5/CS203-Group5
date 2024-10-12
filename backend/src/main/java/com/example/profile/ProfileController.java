@@ -3,10 +3,12 @@ package com.example.profile;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/profile")
@@ -51,5 +53,16 @@ public class ProfileController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PutMapping("/{profileId}/rating")
+    @PreAuthorize("hasRole('ADMIN')") // Ensure only admins can access this endpoint
+    public ResponseEntity<Profile> updateRating(@PathVariable Long profileId, @RequestParam Double newRating) {
+        Optional<Profile> updatedProfile = profileService.getProfile(profileId);
+        if (updatedProfile.isPresent()) {
+            profileService.updateRating(profileId, newRating);
+            return ResponseEntity.ok(updatedProfile.get());
+        }
+        return ResponseEntity.notFound().build();
     }
 }

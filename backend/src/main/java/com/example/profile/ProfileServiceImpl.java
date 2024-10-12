@@ -46,4 +46,12 @@ public class ProfileServiceImpl implements ProfileService {
         }
         profileRepository.deleteById(profileId);
     }
+
+    @Override
+    public void updateRating(Long profileId, Double newRating) {
+        profileRepository.findById(profileId).ifPresent(profile -> {
+            profile.setRating(newRating);
+            profileRepository.save(profile);
+        });
+    }
 }
