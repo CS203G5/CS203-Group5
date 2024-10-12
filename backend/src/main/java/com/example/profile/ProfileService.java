@@ -15,4 +15,6 @@ public interface ProfileService {
     Profile updateProfile(Long profileId, Profile updatedProfile);
 
     void deleteProfile(Long profileId);
+
+    void updateRating(Long profileId, Double newRating);
 }
