@@ -3,6 +3,8 @@ package com.example.participant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 import java.util.List;
 
 @Service
@@ -15,31 +17,21 @@ public class ParticipantService {
         return participantRepository.findAll();
     }
 
-    public Participant getParticipantById(int userId) {
-        return participantRepository.findById(userId).orElse(null);
-    }
-
-    public List<Participant> getParticipantsByTournamentId(int tournamentId) {
-        return participantRepository.findByTournamentId(tournamentId);
-    }
-
     public Participant saveParticipant(Participant participant) {
         return participantRepository.save(participant);
     }
 
-    public Participant updateParticipant(int userId, Participant participantDetails) {
-        Participant participant = participantRepository.findById(userId).orElse(null);
-        if (participant == null) {
-            return null;
-        }
-        participant.setTournamentId(participantDetails.getTournamentId());
-        participant.setWin(participantDetails.getWin());
-        participant.setLose(participantDetails.getLose());
-        participant.setScore(participantDetails.getScore());
-        return participantRepository.save(participant);
+    @Transactional
+    public List<Participant> getParticipantsByUserId(Long user_id) {
+        return participantRepository.getParticipantsByUserId(user_id);
     }
 
-    public void deleteParticipant(int userId) {
-        participantRepository.deleteById(userId);
+    @Transactional
+    public List<Participant> getParticipantsByTournamentId(Long tournament_id) {
+        return participantRepository.getParticipantsByTournamentId(tournament_id);
+    }
+
+    public void deleteById(ParticipantId participantId) {
+        participantRepository.deleteById(participantId);
     }
 }
