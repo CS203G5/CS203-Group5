@@ -1,38 +1,34 @@
 package com.example.participant;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
+import com.example.tournament.Tournament;
+import com.example.profile.Profile;
+
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "participant")
 @IdClass(ParticipantId.class)
 public class Participant {
 
     @Id
-    private int tournamentId;
+    @ManyToOne
+    @JoinColumn(name = "tournament_id", referencedColumnName = "tournament_id")
+    private Tournament tournament;
 
     @Id
-    private int userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "profileId")
+    private Profile profile;
 
     private int win;
     private int lose;
-    private double score;
 
-    // Getters and setters
-    public int getTournamentId() {
-        return tournamentId;
+    public Tournament getTournament() {
+        return tournament;
     }
 
-    public void setTournamentId(int tournamentId) {
-        this.tournamentId = tournamentId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public Profile getProfile() {
+        return profile;
     }
 
     public int getWin() {
@@ -49,13 +45,5 @@ public class Participant {
 
     public void setLose(int lose) {
         this.lose = lose;
-    }
-
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
     }
 }

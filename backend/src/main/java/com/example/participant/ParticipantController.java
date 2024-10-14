@@ -15,9 +15,9 @@ import java.util.List;
 @RequestMapping("/participants")
 public class ParticipantController {
 
-    private final ParticipantService participantService;
-    private final TournamentService tournamentService;
-    private final DuelService duelService;
+    ParticipantService participantService;
+    TournamentService tournamentService;
+    DuelService duelService;
 
     @Autowired
     public ParticipantController(ParticipantService participantService, TournamentService tournamentService, DuelService duelService) {
@@ -25,24 +25,21 @@ public class ParticipantController {
         this.tournamentService = tournamentService;
         this.duelService = duelService;
     }
-
+    
     @GetMapping
     public List<Participant> getAllParticipants() {
         return participantService.getAllParticipants();
     }
 
-    @GetMapping("/tournament/{tournamentId}")
-    public List<Participant> getParticipantsByTournamentId(@PathVariable int tournamentId) {
-        return participantService.getParticipantsByTournamentId(tournamentId);
+    @GetMapping("/tournament/{tournament_id}")
+    public List<Participant> getParticipantsByTournamentId(@PathVariable Long tournament_id) {
+        return participantService.getParticipantsByTournamentId(tournament_id);
     }
 
-    @GetMapping("/{userId}")
-    public Participant getParticipantById(@PathVariable int userId) {
-        Participant participant = participantService.getParticipantById(userId);
-        if (participant == null) {
-            throw new ParticipantNotFoundException(userId);
-        }
-        return participant;
+    @GetMapping("/user/{userId}")
+    public List<Participant> getParticipantsByUserId(@PathVariable Long user_id) {
+        // return participantService.getParticipantsByUserId(userId);
+        return participantService.getParticipantsByUserId(user_id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -51,12 +48,13 @@ public class ParticipantController {
         return participantService.saveParticipant(participant);
     }
 
-    @DeleteMapping("/{userId}")
-    public void deleteParticipant(@PathVariable int userId) {
+    @DeleteMapping("/user/{user_id}/tournament/{tournament_id}")
+    public void deleteParticipant(@PathVariable Long user_id, @PathVariable Long tournament_id) {
+        ParticipantId participantId = new ParticipantId(tournament_id, user_id);
         try {
-            participantService.deleteParticipant(userId);
+            participantService.deleteById(participantId);
         } catch (EmptyResultDataAccessException e) {
-            throw new ParticipantNotFoundException(userId);
+            throw new ParticipantNotFoundException(user_id, tournament_id);
         }
     }
 }
