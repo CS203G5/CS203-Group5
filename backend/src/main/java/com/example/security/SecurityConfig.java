@@ -37,8 +37,9 @@ public class SecurityConfig {
             // Authorize HTTP requests using the new authorizeHttpRequests method
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
-                .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
-                .requestMatchers(ADMIN_MATCHERS).permitAll()   
+                // .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
+                // .requestMatchers(ADMIN_MATCHERS).permitAll()   
+                .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
             )
             // Enable OAuth2 Resource Server and configure JWT validation

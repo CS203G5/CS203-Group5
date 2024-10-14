@@ -34,10 +34,20 @@ public class Tournament {
     @JsonIgnore
     private List<Duel> duels;
 
-    public Tournament(String name){
+    public Tournament(String name, boolean isRandom, Date date, Time time, String location, Long organizer_id, String description) {
         this.name = name;
+        this.isRandom = isRandom;
+        this.date = date;
+        this.time = time;
+        this.location = location;
+        this.organizer_id = organizer_id;
+        this.description = description;
     }
 
+    public Long getTournamentId() {
+        return tournament_id;
+    }
+    
     public boolean getIsRandom() {
         return isRandom;
     }

@@ -3,6 +3,30 @@
 
 USE cs203_db;
 
+DROP TABLE IF EXISTS duel;
+CREATE TABLE duel (
+    duel_id BIGINT AUTO_INCREMENT PRIMARY KEY,  
+    round_name VARCHAR(255),                    
+    winner BIGINT,                              
+    
+    -- Foreign keys for player1 and player2 (Profile IDs)
+    pid1 BIGINT,
+    pid2 BIGINT,
+    
+    -- Foreign key for the associated tournament
+    tournament_id BIGINT NOT NULL,
+    
+    -- Embedded DuelResult fields
+    player1Time BIGINT,                      
+    player2Time BIGINT,                      
+
+    -- Foreign key constraints
+    CONSTRAINT fk_player1 FOREIGN KEY (pid1) REFERENCES profile(profile_id),
+    CONSTRAINT fk_player2 FOREIGN KEY (pid2) REFERENCES profile(profile_id),
+    CONSTRAINT fk_tournament FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id)
+);
+
+
 DROP PROCEDURE IF EXISTS getDuelsByTournament;
 DROP PROCEDURE IF EXISTS getDuelsByRoundName;
 DROP PROCEDURE IF EXISTS getDuelsByPlayer;

@@ -54,12 +54,17 @@ def prepare_duel_data(duels):
             duel_info = {
                 "Duel ID": duel['duel_id'],
                 "Round": duel['roundName'],
-                "Player 1 ID": duel['pid1'],
-                "Player 2 ID": duel['pid2'],
+                "Player 1 Username": duel['player1']['username'],
+                "Player 2 Username": duel['player2']['username'],
                 "Player 1 Time (s)": player1_time_s,
                 "Player 2 Time (s)": player2_time_s,
-                "Winner": f"Player ID {duel['winner']}" if duel['winner'] else "Not determined"
+                "Winner": (
+                    duel['player1']['username'] if duel['winner'] == duel['player1']['profileId']
+                    else duel['player2']['username'] if duel['winner'] == duel['player2']['profileId']
+                    else "Not determined"
+                )
             }
+
             duel_data.append(duel_info)
     return duel_data
 
@@ -67,7 +72,7 @@ def prepare_duel_data(duels):
 def display_duel_table(duel_data):
     if duel_data:
         duel_df = pd.DataFrame(duel_data)
-        st.dataframe(duel_df)  # Use st.table() for a static table or st.dataframe() for an interactive one
+        st.dataframe(duel_df, hide_index=True)        
     else:
         st.write("No duels found.")
 

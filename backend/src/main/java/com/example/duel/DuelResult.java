@@ -17,19 +17,19 @@ public class DuelResult {
         this.player2Time = player2Time;
     }
 
-    public Long getplayer1Time() {
+    public Long getPlayer1Time() {
         return player1Time;
     }
 
-    public void setplayer1Time(Long player1Time) {
+    public void setPlayer1Time(Long player1Time) {
         this.player1Time = player1Time;
     }
 
-    public Long getplayer2Time() {
+    public Long getPlayer2Time() {
         return player2Time;
     }
 
-    public void setplayer2Time(Long player2Time) {
+    public void setPlayer2Time(Long player2Time) {
         this.player2Time = player2Time;
     }
 }
