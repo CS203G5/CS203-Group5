@@ -13,118 +13,249 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import java.util.Collections;
 
 class ParticipantServiceTest {
 
     @InjectMocks
-    private ParticipantService participantService; // The class being tested
+    private ParticipantService participantService;
 
     @Mock
-    private ParticipantRepository participantRepository; // Mock the repository
+    private ParticipantRepository participantRepository;
 
     @Mock
-    private Tournament tournament; // Mocked Tournament
+    private Tournament tournament;
 
     @Mock
-    private Profile profile; // Mocked Profile
+    private Profile profile;
 
     private Participant participant;
 
     @BeforeEach
     void setUp() {
-        // Initialize Mockito mocks
         MockitoAnnotations.openMocks(this);
 
-        // Create a sample Participant object for testing
         participant = new Participant();
         participant.setWin(5);
         participant.setLose(2);
-        // You don't have setters for `tournament` and `profile`, so they need to be set through the constructor if provided
+    }
+
+    void mockRepositoryReturnNull(String methodName, Long id) {
+        switch (methodName) {
+            case "getParticipantsByUserId":
+                when(participantRepository.getParticipantsByUserId(id)).thenReturn(null);
+                break;
+            case "getParticipantsByTournamentId":
+                when(participantRepository.getParticipantsByTournamentId(id)).thenReturn(null);
+                break;
+            default:
+                when(participantRepository.findAll()).thenReturn(null);
+        }
+    }
+
+    void mockRepositoryReturnEmptyList(String methodName, Long id) {
+        switch (methodName) {
+            case "getParticipantsByUserId":
+                when(participantRepository.getParticipantsByUserId(id)).thenReturn(Collections.emptyList());
+                break;
+            case "getParticipantsByTournamentId":
+                when(participantRepository.getParticipantsByTournamentId(id)).thenReturn(Collections.emptyList());
+                break;
+            default:
+                when(participantRepository.findAll()).thenReturn(Collections.emptyList());
+        }
+    }
+
+    void mockRepositoryThrowException(String methodName, Long id) {
+        switch (methodName) {
+            case "getParticipantsByUserId":
+                when(participantRepository.getParticipantsByUserId(id)).thenThrow(new RuntimeException("Database error"));
+                break;
+            case "getParticipantsByTournamentId":
+                when(participantRepository.getParticipantsByTournamentId(id)).thenThrow(new RuntimeException("Database error"));
+                break;
+            case "deleteById":
+                doThrow(new RuntimeException("Database error")).when(participantRepository).deleteById(new ParticipantId(id, id));
+                break;
+            default:
+                when(participantRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+        }
     }
 
     @Test
     void testGetAllParticipants() {
-        // Mock the findAll() method of the repository
         List<Participant> participants = Arrays.asList(participant);
         when(participantRepository.findAll()).thenReturn(participants);
 
-        // Call the method to be tested
         List<Participant> result = participantService.getAllParticipants();
 
-        // Assertions to verify the expected results
         assertEquals(1, result.size());
-        assertEquals(5, result.get(0).getWin()); // Verify win count
-        assertEquals(2, result.get(0).getLose()); // Verify lose count
+        assertEquals(5, result.get(0).getWin());
+        assertEquals(2, result.get(0).getLose());
 
-        // Verify that the repository was called exactly once
+        verify(participantRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testGetAllParticipants_WhenRepositoryReturnsNull() {
+        mockRepositoryReturnNull("findAll", null);
+
+        List<Participant> result = participantService.getAllParticipants();
+
+        assertNull(result);
+        verify(participantRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testGetAllParticipants_WhenRepositoryReturnsEmptyList() {
+        mockRepositoryReturnEmptyList("findAll", null);
+
+        List<Participant> result = participantService.getAllParticipants();
+
+        assertTrue(result.isEmpty());
+        verify(participantRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testGetAllParticipants_WhenRepositoryThrowsException() {
+        mockRepositoryThrowException("findAll", null);
+
+        assertThrows(RuntimeException.class, () -> participantService.getAllParticipants());
         verify(participantRepository, times(1)).findAll();
     }
 
     @Test
     void testSaveParticipant() {
-        // Mock the save() method of the repository
         when(participantRepository.save(participant)).thenReturn(participant);
 
-        // Call the method to be tested
         Participant result = participantService.saveParticipant(participant);
 
-        // Assertions to verify the expected results
-        assertEquals(5, result.getWin()); // Verify win count
-        assertEquals(2, result.getLose()); // Verify lose count
+        assertEquals(5, result.getWin());
+        assertEquals(2, result.getLose());
 
-        // Verify that the repository's save method was called exactly once
+        verify(participantRepository, times(1)).save(participant);
+    }
+
+    @Test
+    void testSaveParticipant_WhenRepositoryReturnsNull() {
+        when(participantRepository.save(participant)).thenReturn(null);
+
+        Participant result = participantService.saveParticipant(participant);
+
+        assertNull(result);
+        verify(participantRepository, times(1)).save(participant);
+    }
+
+    @Test
+    void testSaveParticipant_WhenRepositoryThrowsException() {
+        when(participantRepository.save(participant)).thenThrow(new RuntimeException("Database save error"));
+
+        assertThrows(RuntimeException.class, () -> participantService.saveParticipant(participant));
         verify(participantRepository, times(1)).save(participant);
     }
 
     @Test
     void testGetParticipantsByUserId() {
-        // Mock the getParticipantsByUserId() method of the repository
         List<Participant> participants = Arrays.asList(participant);
         when(participantRepository.getParticipantsByUserId(1L)).thenReturn(participants);
 
-        // Call the method to be tested
         List<Participant> result = participantService.getParticipantsByUserId(1L);
 
-        // Assertions to verify the expected results
         assertEquals(1, result.size());
-        assertEquals(5, result.get(0).getWin()); // Verify win count
-        assertEquals(2, result.get(0).getLose()); // Verify lose count
+        assertEquals(5, result.get(0).getWin());
+        assertEquals(2, result.get(0).getLose());
 
-        // Verify that the repository's getParticipantsByUserId method was called exactly once
+        verify(participantRepository, times(1)).getParticipantsByUserId(1L);
+    }
+
+    @Test
+    void testGetParticipantsByUserId_WhenRepositoryReturnsNull() {
+        mockRepositoryReturnNull("getParticipantsByUserId", 1L);
+
+        List<Participant> result = participantService.getParticipantsByUserId(1L);
+
+        assertNull(result);
+        verify(participantRepository, times(1)).getParticipantsByUserId(1L);
+    }
+
+    @Test
+    void testGetParticipantsByUserId_WhenRepositoryReturnsEmptyList() {
+        mockRepositoryReturnEmptyList("getParticipantsByUserId", 1L);
+
+        List<Participant> result = participantService.getParticipantsByUserId(1L);
+
+        assertTrue(result.isEmpty());
+        verify(participantRepository, times(1)).getParticipantsByUserId(1L);
+    }
+
+    @Test
+    void testGetParticipantsByUserId_WhenRepositoryThrowsException() {
+        mockRepositoryThrowException("getParticipantsByUserId", 1L);
+
+        assertThrows(RuntimeException.class, () -> participantService.getParticipantsByUserId(1L));
         verify(participantRepository, times(1)).getParticipantsByUserId(1L);
     }
 
     @Test
     void testGetParticipantsByTournamentId() {
-        // Mock the getParticipantsByTournamentId() method of the repository
         List<Participant> participants = Arrays.asList(participant);
         when(participantRepository.getParticipantsByTournamentId(1L)).thenReturn(participants);
 
-        // Call the method to be tested
         List<Participant> result = participantService.getParticipantsByTournamentId(1L);
 
-        // Assertions to verify the expected results
         assertEquals(1, result.size());
-        assertEquals(5, result.get(0).getWin()); // Verify win count
-        assertEquals(2, result.get(0).getLose()); // Verify lose count
+        assertEquals(5, result.get(0).getWin());
+        assertEquals(2, result.get(0).getLose());
 
-        // Verify that the repository's getParticipantsByTournamentId method was called exactly once
+        verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
+    }
+
+    @Test
+    void testGetParticipantsByTournamentId_WhenRepositoryReturnsNull() {
+        mockRepositoryReturnNull("getParticipantsByTournamentId", 1L);
+
+        List<Participant> result = participantService.getParticipantsByTournamentId(1L);
+
+        assertNull(result);
+        verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
+    }
+
+    @Test
+    void testGetParticipantsByTournamentId_WhenRepositoryReturnsEmptyList() {
+        mockRepositoryReturnEmptyList("getParticipantsByTournamentId", 1L);
+
+        List<Participant> result = participantService.getParticipantsByTournamentId(1L);
+
+        assertTrue(result.isEmpty());
+        verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
+    }
+
+    @Test
+    void testGetParticipantsByTournamentId_WhenRepositoryThrowsException() {
+        mockRepositoryThrowException("getParticipantsByTournamentId", 1L);
+
+        assertThrows(RuntimeException.class, () -> participantService.getParticipantsByTournamentId(1L));
         verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
     }
 
     @Test
     void testDeleteById() {
         ParticipantId participantId = new ParticipantId(1L, 1L);
-        
-        // Mock the deleteById() method of the repository
         doNothing().when(participantRepository).deleteById(participantId);
 
-        // Call the method to be tested
         participantService.deleteById(participantId);
 
-        // Verify that the repository's deleteById method was called exactly once
+        verify(participantRepository, times(1)).deleteById(participantId);
+    }
+
+    @Test
+    void testDeleteById_WhenRepositoryThrowsException() {
+        ParticipantId participantId = new ParticipantId(1L, 1L);
+        mockRepositoryThrowException("deleteById", 1L);
+
+        assertThrows(RuntimeException.class, () -> participantService.deleteById(participantId));
         verify(participantRepository, times(1)).deleteById(participantId);
     }
 }
