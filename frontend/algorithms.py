@@ -120,3 +120,20 @@ def rand_match_afterwards():
         
     except requests.exceptions.RequestException as e:
         st.error(f"Error: {e}")
+
+
+def display_tournament_bracket(duels):
+    rounds = {}
+    for duel in duels:
+        round_name = duel["roundName"]
+        if round_name not in rounds:
+            rounds[round_name] = []
+        rounds[round_name].append(duel)
+    
+    for round_name in sorted(rounds.keys(), key=int):
+        st.write(f"### Round {round_name}")
+        for duel in rounds[round_name]:
+            player1 = duel["pid1"]
+            player2 = duel["pid2"]
+            winner = duel["winner"]
+            st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner if winner else 'TBD'}")

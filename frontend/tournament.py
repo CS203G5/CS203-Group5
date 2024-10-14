@@ -4,7 +4,7 @@ import streamlit as st
 import requests
 import random
 import trueskill
-from algorithms import rand_match_afterwards, randomly_pair_participants, post_rand_match, get_next_round_name, fetch_participants_by_tournament
+from algorithms import rand_match_afterwards, randomly_pair_participants, post_rand_match, get_next_round_name, fetch_participants_by_tournament, display_tournament_bracket
 
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False
@@ -308,6 +308,7 @@ def tournament_page():
                                         st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
                                     else:
                                         st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
+                    display_tournament_bracket(duels)
 
             if st.button("Edit Selected Tournament"):
                 selected_tournament_id = selected_tournaments[0]
