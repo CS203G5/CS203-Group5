@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -42,10 +44,32 @@ public class DuelServiceImpl implements DuelService{
     public List<Duel> getDuelsByPlayer(Long pid) {
         return duelRepository.getDuelsByPlayer(pid);
     }
-
+    
     public Duel createDuel(Duel duel) {
-        return duelRepository.save(duel);
+        try {
+            // Call the stored procedure that handles the validation logic
+            duelRepository.createDuel(
+                duel.getPlayer1().getProfileId(),
+                duel.getPlayer2().getProfileId(),
+                duel.getRoundName(),
+                duel.getWinner(),
+                duel.getTournament().getTournamentId()
+            );
+            return duel;
+        } catch (DataAccessException e) {
+            if (e.getCause() instanceof BadSqlGrammarException) {
+                String sqlErrorMessage = e.getCause().getMessage();
+                if (sqlErrorMessage.contains("Players must be different")) {
+                    throw new DuelCreationException("Players must be different");
+                } else if (sqlErrorMessage.contains("A duel with the same players, round, and tournament already exists")) {
+                    throw new DuelCreationException("A duel with the same players, round, and tournament already exists");
+                }
+            }
+            throw new DuelCreationException("Failed to create duel due to a database error", e);
+        }
     }
+    
+
 
     public Duel updateDuel(Long did, Duel newDuel) {
         // duelRepository.updateDuel(did, duel.getPid1(), duel.getPid2(), duel.getRoundName(), duel.getWinner());
@@ -61,10 +85,8 @@ public class DuelServiceImpl implements DuelService{
     public Duel updateDuelResult(Long did, DuelResult result) {
         return duelRepository.findById(did).map(duel -> {
             duel.setResult(result);
-            if (result.getPlayer1Time() < result.getPlayer2Time()) {
-                duel.setWinner(duel.getPlayer1().getProfileId());
-            } else if (result.getPlayer1Time() > result.getPlayer2Time()) {
-                duel.setWinner(duel.getPlayer2().getProfileId());
+            if (result.getWinnerId() != null) {
+                duel.setWinner(result.getWinnerId());
             } else {
                 duel.setWinner(null);
             }

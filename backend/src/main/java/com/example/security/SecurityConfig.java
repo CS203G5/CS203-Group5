@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
                 // .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
                 // .requestMatchers(ADMIN_MATCHERS).permitAll()   
-                .requestMatchers("/api/**").permitAll()
+                .requestMatchers("/api/duel/**").permitAll()
                 .anyRequest().authenticated()
             )
             // Enable OAuth2 Resource Server and configure JWT validation
