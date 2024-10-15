@@ -3,8 +3,8 @@ import datetime
 import streamlit as st
 import requests
 import random
-import trueskill
-from algorithms import rand_match_afterwards, randomly_pair_participants, post_rand_match, get_next_round_name, fetch_participants_by_tournament, display_tournament_bracket
+import trueskill as ts
+from algorithms import *
 
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False
@@ -91,7 +91,7 @@ def true_skill_pair_participants(participants):
         return [], None
 
     # Create a TrueSkill environment
-    env = trueskill.TrueSkill()
+    env = ts.TrueSkill()
 
     # Create a list of (participant, rating) tuples
     rated_participants = [(p, env.create_rating()) for p in participants]

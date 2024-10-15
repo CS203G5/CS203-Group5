@@ -1,7 +1,10 @@
 import streamlit as st
 import requests
-import trueskill
+import trueskill as ts
 import random
+
+# Initialize TrueSkill environment
+env = ts.TrueSkill()
 
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -70,7 +73,7 @@ def post_rand_match(tournament_id, player1, player2, round_name, winner):
     try:
         headers = get_headers()
         response = requests.post("http://localhost:8080/api/duel", json=duel, headers=headers)
-        response.raise_for_status()  # Raise an exception for HTTP errors
+        response.raise_for_status()
         if response.status_code == 200:
             return True
         else:
@@ -100,9 +103,10 @@ def rand_match_afterwards():
             winners = [duel["winner"] for duel in latest_round_duels if duel["winner"] not in (None, 0)]
 
             if len(latest_round_duels) == 1 and latest_round_duels[0]["winner"] not in (None, 0):
-                st.write(f"Player {latest_round_duels[0]['winner']} won 1st place in {tournament["name"]}!")            
+                # st.write(f"Player {latest_round_duels[0]['winner']} won 1st place in {tournament["name"]}!")
+                st.write()           
             elif len(winners) == len(latest_round_duels) and len(winners) > 1:
-                for duel in latest_round_duels: st.write(f"{duel["duel_id"]} winner=numofduels")
+                # for duel in latest_round_duels: st.write(f"{duel["duel_id"]} winner=numofduels")
                 pairs, unmatched = randomly_pair_participants(winners)
                 next_round_number = int(latest_round) + 1
                 next_round_name = str(next_round_number)
@@ -110,17 +114,14 @@ def rand_match_afterwards():
                     post_rand_match(tournament_id, player1, player2, next_round_name, winner=None)
                 
                 if unmatched:
-                    st.info(f"Unmatched Participant: {unmatched}")
-                    # Post the unmatched player as player 1 and set them as the winner
+                    # st.info(f"Unmatched Participant: {unmatched}")
                     post_rand_match(tournament_id, unmatched, None, next_round_name, winner=unmatched)
-
-                    st.info(f"Player {unmatched} has a bye into the next round")
+                    # st.info(f"Player {unmatched} has a bye into the next round")
             # else:
             #     for duel in latest_round_duels: st.write(f"{duel["duel_id"]} - {len(winners)} and {len(latest_round_duels)}")
         
     except requests.exceptions.RequestException as e:
         st.error(f"Error: {e}")
-
 
 def display_tournament_bracket(duels):
     rounds = {}
@@ -130,10 +131,15 @@ def display_tournament_bracket(duels):
             rounds[round_name] = []
         rounds[round_name].append(duel)
     
+    st.write("### Matches:")
+
     for round_name in sorted(rounds.keys(), key=int):
         st.write(f"### Round {round_name}")
         for duel in rounds[round_name]:
             player1 = duel["pid1"]
             player2 = duel["pid2"]
             winner = duel["winner"]
-            st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner if winner else 'TBD'}")
+            if player2 in (None, 0):
+                st.write(f"Player {player1} gets a bye into the next round")
+            else:
+                st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner if winner else 'TBD'}")
