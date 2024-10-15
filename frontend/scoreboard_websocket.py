@@ -14,13 +14,26 @@ duel_results = []
 # Function to handle WebSocket messages
 def on_message(ws, message):
     data = json.loads(message)
-    duel_results.append(data)  # Update the list of results
-    # Refresh the Streamlit app to display the updated list
+    duel_results.append(data)
     st.rerun()
 
-# Initialize WebSocket connection
+# Function to handle WebSocket errors
+def on_error(ws, error):
+    print(f"WebSocket error: {error}")
+
+# Function to handle WebSocket close
+def on_close(ws):
+    print("WebSocket connection closed")
+
+# Function to handle WebSocket open
+def on_open(ws):
+    print("WebSocket connection established")
+
+# Function to start WebSocket connection
 def connect_ws():
-    ws = websocket.WebSocketApp("ws://localhost:8080/ws", on_message=on_message)
+    ws = websocket.WebSocketApp("ws://localhost:8080/ws/duel-updates", on_message=on_message,on_error=on_error,on_close=on_close)
+
+    ws.on_open = on_open
     ws.run_forever()
 
 # Function to update duel result
