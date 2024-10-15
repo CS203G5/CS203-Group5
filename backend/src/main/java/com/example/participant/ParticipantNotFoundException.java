@@ -1,7 +1,7 @@
 package com.example.participant;
 
 public class ParticipantNotFoundException extends RuntimeException {
-    public ParticipantNotFoundException(int userId) {
-        super("Participant with ID " + userId + " not found");
+    public ParticipantNotFoundException(Long userId, Long tournamentId) {
+        super("Participant with user ID " + userId + " and tournament ID " + tournamentId + " not found");
     }
 }

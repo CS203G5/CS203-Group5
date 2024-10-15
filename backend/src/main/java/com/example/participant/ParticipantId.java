@@ -4,34 +4,30 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class ParticipantId implements Serializable {
+    private Long tournament;
+    private Long profile;
 
-    private int tournamentId;
-    private int userId;
-
-    // Default constructor
     public ParticipantId() {}
 
-    // Parameterized constructor
-    public ParticipantId(int tournamentId, int userId) {
-        this.tournamentId = tournamentId;
-        this.userId = userId;
+    public ParticipantId(Long tournament, Long profile) {
+        this.tournament = tournament;
+        this.profile = profile;
     }
 
-    // Getters, setters, equals, and hashCode methods
-    public int getTournamentId() {
-        return tournamentId;
+    public Long getTournament() {
+        return tournament;
     }
 
-    public void setTournamentId(int tournamentId) {
-        this.tournamentId = tournamentId;
+    public void setTournament(Long tournament) {
+        this.tournament = tournament;
     }
 
-    public int getUserId() {
-        return userId;
+    public Long getProfile() {
+        return profile;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setProfile(Long profile) {
+        this.profile = profile;
     }
 
     @Override
@@ -39,11 +35,12 @@ public class ParticipantId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParticipantId that = (ParticipantId) o;
-        return tournamentId == that.tournamentId && userId == that.userId;
+        return Objects.equals(tournament, that.tournament) &&
+               Objects.equals(profile, that.profile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tournamentId, userId);
+        return Objects.hash(tournament, profile);
     }
 }

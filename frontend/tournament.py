@@ -4,18 +4,20 @@ import streamlit as st
 import requests
 import random
 
-st.set_page_config(layout="wide")
-# Session state for the toggle functionality
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False
 if "show_update_form" not in st.session_state:
     st.session_state["show_update_form"] = False
+if "selected_tournament_id" not in st.session_state:
     st.session_state["selected_tournament_id"] = None
+if "jwt_token" not in st.session_state:
+    st.session_state["jwt_token"] = None  # Initialize jwt_token
 
 # Mock logged in user
-# def get_logged_in_user():
-#     return {"name": "John Doe", "id": 3}
-# logged_in_user = get_logged_in_user()
+def get_logged_in_user():
+    return {"name": "John Doe", "id": 1}
+logged_in_user = get_logged_in_user()
+
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
     
@@ -37,7 +39,7 @@ def fetch_tournaments_by_admin(organizer_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching data")
+        st.error(f"Error fetching data: {e}")
         return []
     
 def fetch_tournament(tournament_id):

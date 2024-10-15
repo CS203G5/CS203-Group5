@@ -1,14 +1,25 @@
 import streamlit as st
 from login_register import login_user, register_user
 from profile import profile_page
-from matchmaking import matchmaking_page
 from tournament import tournament_page
 from tournaments_avail import tournaments_avail_page
 from scoreboard_websocket import live_scoreboard, update_scoreboard
 
 from RAG import show_rag_assistant
 
+def initialize_session_state():
+    if "username" not in st.session_state:
+        st.session_state["username"] = None
+    if "show_create_form" not in st.session_state:
+        st.session_state["show_create_form"] = False
+    if "show_update_form" not in st.session_state:
+        st.session_state["show_update_form"] = False
+    if "selected_tournament_id" not in st.session_state:
+        st.session_state["selected_tournament_id"] = None
+
 def main():
+    initialize_session_state()
+    
     if 'jwt_token' not in st.session_state:
         st.sidebar.title("Authentication")
         auth_choice = st.sidebar.radio("Choose an option", ["Login", "Register"])
@@ -18,12 +29,10 @@ def main():
             register_user()
     else:
         st.sidebar.success(f"Logged in as {st.session_state['username']}")
-        page_choice = st.sidebar.radio("Choose an option", ["Profile", "Matchmaking", "Tournament", "Available Tournaments", "Update Scoreboard", "Scoreboard", "AI Assistant", "Logout"])
+        page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Available Tournaments", "Update Scoreboard", "Scoreboard", "AI Assistant", "Logout"])
 
         if page_choice == "Profile":
             profile_page()
-        elif page_choice == "Matchmaking":
-            matchmaking_page()
         elif page_choice == "Tournament":
             tournament_page()
         elif page_choice == "Available Tournaments":

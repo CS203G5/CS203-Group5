@@ -28,4 +28,7 @@ public class Profile {
     @NotNull
     @Column(name = "privacy_settings")
     private String privacySettings;
+
+    @Column(name = "rating", nullable = false, columnDefinition = "DOUBLE DEFAULT 0.0")
+    private Double rating = 0.0;
 }
