@@ -13,6 +13,10 @@ import org.mockito.Mock;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.example.tournament.TournamentRepository; 
+import com.example.tournament.TournamentServiceImpl; 
+
+
 @ExtendWith(MockitoExtension.class)
 public class TournamentServiceTest {
 
