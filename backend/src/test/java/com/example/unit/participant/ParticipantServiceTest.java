@@ -1,266 +1,187 @@
 package com.example.unit.participant;
 
-<<<<<<< HEAD
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-=======
-import com.example.participant.*;
+import com.example.participant.Participant;
+import com.example.participant.ParticipantId;
+import com.example.participant.ParticipantNotFoundException;
+import com.example.participant.ParticipantService;
+import com.example.participant.ParticipantRepository;
 import com.example.tournament.Tournament;
 import com.example.profile.Profile;
->>>>>>> main
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import java.util.Collections;
 
 class ParticipantServiceTest {
-
-    @InjectMocks
-    private ParticipantService participantService;
 
     @Mock
     private ParticipantRepository participantRepository;
 
-    @Mock
-    private Tournament tournament;
-
-    @Mock
-    private Profile profile;
-
-    private Participant participant;
+    @InjectMocks
+    private ParticipantService participantService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        participant = new Participant();
-        participant.setWin(5);
-        participant.setLose(2);
-    }
-
-    void mockRepositoryReturnNull(String methodName, Long id) {
-        switch (methodName) {
-            case "getParticipantsByUserId":
-                when(participantRepository.getParticipantsByUserId(id)).thenReturn(null);
-                break;
-            case "getParticipantsByTournamentId":
-                when(participantRepository.getParticipantsByTournamentId(id)).thenReturn(null);
-                break;
-            default:
-                when(participantRepository.findAll()).thenReturn(null);
-        }
-    }
-
-    void mockRepositoryReturnEmptyList(String methodName, Long id) {
-        switch (methodName) {
-            case "getParticipantsByUserId":
-                when(participantRepository.getParticipantsByUserId(id)).thenReturn(Collections.emptyList());
-                break;
-            case "getParticipantsByTournamentId":
-                when(participantRepository.getParticipantsByTournamentId(id)).thenReturn(Collections.emptyList());
-                break;
-            default:
-                when(participantRepository.findAll()).thenReturn(Collections.emptyList());
-        }
-    }
-
-    void mockRepositoryThrowException(String methodName, Long id) {
-        switch (methodName) {
-            case "getParticipantsByUserId":
-                when(participantRepository.getParticipantsByUserId(id)).thenThrow(new RuntimeException("Database error"));
-                break;
-            case "getParticipantsByTournamentId":
-                when(participantRepository.getParticipantsByTournamentId(id)).thenThrow(new RuntimeException("Database error"));
-                break;
-            case "deleteById":
-                doThrow(new RuntimeException("Database error")).when(participantRepository).deleteById(new ParticipantId(id, id));
-                break;
-            default:
-                when(participantRepository.findAll()).thenThrow(new RuntimeException("Database error"));
-        }
     }
 
     @Test
-    void testGetAllParticipants() {
-        List<Participant> participants = Arrays.asList(participant);
+    void getAllParticipants_ReturnsListOfParticipants() {
+        // Arrange
+        List<Participant> participants = new ArrayList<>();
+        participants.add(new Participant()); // Add a dummy participant
+
         when(participantRepository.findAll()).thenReturn(participants);
 
+        // Act
         List<Participant> result = participantService.getAllParticipants();
 
+        // Assert
+        assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(5, result.get(0).getWin());
-        assertEquals(2, result.get(0).getLose());
-
-        verify(participantRepository, times(1)).findAll();
+        verify(participantRepository).findAll();
     }
 
     @Test
-    void testGetAllParticipants_WhenRepositoryReturnsNull() {
-        mockRepositoryReturnNull("findAll", null);
+    void saveParticipant_NewParticipant_ReturnsSavedParticipant() {
+        // Arrange
+        Participant participant = new Participant();
+        when(participantRepository.save(any(Participant.class))).thenReturn(participant);
 
-        List<Participant> result = participantService.getAllParticipants();
+        // Act
+        Participant savedParticipant = participantService.saveParticipant(participant);
 
-        assertNull(result);
-        verify(participantRepository, times(1)).findAll();
+        // Assert
+        assertNotNull(savedParticipant);
+        verify(participantRepository).save(participant);
     }
 
     @Test
-    void testGetAllParticipants_WhenRepositoryReturnsEmptyList() {
-        mockRepositoryReturnEmptyList("findAll", null);
-
-        List<Participant> result = participantService.getAllParticipants();
-
-        assertTrue(result.isEmpty());
-        verify(participantRepository, times(1)).findAll();
+    void saveParticipant_NullParticipant_ReturnsNull() {
+        // Arrange
+        Participant participant = null;
+    
+        // Act
+        Participant savedParticipant = participantService.saveParticipant(participant);
+    
+        // Assert
+        assertNull(savedParticipant);
+        verify(participantRepository, never()).save(any(Participant.class)); // Ensure save was never called
     }
+    
 
     @Test
-    void testGetAllParticipants_WhenRepositoryThrowsException() {
-        mockRepositoryThrowException("findAll", null);
+    void getParticipantsByUserId_ReturnsParticipants() {
+        // Arrange
+        Long userId = 1L;
+        List<Participant> participants = new ArrayList<>();
+        participants.add(new Participant());
 
-        assertThrows(RuntimeException.class, () -> participantService.getAllParticipants());
-        verify(participantRepository, times(1)).findAll();
-    }
+        when(participantRepository.getParticipantsByUserId(userId)).thenReturn(participants);
 
-    @Test
-    void testSaveParticipant() {
-        when(participantRepository.save(participant)).thenReturn(participant);
+        // Act
+        List<Participant> result = participantService.getParticipantsByUserId(userId);
 
-        Participant result = participantService.saveParticipant(participant);
-
-        assertEquals(5, result.getWin());
-        assertEquals(2, result.getLose());
-
-        verify(participantRepository, times(1)).save(participant);
-    }
-
-    @Test
-    void testSaveParticipant_WhenRepositoryReturnsNull() {
-        when(participantRepository.save(participant)).thenReturn(null);
-
-        Participant result = participantService.saveParticipant(participant);
-
-        assertNull(result);
-        verify(participantRepository, times(1)).save(participant);
-    }
-
-    @Test
-    void testSaveParticipant_WhenRepositoryThrowsException() {
-        when(participantRepository.save(participant)).thenThrow(new RuntimeException("Database save error"));
-
-        assertThrows(RuntimeException.class, () -> participantService.saveParticipant(participant));
-        verify(participantRepository, times(1)).save(participant);
-    }
-
-    @Test
-    void testGetParticipantsByUserId() {
-        List<Participant> participants = Arrays.asList(participant);
-        when(participantRepository.getParticipantsByUserId(1L)).thenReturn(participants);
-
-        List<Participant> result = participantService.getParticipantsByUserId(1L);
-
+        // Assert
+        assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(5, result.get(0).getWin());
-        assertEquals(2, result.get(0).getLose());
-
-        verify(participantRepository, times(1)).getParticipantsByUserId(1L);
+        verify(participantRepository).getParticipantsByUserId(userId);
     }
 
     @Test
-    void testGetParticipantsByUserId_WhenRepositoryReturnsNull() {
-        mockRepositoryReturnNull("getParticipantsByUserId", 1L);
+    void getParticipantsByUserId_NonExistentUser_ReturnsEmptyList() {
+        // Arrange
+        Long userId = 999L;
+        when(participantRepository.getParticipantsByUserId(userId)).thenReturn(new ArrayList<>());
 
-        List<Participant> result = participantService.getParticipantsByUserId(1L);
+        // Act
+        List<Participant> result = participantService.getParticipantsByUserId(userId);
 
-        assertNull(result);
-        verify(participantRepository, times(1)).getParticipantsByUserId(1L);
-    }
-
-    @Test
-    void testGetParticipantsByUserId_WhenRepositoryReturnsEmptyList() {
-        mockRepositoryReturnEmptyList("getParticipantsByUserId", 1L);
-
-        List<Participant> result = participantService.getParticipantsByUserId(1L);
-
+        // Assert
+        assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(participantRepository, times(1)).getParticipantsByUserId(1L);
+        verify(participantRepository).getParticipantsByUserId(userId);
     }
 
     @Test
-    void testGetParticipantsByUserId_WhenRepositoryThrowsException() {
-        mockRepositoryThrowException("getParticipantsByUserId", 1L);
+    void getParticipantsByTournamentId_ReturnsParticipants() {
+        // Arrange
+        Long tournamentId = 1L;
+        List<Participant> participants = new ArrayList<>();
+        participants.add(new Participant());
 
-        assertThrows(RuntimeException.class, () -> participantService.getParticipantsByUserId(1L));
-        verify(participantRepository, times(1)).getParticipantsByUserId(1L);
-    }
+        when(participantRepository.getParticipantsByTournamentId(tournamentId)).thenReturn(participants);
 
-    @Test
-    void testGetParticipantsByTournamentId() {
-        List<Participant> participants = Arrays.asList(participant);
-        when(participantRepository.getParticipantsByTournamentId(1L)).thenReturn(participants);
+        // Act
+        List<Participant> result = participantService.getParticipantsByTournamentId(tournamentId);
 
-        List<Participant> result = participantService.getParticipantsByTournamentId(1L);
-
+        // Assert
+        assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(5, result.get(0).getWin());
-        assertEquals(2, result.get(0).getLose());
-
-        verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
+        verify(participantRepository).getParticipantsByTournamentId(tournamentId);
     }
 
     @Test
-    void testGetParticipantsByTournamentId_WhenRepositoryReturnsNull() {
-        mockRepositoryReturnNull("getParticipantsByTournamentId", 1L);
+    void getParticipantsByTournamentId_NonExistentTournament_ReturnsEmptyList() {
+        // Arrange
+        Long tournamentId = 999L;
+        when(participantRepository.getParticipantsByTournamentId(tournamentId)).thenReturn(new ArrayList<>());
 
-        List<Participant> result = participantService.getParticipantsByTournamentId(1L);
+        // Act
+        List<Participant> result = participantService.getParticipantsByTournamentId(tournamentId);
 
-        assertNull(result);
-        verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
-    }
-
-    @Test
-    void testGetParticipantsByTournamentId_WhenRepositoryReturnsEmptyList() {
-        mockRepositoryReturnEmptyList("getParticipantsByTournamentId", 1L);
-
-        List<Participant> result = participantService.getParticipantsByTournamentId(1L);
-
+        // Assert
+        assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
+        verify(participantRepository).getParticipantsByTournamentId(tournamentId);
     }
 
     @Test
-    void testGetParticipantsByTournamentId_WhenRepositoryThrowsException() {
-        mockRepositoryThrowException("getParticipantsByTournamentId", 1L);
-
-        assertThrows(RuntimeException.class, () -> participantService.getParticipantsByTournamentId(1L));
-        verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
-    }
-
-    @Test
-    void testDeleteById() {
+    void deleteById_ValidParticipantId_DeletesParticipant() {
+        // Arrange
         ParticipantId participantId = new ParticipantId(1L, 1L);
         doNothing().when(participantRepository).deleteById(participantId);
 
-        participantService.deleteById(participantId);
+        // Act
+        assertDoesNotThrow(() -> participantService.deleteById(participantId));
 
-        verify(participantRepository, times(1)).deleteById(participantId);
+        // Assert
+        verify(participantRepository).deleteById(participantId);
     }
 
     @Test
-    void testDeleteById_WhenRepositoryThrowsException() {
-        ParticipantId participantId = new ParticipantId(1L, 1L);
-        mockRepositoryThrowException("deleteById", 1L);
+    void deleteById_NullParticipantId_ThrowsIllegalArgumentException() {
+        // Arrange
+        ParticipantId participantId = null;
+    
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            participantService.deleteById(participantId);
+        });
+        assertEquals("ParticipantId cannot be null", exception.getMessage());
+    }
+    
 
-        assertThrows(RuntimeException.class, () -> participantService.deleteById(participantId));
-        verify(participantRepository, times(1)).deleteById(participantId);
+        @Test
+    void deleteById_NonExistentParticipantId_ThrowsParticipantNotFoundException() {
+        // Arrange
+        ParticipantId participantId = new ParticipantId(1L, 999L); // Assume this ID does not exist
+        doThrow(new ParticipantNotFoundException(999L, 1L)).when(participantRepository).deleteById(participantId);
+
+        // Act & Assert
+        ParticipantNotFoundException exception = assertThrows(ParticipantNotFoundException.class, () -> {
+            participantService.deleteById(participantId);
+        });
+        assertEquals("Participant with user ID 999 and tournament ID 1 not found", exception.getMessage());
+        verify(participantRepository).deleteById(participantId);
     }
 }

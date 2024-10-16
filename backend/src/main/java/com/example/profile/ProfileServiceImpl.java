@@ -25,6 +25,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public Profile saveProfile(Profile profile) {
+        if (profile.getUsername() == null || profile.getUsername().trim().isEmpty() ||
+            profile.getEmail() == null || !profile.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            return null; // Return null for invalid profiles
+        }
         return profileRepository.save(profile);
     }
 

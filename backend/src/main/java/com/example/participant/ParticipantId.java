@@ -10,6 +10,9 @@ public class ParticipantId implements Serializable {
     public ParticipantId() {}
 
     public ParticipantId(Long tournament, Long profile) {
+        if (tournament == null || profile == null) {
+            throw new NullPointerException("Tournament and Profile IDs cannot be null");
+        }
         this.tournament = tournament;
         this.profile = profile;
     }

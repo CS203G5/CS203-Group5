@@ -18,8 +18,12 @@ public class ParticipantService {
     }
 
     public Participant saveParticipant(Participant participant) {
+        if (participant == null) {
+            return null; // or throw an exception
+        }
         return participantRepository.save(participant);
     }
+    
 
     @Transactional
     public List<Participant> getParticipantsByUserId(Long user_id) {
@@ -32,6 +36,10 @@ public class ParticipantService {
     }
 
     public void deleteById(ParticipantId participantId) {
+        if (participantId == null) {
+            throw new IllegalArgumentException("ParticipantId cannot be null");
+        }
         participantRepository.deleteById(participantId);
     }
+    
 }

@@ -3,6 +3,7 @@ package com.example.tournament;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +26,15 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     public List<Tournament> getOngoingTournaments() {
-        java.time.LocalDate today = java.time.LocalDate.now();
-    
-    return tournamentRepository.findAll().stream()
-        .filter(t -> {
-            java.time.LocalDate tournamentDate = t.getDate().toLocalDate(); 
-            return tournamentDate.isBefore(today.plusDays(1)) && tournamentDate.isAfter(today.minusDays(1));
-        })
-        .collect(Collectors.toList());
+        LocalDate today = LocalDate.now();
+        return tournamentRepository.findAll().stream()
+            .filter(t -> {
+                LocalDate tournamentDate = t.getDate().toLocalDate(); 
+                return !tournamentDate.isBefore(today) && !tournamentDate.isAfter(today.plusDays(1));
+            })
+            .collect(Collectors.toList());
     }
+    
 
     public List<Tournament> getTournamentByOrganizer(Long aid) {
         return tournamentRepository.getTournamentByOrganizer(aid);

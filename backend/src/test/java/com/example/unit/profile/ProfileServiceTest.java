@@ -1,94 +1,133 @@
-// package com.example.unit.profile;
+package com.example.unit.profile;
 
-// import static org.mockito.Mockito.*;
-// import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows; 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never; 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-// import java.util.Optional;
+import com.example.profile.Profile;
+import com.example.profile.ProfileRepository;
+import com.example.profile.ProfileService;
+import com.example.profile.ProfileServiceImpl;
 
-// import com.example.profile.Profile;
-// import com.example.profile.ProfileRepository;
-// import com.example.profile.ProfileServiceImpl;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// @ExtendWith(MockitoExtension.class)
-// public class ProfileServiceTest {
+@ExtendWith(MockitoExtension.class)
+public class ProfileServiceTest {
 
-//     @Mock
-//     private ProfileRepository profileRepository;
+    @Mock
+    private ProfileRepository profileRepository;
 
-//     @InjectMocks
-//     private ProfileServiceImpl profileService;
+    @InjectMocks
+    private ProfileServiceImpl profileService;
 
-//     @Test
-//     public void testGetProfile() {
-//         // Given
-//         Long profileId = 1L;
-//         Profile mockProfile = new Profile(1L, "user1", "user1@example.com", "Bio", "Public");
-//         when(profileRepository.findById(profileId)).thenReturn(Optional.of(mockProfile));
+    @Test
+    void saveProfile_NewProfile_ReturnSavedProfile() {
+        // Arrange
+        Profile profile = new Profile(null, "NewUser", "newuser@example.com", "Bio", "Public", 0.0);
+        when(profileRepository.save(any(Profile.class))).thenReturn(profile);
 
-//         // When
-//         Optional<Profile> result = profileService.getProfile(profileId);
+        // Act
+        Profile savedProfile = profileService.saveProfile(profile);
 
-//         // Then
-//         assertTrue(result.isPresent());
-//         assertEquals("user1", result.get().getUsername());
-//         verify(profileRepository).findById(profileId);
-//     }
+        // Assert
+        assertNotNull(savedProfile);
+        verify(profileRepository).save(profile);
+    }
 
-//     @Test
-//     public void testUpdateProfile() {
-//         // Given
-//         Long profileId = 1L;
-//         Profile existingProfile = new Profile(1L, "user1", "user1@example.com", "Bio", "Public");
-//         Profile updatedProfile = new Profile(1L, "user1", "user2@example.com", "New Bio", "Private");
+    @Test
+    public void saveProfile_InvalidProfile_ReturnNull() {
+        // Arrange
+        Profile profile = new Profile(null, "", "invalidEmail", "Bio", "Public", 0.0); // Invalid profile with empty username
+    
+        // Act
+        Profile savedProfile = profileService.saveProfile(profile);
+    
+        // Assert
+        assertNull(savedProfile); 
+        verify(profileRepository, never()).save(profile); 
+    }
+    
 
-//         when(profileRepository.findById(profileId)).thenReturn(Optional.of(existingProfile));
-//         when(profileRepository.findByEmail(updatedProfile.getEmail())).thenReturn(Optional.empty());
-//         when(profileRepository.save(any(Profile.class))).thenReturn(existingProfile);
+    @Test
+    void updateProfile_NotFound_ReturnNull() {
+        // Arrange
+        Profile updatedProfile = new Profile(null, "UpdatedUser", "updated@example.com", "Updated Bio", "Private", 0.0);
+        Long profileId = 10L;
+        when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
 
-//         // When
-//         Profile result = profileService.updateProfile(profileId, updatedProfile);
+        // Act
+        Profile result = profileService.updateProfile(profileId, updatedProfile);
 
-//         // Then
-//         assertEquals("user2@example.com", result.getEmail());
-//         verify(profileRepository).findById(profileId);
-//         verify(profileRepository).save(existingProfile);
-//     }
+        // Assert
+        assertNull(result);
+        verify(profileRepository).findById(profileId);
+    }
 
-//     @Test
-//     public void testUpdateProfile_EmailAlreadyInUse() {
-//         // Given
-//         Long profileId = 1L;
-//         Profile existingProfile = new Profile(1L, "user1", "user1@example.com", "Bio", "Public");
-//         Profile updatedProfile = new Profile(1L, "user1", "user2@example.com", "New Bio", "Private");
+    @Test
+    void getProfile_Found_ReturnsProfile() {
+        // Arrange
+        Long profileId = 1L;
+        Profile profile = new Profile(profileId, "User1", "user1@example.com", "Bio", "Public", 0.0);
+        when(profileRepository.findById(profileId)).thenReturn(Optional.of(profile));
 
-//         when(profileRepository.findById(profileId)).thenReturn(Optional.of(existingProfile));
-//         when(profileRepository.findByEmail(updatedProfile.getEmail())).thenReturn(Optional.of(new Profile())); // Simulate existing email
+        // Act
+        Optional<Profile> result = profileService.getProfile(profileId);
 
-//         // When / Then
-//         RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-//             profileService.updateProfile(profileId, updatedProfile);
-//         });
-//         assertEquals("Email is already in use.", thrown.getMessage());
-//     }
+        // Assert
+        assertNotNull(result);
+        assertEquals(profile, result.get());
+        verify(profileRepository).findById(profileId);
+    }
 
-//     @Test
-//     public void testUpdateProfile_ProfileNotFound() {
-//         // Given
-//         Long profileId = 1L;
-//         Profile updatedProfile = new Profile(1L, "user1", "user2@example.com", "New Bio", "Private");
+    @Test
+    void getProfile_NotFound_ReturnsEmpty() {
+        // Arrange
+        Long profileId = 2L;
+        when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
 
-//         when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
+        // Act
+        Optional<Profile> result = profileService.getProfile(profileId);
 
-//         // When / Then
-//         RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-//             profileService.updateProfile(profileId, updatedProfile);
-//         });
-//         assertEquals("Profile not found", thrown.getMessage());
-//     }
-// }
+        // Assert
+        assertNull(result.orElse(null));
+        verify(profileRepository).findById(profileId);
+    }
+
+    @Test
+    void deleteProfile_Exists_DeletesProfile() {
+        // Arrange
+        Long profileId = 1L;
+        when(profileRepository.existsById(profileId)).thenReturn(true);
+
+        // Act
+        profileService.deleteProfile(profileId);
+
+        // Assert
+        verify(profileRepository).deleteById(profileId);
+    }
+
+    @Test
+    void deleteProfile_NotExists_ThrowsException() {
+        // Arrange
+        Long profileId = 2L;
+        when(profileRepository.existsById(profileId)).thenReturn(false);
+
+        // Act and Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> profileService.deleteProfile(profileId));
+        assertEquals("Profile with id " + profileId + " does not exist", exception.getMessage());
+        verify(profileRepository, never()).deleteById(profileId);
+    }
+}

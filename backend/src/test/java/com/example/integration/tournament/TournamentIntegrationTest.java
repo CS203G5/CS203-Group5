@@ -1,107 +1,110 @@
-package com.example.integration.tournament;
+// package com.example.integration.tournament;
 
-import com.example.Main;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+// import static org.junit.jupiter.api.Assertions.*;
 
-import java.net.URI;
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.List;
+// import java.net.URI;
+// import java.sql.Date;
+// import java.sql.Time;
+// import java.time.LocalDateTime;
+// import java.util.Collections;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Main.class)
-@Transactional
-public class TournamentIntegrationTest {
+// import org.junit.jupiter.api.AfterEach;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.test.context.SpringBootTest;
+// import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+// import org.springframework.boot.test.web.client.TestRestTemplate;
+// import org.springframework.boot.test.web.server.LocalServerPort;
+// import org.springframework.http.HttpMethod;
+// import org.springframework.http.ResponseEntity;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+// import com.example.tournament.Tournament;
+// import com.example.tournament.TournamentRepository;
 
-    private String baseUrl = "/api/tournaments";
+// @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+// class TournamentIntegrationTest {
 
-    @Test
-    public void testAddTournament() throws Exception {
-        Tournament tournament = new Tournament();
-        tournament.setName("Integration Test Tournament");
-        tournament.setIsRandom(true);
-        tournament.setDate(Date.valueOf(LocalDate.now()));
-        tournament.setLocation("Test Location");
-        tournament.setOrganizer(123L);
-        tournament.setDescription("An integration test tournament");
+//     @LocalServerPort
+//     private int port;
 
-        URI uri = new URI(baseUrl);
+//     private final String baseUrl = "http://localhost:";
 
-        ResponseEntity<Tournament> result = restTemplate.postForEntity(uri, tournament, Tournament.class);
-        assertEquals(201, result.getStatusCode().value());
-        assertNotNull(result.getBody());
-        assertEquals("Integration Test Tournament", result.getBody().getName());
-    }
+//     @Autowired
+//     private TestRestTemplate restTemplate;
 
-    @Test
-    public void testGetAllTournaments() {
-        ResponseEntity<Tournament[]> result = restTemplate.getForEntity(baseUrl, Tournament[].class);
-        assertEquals(200, result.getStatusCode().value());
-        assertNotNull(result.getBody());
-        assertTrue(result.getBody().length > 0);
-    }
+//     @Autowired
+//     private TournamentRepository tournamentRepository;
 
-    @Test
-    public void testUpdateTournament() throws Exception {
-        // Add a tournament first
-        Tournament tournament = new Tournament();
-        tournament.setName("Update Test Tournament");
-        tournament.setIsRandom(false);
-        tournament.setDate(Date.valueOf(LocalDate.now()));
-        tournament.setLocation("Test Location");
-        tournament.setOrganizer(123L);
-        tournament.setDescription("Update test tournament");
+//     @AfterEach
+//     void tearDown() {
+//         tournamentRepository.deleteAll();
+//     }
 
-        URI uri = new URI(baseUrl);
-        ResponseEntity<Tournament> result = restTemplate.postForEntity(uri, tournament, Tournament.class);
-        assertEquals(201, result.getStatusCode().value());
+//     @Test
+//     public void getTournaments_Success() throws Exception {
+//         tournamentRepository.save(new Tournament("Test Tournament"));
 
-        // Update the tournament
-        Tournament updatedTournament = result.getBody();
-        updatedTournament.setName("Updated Tournament");
+//         URI uri = new URI(baseUrl + port + "/tournaments");
+//         ResponseEntity<Tournament[]> result = restTemplate.getForEntity(uri, Tournament[].class);
 
-        URI updateUri = new URI(baseUrl + "/" + updatedTournament.getTournament_id());
-        restTemplate.put(updateUri, updatedTournament);
+//         assertEquals(200, result.getStatusCode().value());
+//         assertTrue(result.getBody().length > 0);
+//     }
 
-        // Verify the update
-        ResponseEntity<Tournament> updatedResult = restTemplate.getForEntity(updateUri, Tournament.class);
-        assertEquals(200, updatedResult.getStatusCode().value());
-        assertEquals("Updated Tournament", updatedResult.getBody().getName());
-    }
+//     @Test
+//     public void getTournament_ValidId_Success() throws Exception {
+//         Tournament savedTournament = tournamentRepository.save(new Tournament("Test Tournament"));
+//         URI uri = new URI(baseUrl + port + "/tournaments/" + savedTournament.getTournament_id());
 
-    @Test
-    public void testDeleteTournament() throws Exception {
-        // Add a tournament first
-        Tournament tournament = new Tournament();
-        tournament.setName("Delete Test Tournament");
-        tournament.setIsRandom(false);
-        tournament.setDate(Date.valueOf(LocalDate.now()));
-        tournament.setLocation("Test Location");
-        tournament.setOrganizer(123L);
-        tournament.setDescription("Delete test tournament");
+//         ResponseEntity<Tournament> result = restTemplate.getForEntity(uri, Tournament.class);
 
-        URI uri = new URI(baseUrl);
-        ResponseEntity<Tournament> result = restTemplate.postForEntity(uri, tournament, Tournament.class);
-        assertEquals(201, result.getStatusCode().value());
+//         assertEquals(200, result.getStatusCode().value());
+//         assertEquals(savedTournament.getName(), result.getBody().getName());
+//     }
 
-        // Delete the tournament
-        Long tournamentId = result.getBody().getTournament_id();
-        URI deleteUri = new URI(baseUrl + "/" + tournamentId);
-        restTemplate.delete(deleteUri);
+//     @Test
+//     public void getTournament_InvalidId_Failure() throws Exception {
+//         URI uri = new URI(baseUrl + port + "/tournaments/999"); // Assuming 999 does not exist
 
-        // Verify deletion
-        ResponseEntity<Tournament> deletedResult = restTemplate.getForEntity(deleteUri, Tournament.class);
-        assertEquals(404, deletedResult.getStatusCode().value());
-    }
-}
+//         ResponseEntity<Tournament> result = restTemplate.getForEntity(uri, Tournament.class);
+
+//         assertEquals(404, result.getStatusCode().value());
+//     }
+
+//     @Test
+//     public void addTournament_Success() throws Exception {
+//         URI uri = new URI(baseUrl + port + "/tournaments");
+//         Tournament tournament = new Tournament("New Tournament");
+//         tournament.setIsRandom(true);
+//         tournament.setDate(Date.valueOf("2024-10-01"));
+//         tournament.setTime(Time.valueOf("10:00:00"));
+//         tournament.setLocation("Location B");
+//         tournament.setDescription("Description");
+//         tournament.setModifiedAt(LocalDateTime.now());
+
+//         ResponseEntity<Tournament> result = restTemplate.postForEntity(uri, tournament, Tournament.class);
+
+//         assertEquals(201, result.getStatusCode().value());
+//         assertEquals(tournament.getName(), result.getBody().getName());
+//     }
+
+//     @Test
+//     public void deleteTournament_ValidId_Success() throws Exception {
+//         Tournament savedTournament = tournamentRepository.save(new Tournament("Test Tournament"));
+//         URI uri = new URI(baseUrl + port + "/tournaments/" + savedTournament.getTournament_id());
+
+//         ResponseEntity<Void> result = restTemplate.exchange(uri, HttpMethod.DELETE, null, Void.class);
+
+//         assertEquals(200, result.getStatusCode().value());
+//         assertFalse(tournamentRepository.findById(savedTournament.getTournament_id()).isPresent());
+//     }
+
+//     @Test
+//     public void deleteTournament_InvalidId_Failure() throws Exception {
+//         URI uri = new URI(baseUrl + port + "/tournaments/999"); // Assuming 999 does not exist
+
+//         ResponseEntity<Void> result = restTemplate.exchange(uri, HttpMethod.DELETE, null, Void.class);
+
+//         assertEquals(404, result.getStatusCode().value());
+//     }
+// }

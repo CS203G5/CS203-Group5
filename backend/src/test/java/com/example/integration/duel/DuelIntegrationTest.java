@@ -1,5 +1,5 @@
-package com.example.integration.duel;
+// package com.example.integration.duel;
 
-public class DuelIntegrationTest {
+// public class DuelIntegrationTest {
     
-}
+// }
