@@ -31,4 +31,8 @@ public class Profile {
 
     @Column(name = "rating", nullable = false, columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double rating = 0.0;
+
+    @Column(name = "role")
+    @NotNull(message = "Authorities should not be null")
+    private String role;
 }
