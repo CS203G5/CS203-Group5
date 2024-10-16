@@ -14,10 +14,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Duel {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long duel_id;
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    private Long duel_id;
 
     private String roundName;
-    @Embedded private DuelResult result;
+
+    @Embedded 
+    private DuelResult result;
+
     private Long winner;
 
     @OneToOne(cascade = CascadeType.PERSIST)
@@ -46,5 +51,14 @@ public class Duel {
 
     public void setWinner(Long winner){
         this.winner = winner;
+    }
+
+    // New methods to set the player1 and player2 via their profile IDs
+    public void setPid1(Profile player1) {
+        this.player1 = player1;
+    }
+
+    public void setPid2(Profile player2) {
+        this.player2 = player2;
     }
 }
