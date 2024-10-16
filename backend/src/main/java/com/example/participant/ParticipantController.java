@@ -33,7 +33,13 @@ public class ParticipantController {
 
     @GetMapping("/tournament/{tournament_id}")
     public List<Participant> getParticipantsByTournamentId(@PathVariable Long tournament_id) {
-        return participantService.getParticipantsByTournamentId(tournament_id);
+        List<Participant> participants = participantService.getParticipantsByTournamentId(tournament_id);
+        
+        if (participants.isEmpty()) {
+            throw new ParticipantNotFoundException(tournament_id);
+        }
+        
+        return participants;
     }
 
     @GetMapping("/user/{userId}")
@@ -51,10 +57,12 @@ public class ParticipantController {
     @DeleteMapping("/user/{user_id}/tournament/{tournament_id}")
     public void deleteParticipant(@PathVariable Long user_id, @PathVariable Long tournament_id) {
         ParticipantId participantId = new ParticipantId(tournament_id, user_id);
-        try {
-            participantService.deleteById(participantId);
-        } catch (EmptyResultDataAccessException e) {
+        
+        if (!participantService.existsById(participantId)) {
             throw new ParticipantNotFoundException(user_id, tournament_id);
         }
+    
+        participantService.deleteById(participantId);
     }
+    
 }
