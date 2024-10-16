@@ -136,4 +136,4 @@ public class ParticipantIntegrationTest {
 //         ResponseEntity<Participant> getResponse = restTemplate.getForEntity(uri, Participant.class);
 //         assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode());
 //     }
-// }
+}
