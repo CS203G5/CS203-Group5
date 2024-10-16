@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -61,6 +62,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     public Tournament update(Long tid, Tournament newTournamentInfo) {
         return tournamentRepository.findById(tid).map(tournament -> {
+            // Update the fields
             tournament.setName(newTournamentInfo.getName());
             tournament.setIsRandom(newTournamentInfo.getIsRandom());
             tournament.setDate(newTournamentInfo.getDate());
@@ -70,7 +72,7 @@ public class TournamentServiceImpl implements TournamentService {
             tournament.setDescription(newTournamentInfo.getDescription());
             tournament.setModifiedAt(LocalDateTime.now());
             return tournamentRepository.save(tournament);
-        }).orElse(null);
+        }).orElseThrow(() -> new EntityNotFoundException("Tournament not found with id: " + tid));
     }
 
     public void deleteById(List<Long> deleteList) {

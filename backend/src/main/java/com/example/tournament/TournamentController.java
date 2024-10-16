@@ -3,6 +3,8 @@ package com.example.tournament;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 
@@ -84,10 +86,16 @@ public class TournamentController {
     }
 
     @PutMapping("/{tid}")
-    public Tournament updateTournament(@PathVariable Long tid, @Valid @RequestBody Tournament tournament) {
-        tournament.setModifiedAt(LocalDateTime.now());
-        return ts.update(tid, tournament);
+    public ResponseEntity<Tournament> updateTournament(@PathVariable Long tid, @Valid @RequestBody Tournament tournament) {
+        try {
+            tournament.setModifiedAt(LocalDateTime.now());
+            Tournament updatedTournament = ts.update(tid, tournament);
+            return ResponseEntity.ok(updatedTournament);  // Return 200 OK if successful
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Return 404 Not Found if not found
+        }
     }
+
 
     @DeleteMapping()
     public void deleteTournament(@Valid @RequestBody List<Long> deleteList) {
