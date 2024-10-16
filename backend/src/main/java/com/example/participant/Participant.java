@@ -1,49 +1,58 @@
-package com.example.participant;
+    package com.example.participant;
 
-import com.example.tournament.Tournament;
-import com.example.profile.Profile;
+    import com.example.tournament.Tournament;
+    import com.example.profile.Profile;
 
-import jakarta.persistence.*;
+    import jakarta.persistence.*;
 
-@Entity
-@Table(name = "participant")
-@IdClass(ParticipantId.class)
-public class Participant {
+    @Entity
+    @Table(name = "participant")
+    @IdClass(ParticipantId.class)
+    public class Participant {
 
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "tournament_id", referencedColumnName = "tournament_id")
-    private Tournament tournament;
+        @Id
+        @ManyToOne
+        @JoinColumn(name = "tournament_id", referencedColumnName = "tournament_id")
+        private Tournament tournament;
 
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "profileId")
-    private Profile profile;
+        @Id
+        @ManyToOne
+        @JoinColumn(name = "user_id", referencedColumnName = "profileId")
+        private Profile profile;
 
-    private int win;
-    private int lose;
+        private int win;
+        private int lose;
 
-    public Tournament getTournament() {
-        return tournament;
+        public Tournament getTournament() {
+            return tournament;
+        }
+
+        public Profile getProfile() {
+            return profile;
+        }
+
+        public int getWin() {
+            return win;
+        }
+
+        public void setWin(int win) {
+            this.win = win;
+        }
+
+        public int getLose() {
+            return lose;
+        }
+
+        public void setLose(int lose) {
+            this.lose = lose;
+        }
+
+        public void setTournament(Tournament tournament) {
+            this.tournament = tournament;
+        }
+        
+        public void setProfile(Profile profile) {
+            this.profile = profile;
+        }
+        
     }
-
-    public Profile getProfile() {
-        return profile;
-    }
-
-    public int getWin() {
-        return win;
-    }
-
-    public void setWin(int win) {
-        this.win = win;
-    }
-
-    public int getLose() {
-        return lose;
-    }
-
-    public void setLose(int lose) {
-        this.lose = lose;
-    }
-}
