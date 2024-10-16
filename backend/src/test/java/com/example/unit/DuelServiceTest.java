@@ -1,4 +1,4 @@
-package com.example.unit.duel;
+package com.example.unit;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
