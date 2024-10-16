@@ -164,10 +164,14 @@ class DuelServiceImplTest {
     
         // Call the service method to update the duel result
         Duel updatedDuel = duelServiceImpl.updateDuelResult(1L, result);
+
+        System.out.println("Finished calling updateDuelResult");
     
         // Assert that the winner is player 2 (pid2)
         assertNotNull(updatedDuel);
         assertEquals(200L, updatedDuel.getWinner()); // Expect Player 2 (200L) to win
+
+        System.out.println("Winner ID: " + updatedDuel.getWinner());
     
         // Verify that the repository methods were called
         verify(duelRepository, times(1)).findById(1L);
