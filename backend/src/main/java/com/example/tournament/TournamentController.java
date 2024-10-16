@@ -96,7 +96,6 @@ public class TournamentController {
         }
     }
 
-
     @DeleteMapping()
     public void deleteTournament(@Valid @RequestBody List<Long> deleteList) {
         ts.deleteById(deleteList);

@@ -78,9 +78,10 @@ public class TournamentServiceImpl implements TournamentService {
     public void deleteById(List<Long> deleteList) {
         for (Long tid : deleteList) {
             if (!tournamentRepository.existsById(tid)) {
-                throw new IllegalArgumentException("Tournament with id " + tid + " does not exist");
+                throw new TournamentNotFoundException("Tournament with id " + tid + " does not exist");
             }
             tournamentRepository.deleteById(tid);
         }
-    }
+    }  
+    
 }

@@ -28,8 +28,8 @@ public class DuelServiceImpl implements DuelService{
     }
     
     public Duel getDuelById(Long did) {
-        return duelRepository.findById(did).orElse(null);
-    }
+        return duelRepository.findById(did).orElseThrow(() -> new DuelNotFoundException("Duel not found with id: " + did));
+    }    
 
     public List<Duel> getDuelsByPlayer(Long pid) {
         return duelRepository.getDuelsByPlayer(pid);
@@ -65,10 +65,11 @@ public class DuelServiceImpl implements DuelService{
     }
 
     public void deleteDuel(Long did) {
-        try{
-            duelRepository.deleteById(did);
-        } catch (Exception e) {
-            System.out.println("Duel not found with id: " + did);
+        if (!duelRepository.existsById(did)) {
+            throw new DuelNotFoundException("Duel not found with id: " + did);
         }
-    }  
+        duelRepository.deleteById(did);
+    }
+    
+    
 }
