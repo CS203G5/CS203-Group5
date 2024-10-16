@@ -8,7 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DuelRepository extends JpaRepository<Duel, Long> {        
+public interface DuelRepository extends JpaRepository<Duel, Long> {
+
     @Procedure(name = "getDuelsByTournament")
     List<Duel> getDuelsByTournament(@Param("tid") Long tid);
 
@@ -17,7 +18,10 @@ public interface DuelRepository extends JpaRepository<Duel, Long> {
 
     @Procedure(name = "getDuelsByPlayer")
     List<Duel> getDuelsByPlayer(@Param("p_pid") Long pid);
-
+    
+    @Procedure(name="createDuel")
+    Duel createDuel(@Param("p_pid1") Long pid1, @Param("p_pid2") Long pid2, @Param("p_roundName") String roundName, @Param("p_winner") Long winner, @Param("p_tid") Long tid);
+    
     @Procedure(name = "deleteDuel")
     void deleteDuel(@Param("did") Long did); 
 }
