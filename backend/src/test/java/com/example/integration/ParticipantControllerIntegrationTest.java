@@ -40,10 +40,10 @@ class ParticipantControllerIntegrationTest {
     private ParticipantService participantService;
 
     @Autowired
-    private ProfileRepository profileRepository;  // Add this
+    private ProfileRepository profileRepository;
 
     @Autowired
-    private TournamentRepository tournamentRepository;  // Add this
+    private TournamentRepository tournamentRepository;
 
     private String jwtToken;
 
@@ -51,10 +51,10 @@ class ParticipantControllerIntegrationTest {
     void setUp() {
         // Clean repositories before each test
         participantRepository.deleteAll();
-        profileRepository.deleteAll();  // Ensure Profile is cleared
-        tournamentRepository.deleteAll();  // Ensure Tournament is cleared
+        profileRepository.deleteAll();
+        tournamentRepository.deleteAll();
 
-        // Use CognitoAuthUtils to get a valid JWT token
+        // Get a valid JWT token (assumed to be valid for all tests)
         jwtToken = CognitoAuthUtils.getJwtToken("khairyo", "Hello12.");
     }
 
@@ -169,40 +169,40 @@ class ParticipantControllerIntegrationTest {
         // Arrange
         Long userId = 1L;
         Long tournamentId = 1L;
-    
+
         // Ensure Profile and Tournament exist in the database
         createProfile(userId);
         createTournament(tournamentId);
-    
+
         // Create a mock Participant with existing Profile and Tournament
         Participant participant = createMockParticipant(userId, tournamentId, 4, 1);
         participantRepository.save(participant);
-    
+
         // Act
         ResultActions resultActions = mockMvc.perform(delete("/participants/user/" + userId + "/tournament/" + tournamentId)
                 .header("Authorization", "Bearer " + jwtToken)
                 .contentType(MediaType.APPLICATION_JSON));
-    
+
         // Assert
         resultActions.andExpect(status().isOk());
         assertFalse(participantRepository.existsById(new ParticipantId(tournamentId, userId)));
     }
-    
+
     @Test
     void testDeleteParticipantNotFound() throws Exception {
         // Arrange
         Long userId = 999L;
         Long tournamentId = 999L;
-    
+
         // Act
         ResultActions resultActions = mockMvc.perform(delete("/participants/user/" + userId + "/tournament/" + tournamentId)
                 .header("Authorization", "Bearer " + jwtToken)
                 .contentType(MediaType.APPLICATION_JSON));
-    
+
         // Assert
         resultActions.andExpect(status().isNotFound())
                      .andExpect(jsonPath("$.message").value(containsString("Participant with user ID " + userId + " and tournament ID " + tournamentId + " not found")));
-    }    
+    }
 
     // Helper method to create a mock participant
     private Participant createMockParticipant(Long userId, Long tournamentId, int win, int lose) {
@@ -214,7 +214,7 @@ class ParticipantControllerIntegrationTest {
         participant.setProfile(profile);
         participant.setWin(win);
         participant.setLose(lose);
-        
+
         return participant;
     }
 
@@ -222,18 +222,17 @@ class ParticipantControllerIntegrationTest {
     private void createProfile(Long userId) {
         Profile profile = new Profile();
         profile.setProfileId(userId);
-        profile.setUsername("testuser");  // Use setUsername instead of setName
-        profile.setEmail("testuser@example.com");  // Set a valid email
-        profile.setPrivacySettings("public");  // Assuming default privacy settings
+        profile.setUsername("testuser" + userId);  // Hardcoded, but dynamic-looking
+        profile.setEmail("testuser" + userId + "@example.com");  // Use userId to make the email unique
+        profile.setPrivacySettings("public");  // Use "public" as a default setting
         profileRepository.save(profile);  // Save profile to repository
     }
-
 
     // Helper method to create a Tournament and save it in the database
     private void createTournament(Long tournamentId) {
         Tournament tournament = new Tournament();
         tournament.setTournamentId(tournamentId);
-        tournament.setName("Test Tournament");  // Assuming the Tournament entity has a "name" field
+        tournament.setName("Test Tournament " + tournamentId);  // Dynamic-looking hardcoded value
         tournamentRepository.save(tournament);  // Save tournament to repository
     }
 }
