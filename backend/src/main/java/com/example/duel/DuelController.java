@@ -5,8 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.example.tournament.TournamentNotFoundException;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/duel")
@@ -17,14 +18,20 @@ public class DuelController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
-    
+
     @GetMapping()
     public ResponseEntity<List<Duel>> getDuelsByTournament(@RequestParam(required = false) Long tid) {
         if (tid == null) {
             return ResponseEntity.ok(ds.findAll());
-        } else {
-            return ResponseEntity.ok(ds.getDuelsByTournament(tid));
         }
+
+        List<Duel> duels = ds.getDuelsByTournament(tid);
+
+        if (duels.isEmpty()) {
+            throw new TournamentNotFoundException(tid);
+        }
+
+        return ResponseEntity.ok(duels);
     }
 
     @GetMapping("/{did}")
@@ -61,7 +68,7 @@ public class DuelController {
 
         return ResponseEntity.ok(updatedDuel);
     }
-    
+
     @PutMapping("/{did}/result")
     public ResponseEntity<Duel> updateDuelResult(@PathVariable Long did, @RequestBody DuelResult result) {
         Duel updatedDuel = ds.updateDuelResult(did, result);
@@ -69,7 +76,7 @@ public class DuelController {
 
         return ResponseEntity.ok(updatedDuel);
     }
-    
+
     @DeleteMapping("/{did}")
     public void deleteDuel(@PathVariable Long did) {
         ds.deleteDuel(did);
