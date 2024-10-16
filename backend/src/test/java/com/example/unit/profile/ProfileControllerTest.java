@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -90,7 +90,7 @@ public class ProfileControllerTest {
 
     // Success Case: Update Profile
     @Test
-    @WithMockUser // Simulate an authenticated user
+    @WithMockUser(roles = "ADMIN") // Simulate an authenticated admin user
     public void testUpdateProfileSuccess() throws Exception {
         Mockito.when(profileService.updateProfile(anyLong(), any(Profile.class)))
                 .thenReturn(profile);
@@ -104,7 +104,7 @@ public class ProfileControllerTest {
 
     // Failure Case: Update Profile - Not Found
     @Test
-    @WithMockUser // Simulate an authenticated user
+    @WithMockUser(roles = "ADMIN") // Simulate an authenticated admin user
     public void testUpdateProfileNotFound() throws Exception {
         Mockito.when(profileService.updateProfile(anyLong(), any(Profile.class)))
                 .thenReturn(null);
@@ -117,7 +117,7 @@ public class ProfileControllerTest {
 
     // Success Case: Delete Profile
     @Test
-    @WithMockUser // Simulate an authenticated user
+    @WithMockUser(roles = "ADMIN") // Simulate an authenticated admin user
     public void testDeleteProfileSuccess() throws Exception {
         Mockito.doNothing().when(profileService).deleteProfile(1L);
 
@@ -127,7 +127,7 @@ public class ProfileControllerTest {
 
     // Failure Case: Delete Profile - Bad Request
     @Test
-    @WithMockUser // Simulate an authenticated user
+    @WithMockUser(roles = "ADMIN") // Simulate an authenticated admin user
     public void testDeleteProfileBadRequest() throws Exception {
         Mockito.doThrow(new IllegalArgumentException("Profile not found"))
                 .when(profileService).deleteProfile(anyLong());
