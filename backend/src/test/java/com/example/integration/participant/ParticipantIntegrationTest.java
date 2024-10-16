@@ -1,129 +1,139 @@
-// package com.example.integration.participant;
+package com.example.integration.participant;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertNotNull;
+import com.example.participant.Participant;
+import com.example.participant.ParticipantId;
+import com.example.tournament.Tournament;
+import com.example.profile.Profile;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.*;
+import com.example.integration.utils.CognitoAuthUtils; // Adjust the package path as necessary
 
-// import org.junit.jupiter.api.AfterEach;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-// import org.springframework.boot.test.context.SpringBootTest;
-// import org.springframework.boot.test.web.client.LocalServerPort;
-// import org.springframework.boot.test.web.client.TestRestTemplate;
-// import org.springframework.http.HttpEntity;
-// import org.springframework.http.HttpMethod;
-// import org.springframework.http.ResponseEntity;
-// import org.springframework.http.HttpStatus;
+import java.net.URI;
+import java.util.List;
 
-// import java.net.URI;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-// import com.example.participant.Participant;
-// import com.example.participant.ParticipantRepository;
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class ParticipantIntegrationTest {
 
-// @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-// @AutoConfigureMockMvc
-// class ParticipantIntegrationTest {
+    @LocalServerPort
+    private int port;
 
-//     @LocalServerPort
-//     private int port;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-//     private final String baseUrl = "http://localhost:";
+    private String jwtToken;
 
-//     @Autowired
-//     private TestRestTemplate restTemplate;
+    @BeforeEach
+    public void setUp() {
+        // Simulate the CognitoAuthUtils.getJwtToken() to generate a valid JWT token for authorization
+        String username = "khairyo";  // use valid username
+        String password = "Hello12."; // use valid password
+        this.jwtToken = CognitoAuthUtils.getJwtToken(username, password);
+    }
 
-//     @Autowired
-//     private ParticipantRepository participantRepository;
+    private HttpHeaders createHeadersWithAuth() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken); // Add the JWT token to the Authorization header
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
+    }
 
-//     @AfterEach
-//     void tearDown() {
-//         // Clear the database after each test
-//         participantRepository.deleteAll();
-//     }
+    // @Test
+    // public void testRegisterParticipant_Success() throws Exception {
+    //     // Create a new Participant object
+    //     Participant participant = new Participant();
+    //     Tournament tournament = new Tournament();
+    //     tournament.setTournamentId(1L);  // Example tournament ID
+    //     participant.setTournament(tournament);
 
-//     @Test
-//     public void testSaveParticipant_Success() throws Exception {
-//         // Given a new participant
-//         Participant participant = new Participant();
-//         participant.setTournamentId(1);
-//         participant.setUserId(1);
-//         participant.setWin(0);
-//         participant.setLose(0);
-//         participant.setScore(0.0);
+    //     Profile profile = new Profile();
+    //     profile.setProfileId(1L);  // Example profile ID
+    //     participant.setProfile(profile);
 
-//         URI uri = new URI(baseUrl + port + "/participants");
+    //     participant.setWin(3);
+    //     participant.setLose(1);
 
-//         // When we save the participant
-//         ResponseEntity<Participant> result = restTemplate.postForEntity(uri, participant, Participant.class);
+    //     // Call the API to register a new participant
+    //     URI uri = new URI("http://localhost:" + port + "/participants/register");
+    //     HttpEntity<Participant> entity = new HttpEntity<>(participant, createHeadersWithAuth());
 
-//         // Then we should get a 201 Created response
-//         assertEquals(HttpStatus.CREATED, result.getStatusCode());
-//         assertNotNull(result.getBody().getUserId());  // Assuming userId is generated or assigned
-//         assertEquals(participant.getTournamentId(), result.getBody().getTournamentId());
-//         assertEquals(participant.getUserId(), result.getBody().getUserId());
-//     }
+    //     ResponseEntity<Participant> response = restTemplate.postForEntity(uri, entity, Participant.class);
 
-//     @Test
-//     public void testGetParticipant_Success() throws Exception {
-//         // Given an existing participant
-//         Participant participant = new Participant();
-//         participant.setTournamentId(1);
-//         participant.setUserId(1);
-//         participant.setWin(0);
-//         participant.setLose(0);
-//         participant.setScore(0.0);
-//         participantRepository.save(participant);
+    //     // Assert the response status and participant properties
+    //     assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    //     assertNotNull(response.getBody());
+    //     assertEquals(participant.getWin(), response.getBody().getWin());
+    //     assertEquals(participant.getLose(), response.getBody().getLose());
+    // }
 
-//         URI uri = new URI(baseUrl + port + "/participants/1/1"); // Assuming tournamentId=1, userId=1
+    @Test
+    public void testGetAllParticipants_Success() throws Exception {
+        // Test retrieving all participants
+        URI uri = new URI("http://localhost:" + port + "/participants");
 
-//         // When we retrieve the participant
-//         ResponseEntity<Participant> result = restTemplate.getForEntity(uri, Participant.class);
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithAuth());
 
-//         // Then we should get a 200 OK response
-//         assertEquals(HttpStatus.OK, result.getStatusCode());
-//         assertEquals(participant.getUserId(), result.getBody().getUserId());
-//         assertEquals(participant.getTournamentId(), result.getBody().getTournamentId());
-//     }
+        ResponseEntity<List> response = restTemplate.exchange(uri, HttpMethod.GET, entity, List.class);
 
-//     @Test
-//     public void testUpdateParticipant_Success() throws Exception {
-//         // Given an existing participant
-//         Participant participant = new Participant();
-//         participant.setTournamentId(1);
-//         participant.setUserId(1);
-//         participant.setWin(0);
-//         participant.setLose(0);
-//         participant.setScore(0.0);
-//         Participant savedParticipant = participantRepository.save(participant);
+        // Assert the response status and list content
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
 
-//         // When we update the participant
-//         savedParticipant.setWin(1);
-//         URI uri = new URI(baseUrl + port + "/participants/" + savedParticipant.getTournamentId() + "/" + savedParticipant.getUserId());
-//         HttpEntity<Participant> requestEntity = new HttpEntity<>(savedParticipant);
-//         ResponseEntity<Participant> result = restTemplate.exchange(uri, HttpMethod.PUT, requestEntity, Participant.class);
+    @Test
+    public void testGetParticipantsByTournamentId_Success() throws Exception {
+        // Test retrieving participants by tournament ID
+        Long tournamentId = 1L;  // Example tournament ID
+        URI uri = new URI("http://localhost:" + port + "/participants/tournament/" + tournamentId);
 
-//         // Then we should get a 200 OK response
-//         assertEquals(HttpStatus.OK, result.getStatusCode());
-//         assertEquals(1, result.getBody().getWin());
-//     }
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithAuth());
+
+        ResponseEntity<List> response = restTemplate.exchange(uri, HttpMethod.GET, entity, List.class);
+
+        // Assert the response status and participants list content
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    public void testGetParticipantsByUserId_Success() throws Exception {
+        // Test retrieving participants by user ID
+        Long userId = 1L;  // Example user ID
+        URI uri = new URI("http://localhost:" + port + "/participants/user/" + userId);
+
+        HttpEntity<String> entity = new HttpEntity<>(createHeadersWithAuth());
+
+        ResponseEntity<List> response = restTemplate.exchange(uri, HttpMethod.GET, entity, List.class);
+
+        // Assert the response status and participants list content
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
 
 //     @Test
 //     public void testDeleteParticipant_Success() throws Exception {
-//         // Given an existing participant
-//         Participant participant = new Participant();
-//         participant.setTournamentId(1);
-//         participant.setUserId(1);
-//         participant.setWin(0);
-//         participant.setLose(0);
-//         participant.setScore(0.0);
-//         Participant savedParticipant = participantRepository.save(participant);
+//         // Test deleting a participant by user ID and tournament ID
+//         Long userId = 1L;  // Example user ID
+//         Long tournamentId = 1L;  // Example tournament ID
+//         URI uri = new URI("http://localhost:" + port + "/participants/user/" + userId + "/tournament/" + tournamentId);
 
-//         // When we delete the participant
-//         URI uri = new URI(baseUrl + port + "/participants/" + savedParticipant.getTournamentId() + "/" + savedParticipant.getUserId());
-//         restTemplate.delete(uri);
+//         HttpEntity<String> entity = new HttpEntity<>(createHeadersWithAuth());
 
-//         // Then we should not be able to retrieve it
-//         ResponseEntity<Participant> result = restTemplate.getForEntity(uri, Participant.class);
-//         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+//         // Send a DELETE request to remove the participant
+//         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, entity, Void.class);
+
+//         // Assert that the participant was deleted
+//         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+//         // Verify the participant is no longer found
+//         ResponseEntity<Participant> getResponse = restTemplate.getForEntity(uri, Participant.class);
+//         assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode());
 //     }
 // }

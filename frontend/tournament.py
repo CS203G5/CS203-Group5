@@ -3,6 +3,8 @@ import datetime
 import streamlit as st
 import requests
 import random
+import trueskill as ts
+from algorithms import *
 
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False
@@ -83,60 +85,28 @@ def delete_tournaments(tournament_ids):
         st.error(f"Failed to delete tournaments: {e}")
         return None
     
-# Function to fetch participants by TournamentID
-def fetch_participants_by_tournament(tournament_id):
-    response = requests.get(f"http://localhost:8080/participants/tournament/{tournament_id}")
-    return response.json()
+def true_skill_pair_participants(participants):
+    if not participants:
+        st.error("Participants list is empty or not initialized.")
+        return [], None
 
-# Function to pair participants randomly
-def pair_participants(participants):
-    random.shuffle(participants)
+    # Create a TrueSkill environment
+    env = ts.TrueSkill()
+
+    # Create a list of (participant, rating) tuples
+    rated_participants = [(p, env.create_rating()) for p in participants]
+
+    # Sort participants by their rating
+    rated_participants.sort(key=lambda x: x[1].mu, reverse=True)
+
     pairs = []
     unmatched = None
-    for i in range(0, len(participants), 2):
-        if i + 1 < len(participants):
-            pairs.append((participants[i], participants[i + 1]))
+    for i in range(0, len(rated_participants), 2):
+        if i + 1 < len(rated_participants):
+            pairs.append((rated_participants[i][0], rated_participants[i + 1][0]))
         else:
-            unmatched = participants[i]
+            unmatched = rated_participants[i][0]
     return pairs, unmatched
-
-def get_next_round_name(tournament_id):
-    try:
-        url = f"http://localhost:8080/duel?tid={tournament_id}"
-        response = requests.get(url)
-        response.raise_for_status()
-        duels = response.json()
-        rounds = [duel["roundName"] for duel in duels if duel["winner"] not in (None, 0)]
-        if rounds:
-            last_round = max(rounds)
-            next_round_number = int(last_round.split(" ")[1]) + 1
-            return f"Round {next_round_number}"
-        else:
-            return "Round 1"
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching rounds: {e}")
-        return "Round 1"
-
-def post_match(tournament_id, player1, player2, winner=0):
-    round_name = get_next_round_name(tournament_id)
-    duel = {
-        "tournament": {"tournament_id": tournament_id},
-        "pid1": player1,
-        "pid2": player2,
-        "roundName": round_name,
-        "winner": winner
-    }
-    try:
-        response = requests.post("http://localhost:8080/duel", json=duel)
-        response.raise_for_status()  # Raise an exception for HTTP errors
-        if response.status_code == 200:
-            return True
-        else:
-            st.error(f"Failed to post match: {response.status_code} - {response.text}")
-            return False
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error posting match: {e}")
-        return False
 
 def tournament_page():
     st.header("My Tournaments")
@@ -278,27 +248,68 @@ def tournament_page():
                 selected_tournament_id = selected_tournaments[0]
                 tournament_data = fetch_tournament(selected_tournament_id)
                 if tournament_data:
-                    if tournament_data["isRandom"]:
-                        st.write("Randomizing matches...")
-                        participants = fetch_participants_by_tournament(selected_tournament_id)
-                        pairs, unmatched = pair_participants(participants)
-                        
-                        st.write(f"Tournament ID: {selected_tournament_id}")
-                        
-                        for pair in pairs:
-                            player1 = pair[0]['userId']
-                            player2 = pair[1]['userId']
-                            if post_match(selected_tournament_id, player1, player2):
-                                st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
-                            else:
-                                st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
-                        
-                        if unmatched:
-                            st.write(f"Unmatched Participant: {unmatched['userId']}")
+                    # Fetch duels to check if the tournament ID is already in duels
+                    headers = get_headers()
+                    response = requests.get(f"http://localhost:8080/api/duel?tid={selected_tournament_id}", headers=headers)
+                    response.raise_for_status()
+                    duels = response.json()
+                    
+                    if duels:
+                        st.write("Matching was done, no more matching can be done.")
                     else:
-                        # Use TrueSkill for matching
-                        st.write("Using TrueSkill for matching...")
-                        # Add your TrueSkill logic here
+                        if tournament_data["isRandom"]:
+                            st.write("Randomizing matches...")
+                            participants = fetch_participants_by_tournament(selected_tournament_id)
+                            if not participants:
+                                st.write("No participants registered to match.")
+                            else:
+                                pairs, unmatched = randomly_pair_participants(participants)
+                                
+                                st.write(f"Tournament ID: {selected_tournament_id}")
+                                
+                                for pair in pairs:
+                                    player1 = pair[0]['profile']['profileId']
+                                    player2 = pair[1]['profile']['profileId']
+                                    if post_rand_match(selected_tournament_id, player1, player2, round_name=1, winner=0):
+                                        st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
+                                    else:
+                                        st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
+                                
+                                if unmatched:
+                                    st.write(f"Unmatched Participant: {unmatched['profile']['profileId']}")
+                                    # Post the unmatched player as player 1 and set them as the winner
+                                    if post_rand_match(selected_tournament_id, unmatched['profile']['profileId'], player2=0, round_name=1, winner=unmatched['profile']['profileId']):
+                                        st.write(f"Player {unmatched['profile']['profileId']} has a bye into the next round")
+                                    else:
+                                        st.error(f"Error matching Player {unmatched['profile']['profileId']}")
+                        else:
+                            # Use TrueSkill for matching
+                            st.write("Using TrueSkill for matching...")
+                            participants = fetch_participants_by_tournament(selected_tournament_id)
+                            if not participants:
+                                st.write("No participants registered to match.")
+                            else:
+                                pairs, unmatched = true_skill_pair_participants(participants)
+                                
+                                st.write(f"Tournament ID: {selected_tournament_id}")
+                                
+                                for pair in pairs:
+                                    player1 = pair[0]['profile']['profileId']
+                                    player2 = pair[1]['profile']['profileId']
+                                    if post_rand_match(selected_tournament_id, player1, player2, round_name=1, winner=0):
+                                        st.write(f"Player {unmatched['profile']['profileId']} has a bye into the next round")
+                                    else:
+                                        st.error(f"Error matching Player {unmatched['profile']['profileId']}")
+                                
+                                if unmatched:
+                                    st.write(f"Unmatched Participant: {unmatched['profile']['profileId']}")
+                                    # Post the unmatched player as player 1 and set them as the winner
+                                    if post_rand_match(selected_tournament_id, unmatched['profile']['profileId'], player2=0, round_name=1, winner=unmatched['profile']['profileId']):
+                                        st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
+                                    else:
+                                        st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
+                    display_tournament_bracket(duels)
+
             if st.button("Edit Selected Tournament"):
                 selected_tournament_id = selected_tournaments[0]
                 tournament_data = fetch_tournament(selected_tournament_id)
@@ -343,4 +354,3 @@ def tournament_page():
 
                 if update_tournament(tournament_data["tournament_id"], payload):
                     st.success("Tournament updated successfully! Please refresh to see the changes.")
-
