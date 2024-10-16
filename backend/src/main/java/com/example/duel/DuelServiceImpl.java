@@ -39,15 +39,14 @@ public class DuelServiceImpl implements DuelService{
         return duelRepository.save(duel);
     }
 
-    public Duel updateDuel(Long did, Duel newDuel) {
-        // duelRepository.updateDuel(did, duel.getPid1(), duel.getPid2(), duel.getRoundName(), duel.getWinner());
-
+    @Override
+    public Duel updateDuel(Long did, Duel newDuelInfo) {
         return duelRepository.findById(did).map(duel -> {
-            duel.setPid1(newDuel.getPid1());
-            duel.setPid2(newDuel.getPid2());
-            duel.setRoundName(newDuel.getRoundName());
+            duel.setPid1(newDuelInfo.getPid1());
+            duel.setPid2(newDuelInfo.getPid2());
+            duel.setRoundName(newDuelInfo.getRoundName());
             return duelRepository.save(duel);
-        }).orElseThrow(() -> new EntityNotFoundException("Duel not found with id: " + did));
+        }).orElseThrow(() -> new DuelNotFoundException("Duel not found with id: " + did));
     }
 
     public Duel updateDuelResult(Long did, DuelResult result) {

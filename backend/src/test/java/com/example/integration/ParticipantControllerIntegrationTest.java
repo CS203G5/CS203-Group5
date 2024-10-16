@@ -5,9 +5,10 @@ import com.example.participant.ParticipantId;
 import com.example.participant.ParticipantRepository;
 import com.example.participant.ParticipantService;
 import com.example.tournament.Tournament;
-import com.example.profile.ProfileRepository;
 import com.example.profile.Profile;
 import com.example.integration.CognitoAuthUtils;
+import com.example.profile.ProfileRepository;
+import com.example.tournament.TournamentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +17,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
-import java.util.List;
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+
 @SpringBootTest
 @AutoConfigureMockMvc
-class ParticipantIntegrationTest {
+class ParticipantControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,12 +39,20 @@ class ParticipantIntegrationTest {
     @Autowired
     private ParticipantService participantService;
 
+    @Autowired
+    private ProfileRepository profileRepository;  // Add this
+
+    @Autowired
+    private TournamentRepository tournamentRepository;  // Add this
+
     private String jwtToken;
 
     @BeforeEach
     void setUp() {
-        // Clean the repository before each test
+        // Clean repositories before each test
         participantRepository.deleteAll();
+        profileRepository.deleteAll();  // Ensure Profile is cleared
+        tournamentRepository.deleteAll();  // Ensure Tournament is cleared
 
         // Use CognitoAuthUtils to get a valid JWT token
         jwtToken = CognitoAuthUtils.getJwtToken("khairyo", "Hello12.");
@@ -52,6 +61,8 @@ class ParticipantIntegrationTest {
     @Test
     void testGetAllParticipantsSuccess() throws Exception {
         // Arrange
+        createProfile(1L);
+        createTournament(1L);
         Participant participant1 = createMockParticipant(1L, 1L, 3, 2);
         Participant participant2 = createMockParticipant(2L, 1L, 5, 1);
         participantRepository.saveAll(List.of(participant1, participant2));
@@ -72,6 +83,8 @@ class ParticipantIntegrationTest {
     void testGetParticipantsByTournamentIdSuccess() throws Exception {
         // Arrange
         Long tournamentId = 1L;
+        createProfile(1L);
+        createTournament(tournamentId);
         Participant participant = createMockParticipant(1L, tournamentId, 4, 2);
         participantRepository.save(participant);
 
@@ -90,6 +103,8 @@ class ParticipantIntegrationTest {
     void testGetParticipantsByUserIdSuccess() throws Exception {
         // Arrange
         Long userId = 1L;
+        createProfile(userId);
+        createTournament(1L);
         Participant participant = createMockParticipant(userId, 1L, 4, 1);
         participantRepository.save(participant);
 
@@ -107,6 +122,9 @@ class ParticipantIntegrationTest {
     @Test
     void testRegisterParticipantSuccess() throws Exception {
         // Arrange
+        createProfile(1L);  // Ensure Profile exists
+        createTournament(1L);  // Ensure Tournament exists
+
         String participantJson = """
         {
             "tournament": { "tournament_id": 1 },
@@ -152,7 +170,7 @@ class ParticipantIntegrationTest {
         Long userId = 1L;
         Long tournamentId = 1L;
     
-        // Ensure that the Profile and Tournament exist in the database
+        // Ensure Profile and Tournament exist in the database
         createProfile(userId);
         createTournament(tournamentId);
     
@@ -170,7 +188,6 @@ class ParticipantIntegrationTest {
         assertFalse(participantRepository.existsById(new ParticipantId(tournamentId, userId)));
     }
     
-
     @Test
     void testDeleteParticipantNotFound() throws Exception {
         // Arrange
@@ -183,18 +200,14 @@ class ParticipantIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON));
     
         // Assert
-        resultActions
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("Participant with user ID " + userId + " and tournament ID " + tournamentId + " not found")));
-    }
-    
+        resultActions.andExpect(status().isNotFound())
+                     .andExpect(jsonPath("$.message").value(containsString("Participant with user ID " + userId + " and tournament ID " + tournamentId + " not found")));
+    }    
+
     // Helper method to create a mock participant
     private Participant createMockParticipant(Long userId, Long tournamentId, int win, int lose) {
-        Tournament tournament = new Tournament();
-        tournament.setTournamentId(tournamentId);
-
-        Profile profile = new Profile();
-        profile.setProfileId(userId);
+        Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow();
+        Profile profile = profileRepository.findById(userId).orElseThrow();
 
         Participant participant = new Participant();
         participant.setTournament(tournament);
@@ -205,20 +218,22 @@ class ParticipantIntegrationTest {
         return participant;
     }
 
-    // Helper method to create a profile
-    private void createProfile(Long profileId) {
+    // Helper method to create a Profile and save it in the database
+    private void createProfile(Long userId) {
         Profile profile = new Profile();
-        profile.setProfileId(profileId);
-        profile.setName("Test Profile");
-        profileRepository.save(profile);
+        profile.setProfileId(userId);
+        profile.setUsername("testuser");  // Use setUsername instead of setName
+        profile.setEmail("testuser@example.com");  // Set a valid email
+        profile.setPrivacySettings("public");  // Assuming default privacy settings
+        profileRepository.save(profile);  // Save profile to repository
     }
 
-    // Helper method to create a tournament
+
+    // Helper method to create a Tournament and save it in the database
     private void createTournament(Long tournamentId) {
         Tournament tournament = new Tournament();
         tournament.setTournamentId(tournamentId);
-        tournament.setName("Test Tournament");
-        tournamentRepository.save(tournament);
-}
-
+        tournament.setName("Test Tournament");  // Assuming the Tournament entity has a "name" field
+        tournamentRepository.save(tournament);  // Save tournament to repository
+    }
 }

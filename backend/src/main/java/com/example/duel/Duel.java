@@ -3,17 +3,27 @@ package com.example.duel;
 import com.example.tournament.Tournament;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Entity
 @Table(name = "duel")
 @Data
 public class Duel {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long duel_id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    private Long duel_id;
+
+    @NotNull
     private Long pid1;
+
+    @NotNull
     private Long pid2;
+
     private String roundName;
-    @Embedded private DuelResult result;
+    
+    @Embedded 
+    private DuelResult result;
+    
     private Long winner;
 
     @ManyToOne
@@ -28,13 +38,11 @@ public class Duel {
         return tournament;
     }
 
-    public void setPid1 (Long pid1){
+    public void setPid1(Long pid1) {
         this.pid1 = pid1;
     }
 
-    public void setPid2 (Long pid2){
+    public void setPid2(Long pid2) {
         this.pid2 = pid2;
     }
-
-    
 }
