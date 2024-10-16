@@ -32,4 +32,12 @@ public class DuelResult {
     public void setPlayer2Time(Long player2Time) {
         this.player2Time = player2Time;
     }
+
+    public Long getWinnerId() {
+        return player1Time < player2Time ? 1L : 2L;
+    }
+
+    public Long getLoserId() {
+        return player1Time < player2Time ? 2L : 1L;
+    }
 }
