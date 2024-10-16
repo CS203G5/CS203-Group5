@@ -3,7 +3,6 @@ package com.example.unit.profile;
 import com.example.profile.Profile;
 import com.example.profile.ProfileController;
 import com.example.profile.ProfileService;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -43,6 +43,7 @@ public class ProfileControllerTest {
 
     // Success Case: Get Profile by ID
     @Test
+    @WithMockUser // Simulate an authenticated user
     public void testGetProfileSuccess() throws Exception {
         Mockito.when(profileService.getProfile(1L)).thenReturn(Optional.of(profile));
 
@@ -53,6 +54,7 @@ public class ProfileControllerTest {
 
     // Failure Case: Get Profile - Not Found
     @Test
+    @WithMockUser // Simulate an authenticated user
     public void testGetProfileNotFound() throws Exception {
         Mockito.when(profileService.getProfile(1L)).thenReturn(Optional.empty());
 
@@ -62,6 +64,7 @@ public class ProfileControllerTest {
 
     // Success Case: Create Profile
     @Test
+    @WithMockUser // Simulate an authenticated user
     public void testCreateProfileSuccess() throws Exception {
         Mockito.when(profileService.saveProfile(any(Profile.class))).thenReturn(profile);
 
@@ -74,6 +77,7 @@ public class ProfileControllerTest {
 
     // Success Case: Search Profiles
     @Test
+    @WithMockUser // Simulate an authenticated user
     public void testSearchProfilesSuccess() throws Exception {
         Mockito.when(profileService.searchProfiles("john"))
                 .thenReturn(Arrays.asList(profile));
@@ -86,6 +90,7 @@ public class ProfileControllerTest {
 
     // Success Case: Update Profile
     @Test
+    @WithMockUser // Simulate an authenticated user
     public void testUpdateProfileSuccess() throws Exception {
         Mockito.when(profileService.updateProfile(anyLong(), any(Profile.class)))
                 .thenReturn(profile);
@@ -99,6 +104,7 @@ public class ProfileControllerTest {
 
     // Failure Case: Update Profile - Not Found
     @Test
+    @WithMockUser // Simulate an authenticated user
     public void testUpdateProfileNotFound() throws Exception {
         Mockito.when(profileService.updateProfile(anyLong(), any(Profile.class)))
                 .thenReturn(null);
@@ -111,6 +117,7 @@ public class ProfileControllerTest {
 
     // Success Case: Delete Profile
     @Test
+    @WithMockUser // Simulate an authenticated user
     public void testDeleteProfileSuccess() throws Exception {
         Mockito.doNothing().when(profileService).deleteProfile(1L);
 
@@ -120,6 +127,7 @@ public class ProfileControllerTest {
 
     // Failure Case: Delete Profile - Bad Request
     @Test
+    @WithMockUser // Simulate an authenticated user
     public void testDeleteProfileBadRequest() throws Exception {
         Mockito.doThrow(new IllegalArgumentException("Profile not found"))
                 .when(profileService).deleteProfile(anyLong());
@@ -130,6 +138,7 @@ public class ProfileControllerTest {
 
     // Success Case: Update Rating - Admin Only
     @Test
+    @WithMockUser(roles = "ADMIN") // Simulate an admin user
     public void testUpdateRatingSuccess() throws Exception {
         Mockito.when(profileService.getProfile(1L)).thenReturn(Optional.of(profile));
 
