@@ -152,24 +152,32 @@ class DuelServiceImplTest {
         existingDuel.setDuel_id(1L);
         existingDuel.setPid1(100L); // Player 1
         existingDuel.setPid2(200L); // Player 2
-
+    
         // Mock repository to return this duel when findById(1L) is called
         when(duelRepository.findById(1L)).thenReturn(Optional.of(existingDuel));
-
+    
         // Create a mock DuelResult where player 2 has a better time than player 1
         DuelResult result = new DuelResult(300L, 400L); // Player 2 wins
-
+    
+        // Add debug print to see if the test is running as expected
+        System.out.println("About to call updateDuelResult");
+    
         // Call the service method to update the duel result
         Duel updatedDuel = duelServiceImpl.updateDuelResult(1L, result);
-
+    
         // Assert that the winner is player 2 (pid2)
         assertNotNull(updatedDuel);
         assertEquals(200L, updatedDuel.getWinner()); // Expect Player 2 (200L) to win
-
+    
         // Verify that the repository methods were called
         verify(duelRepository, times(1)).findById(1L);
         verify(duelRepository, times(1)).save(existingDuel);
+    
+        // Additional print statements
+        System.out.println("Duel ID: " + updatedDuel.getDuel_id());
+        System.out.println("Winner ID: " + updatedDuel.getWinner());
     }
+    
 
     @Test
     void testUpdateDuelResult_NotFound() {

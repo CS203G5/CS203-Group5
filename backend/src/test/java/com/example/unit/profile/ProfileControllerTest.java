@@ -3,147 +3,148 @@ package com.example.unit.profile;
 import com.example.profile.Profile;
 import com.example.profile.ProfileController;
 import com.example.profile.ProfileService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(ProfileController.class)
-public class ProfileControllerTest {
+class ProfileControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @InjectMocks
+    private ProfileController profileController;
 
-    @MockBean
+    @Mock
     private ProfileService profileService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private Profile profile;
 
     @BeforeEach
-    public void setUp() {
-        profile = new Profile(1L, "john_doe", "john@example.com", "Hello, I'm John", "PRIVATE", 4.5);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        profile = new Profile(1L, "testuser", "test@example.com", "Test Bio", "PUBLIC", 4.5);
     }
 
-    // Success Case: Get Profile by ID
+    // Success case for getting a profile by ID
     @Test
-    @WithMockUser // Simulate an authenticated user
-    public void testGetProfileSuccess() throws Exception {
-        Mockito.when(profileService.getProfile(1L)).thenReturn(Optional.of(profile));
+    void testGetProfile_Success() {
+        when(profileService.getProfile(1L)).thenReturn(Optional.of(profile));
 
-        mockMvc.perform(get("/profile/{profileId}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("john_doe"));
+        ResponseEntity<Profile> response = profileController.getProfile(1L);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals("testuser", response.getBody().getUsername());
     }
 
-    // Failure Case: Get Profile - Not Found
+    // Failure case for getting a profile by ID
     @Test
-    @WithMockUser // Simulate an authenticated user
-    public void testGetProfileNotFound() throws Exception {
-        Mockito.when(profileService.getProfile(1L)).thenReturn(Optional.empty());
+    void testGetProfile_Failure_NotFound() {
+        when(profileService.getProfile(9999L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/profile/{profileId}", 1L))
-                .andExpect(status().isNotFound());
+        ResponseEntity<Profile> response = profileController.getProfile(9999L);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertNull(response.getBody());
     }
 
-    // Success Case: Create Profile
+    // Success case for searching profiles
     @Test
-    @WithMockUser // Simulate an authenticated user
-    public void testCreateProfileSuccess() throws Exception {
-        Mockito.when(profileService.saveProfile(any(Profile.class))).thenReturn(profile);
+    void testSearchProfiles_Success() {
+        List<Profile> profiles = Arrays.asList(profile);
+        when(profileService.searchProfiles("test")).thenReturn(profiles);
 
-        mockMvc.perform(post("/profile")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(profile)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("john_doe"));
+        ResponseEntity<List<Profile>> response = profileController.searchProfiles("test");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(1, response.getBody().size());
+        assertEquals("testuser", response.getBody().get(0).getUsername());
     }
 
-    // Success Case: Search Profiles
+    // Success case for creating a profile
     @Test
-    @WithMockUser // Simulate an authenticated user
-    public void testSearchProfilesSuccess() throws Exception {
-        Mockito.when(profileService.searchProfiles("john"))
-                .thenReturn(Arrays.asList(profile));
+    void testCreateProfile_Success() {
+        when(profileService.saveProfile(any(Profile.class))).thenReturn(profile);
 
-        mockMvc.perform(get("/profile/search")
-                        .param("searchTerm", "john"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].username").value("john_doe"));
+        ResponseEntity<Profile> response = profileController.createProfile(profile);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals("testuser", response.getBody().getUsername());
     }
 
-    // Success Case: Update Profile
+    // Success case for updating a profile
     @Test
-    @WithMockUser(roles = "ADMIN") // Simulate an authenticated admin user
-    public void testUpdateProfileSuccess() throws Exception {
-        Mockito.when(profileService.updateProfile(anyLong(), any(Profile.class)))
-                .thenReturn(profile);
+    void testUpdateProfile_Success() {
+        when(profileService.updateProfile(anyLong(), any(Profile.class))).thenReturn(profile);
 
-        mockMvc.perform(put("/profile/{profileId}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(profile)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("john_doe"));
+        ResponseEntity<Profile> response = profileController.updateProfile(1L, profile);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals("testuser", response.getBody().getUsername());
     }
 
-    // Failure Case: Update Profile - Not Found
+    // Failure case for updating a profile when profile is not found
     @Test
-    @WithMockUser(roles = "ADMIN") // Simulate an authenticated admin user
-    public void testUpdateProfileNotFound() throws Exception {
-        Mockito.when(profileService.updateProfile(anyLong(), any(Profile.class)))
-                .thenReturn(null);
+    void testUpdateProfile_Failure_NotFound() {
+        when(profileService.updateProfile(anyLong(), any(Profile.class))).thenReturn(null);
 
-        mockMvc.perform(put("/profile/{profileId}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(profile)))
-                .andExpect(status().isNotFound());
+        ResponseEntity<Profile> response = profileController.updateProfile(9999L, profile);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertNull(response.getBody());
     }
 
-    // Success Case: Delete Profile
+    // Success case for deleting a profile
     @Test
-    @WithMockUser(roles = "ADMIN") // Simulate an authenticated admin user
-    public void testDeleteProfileSuccess() throws Exception {
-        Mockito.doNothing().when(profileService).deleteProfile(1L);
+    void testDeleteProfile_Success() {
+        doNothing().when(profileService).deleteProfile(anyLong());
 
-        mockMvc.perform(delete("/profile/{profileId}", 1L))
-                .andExpect(status().isNoContent());
+        ResponseEntity<Void> response = profileController.deleteProfile(1L);
+
+        assertEquals(204, response.getStatusCodeValue());
+        verify(profileService, times(1)).deleteProfile(1L);
     }
 
-    // Failure Case: Delete Profile - Bad Request
+    // Failure case for deleting a profile when profile is not found
     @Test
-    @WithMockUser(roles = "ADMIN") // Simulate an authenticated admin user
-    public void testDeleteProfileBadRequest() throws Exception {
-        Mockito.doThrow(new IllegalArgumentException("Profile not found"))
-                .when(profileService).deleteProfile(anyLong());
+    void testDeleteProfile_Failure_NotFound() {
+        doThrow(new IllegalArgumentException("Profile not found")).when(profileService).deleteProfile(anyLong());
 
-        mockMvc.perform(delete("/profile/{profileId}", 1L))
-                .andExpect(status().isBadRequest());
+        ResponseEntity<Void> response = profileController.deleteProfile(9999L);
+
+        assertEquals(400, response.getStatusCodeValue());
     }
 
-    // Success Case: Update Rating - Admin Only
+    // Success case for updating a profile rating
     @Test
-    @WithMockUser(roles = "ADMIN") // Simulate an admin user
-    public void testUpdateRatingSuccess() throws Exception {
-        Mockito.when(profileService.getProfile(1L)).thenReturn(Optional.of(profile));
+    void testUpdateRating_Success() {
+        when(profileService.getProfile(1L)).thenReturn(Optional.of(profile));
+        doNothing().when(profileService).updateRating(1L, 4.8);
 
-        mockMvc.perform(put("/profile/{profileId}/rating", 1L)
-                        .param("newRating", "4.7"))
-                .andExpect(status().isOk());
+        ResponseEntity<Profile> response = profileController.updateRating(1L, 4.8);
+
+        assertEquals(200, response.getStatusCodeValue());
+        verify(profileService, times(1)).updateRating(1L, 4.8);
+    }
+
+    // Failure case for updating a profile rating when profile is not found
+    @Test
+    void testUpdateRating_Failure_NotFound() {
+        when(profileService.getProfile(9999L)).thenReturn(Optional.empty());
+
+        ResponseEntity<Profile> response = profileController.updateRating(9999L, 4.8);
+
+        assertEquals(404, response.getStatusCodeValue());
+        verify(profileService, never()).updateRating(anyLong(), anyDouble());
     }
 }
