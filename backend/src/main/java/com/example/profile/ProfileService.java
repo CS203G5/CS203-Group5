@@ -12,8 +12,10 @@ public interface ProfileService {
 
     Profile saveProfile(Profile profile);
 
-    Profile updateProfile(Long profileId, Profile updatedProfile);
+    Optional<Profile> updateProfile(Long profileId, Profile updatedProfile);
 
+    Optional<Profile> getProfileByUsername(String username);
+    
     void deleteProfile(Long profileId);
 
     void updateRating(Long profileId, Double newRating);
