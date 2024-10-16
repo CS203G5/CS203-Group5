@@ -1,81 +1,85 @@
-// package com.example.unit.participant;
+package com.example.unit.participant;
 
-// import static org.mockito.Mockito.*;
-// import static org.junit.jupiter.api.Assertions.*;
+import com.example.participant.Participant;
+import com.example.participant.ParticipantId;
+import com.example.participant.ParticipantRepository;
+import com.example.participant.ParticipantService;
 
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-// import com.example.participant.Participant;
-// import com.example.participant.ParticipantRepository;
-// import com.example.participant.ParticipantService;
+import java.util.Optional;
+import java.util.List;
 
-// import java.util.Optional;
+class ParticipantServiceTest {
 
-// public class ParticipantServiceTest {
+    @Mock
+    private ParticipantRepository participantRepository;
 
-//     @Mock
-//     private ParticipantRepository participantRepository;
+    @InjectMocks
+    private ParticipantService participantService;
 
-//     @InjectMocks
-//     private ParticipantService participantService;
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
-//     private Participant existingParticipant;
+    @Test
+    void testGetAllParticipantsSuccess() {
+        List<Participant> participants = List.of(new Participant());
+        when(participantRepository.findAll()).thenReturn(participants);
 
-//     @BeforeEach
-//     public void setUp() {
-//         MockitoAnnotations.openMocks(this);
-//         existingParticipant = new Participant();
-//         existingParticipant.setUserId(1);
-//         existingParticipant.setTournamentId(101);
-//         existingParticipant.setWin(5);
-//         existingParticipant.setLose(3);
-//         existingParticipant.setScore(100);
-//     }
+        List<Participant> result = participantService.getAllParticipants();
 
-//     @Test
-//     public void testUpdateParticipant_Success() {
-//         // Given
-//         int userId = 1;
-//         Participant updatedDetails = new Participant();
-//         updatedDetails.setTournamentId(102);
-//         updatedDetails.setWin(6);
-//         updatedDetails.setLose(4);
-//         updatedDetails.setScore(150);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
 
-//         when(participantRepository.findById(userId)).thenReturn(Optional.of(existingParticipant));
-//         when(participantRepository.save(any(Participant.class))).thenReturn(existingParticipant);
+    @Test
+    void testGetParticipantsByUserIdSuccess() {
+        Long userId = 1L;
+        List<Participant> participants = List.of(new Participant());
+        when(participantRepository.getParticipantsByUserId(userId)).thenReturn(participants);
 
-//         // When
-//         Participant result = participantService.updateParticipant(userId, updatedDetails);
+        List<Participant> result = participantService.getParticipantsByUserId(userId);
 
-//         // Then
-//         assertNotNull(result);
-//         assertEquals(102, result.getTournamentId());
-//         assertEquals(6, result.getWin());
-//         assertEquals(4, result.getLose());
-//         assertEquals(150, result.getScore());
-//         verify(participantRepository).findById(userId);
-//         verify(participantRepository).save(existingParticipant);
-//     }
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
 
-//     @Test
-//     public void testUpdateParticipant_NotFound() {
-//         // Given
-//         int userId = 999; // Non-existing user ID
-//         Participant updatedDetails = new Participant();
+    @Test
+    void testGetParticipantsByUserIdFailure() {
+        Long userId = 1L;
+        when(participantRepository.getParticipantsByUserId(userId)).thenReturn(List.of());
 
-//         when(participantRepository.findById(userId)).thenReturn(Optional.empty());
+        List<Participant> result = participantService.getParticipantsByUserId(userId);
 
-//         // When
-//         Participant result = participantService.updateParticipant(userId, updatedDetails);
+        assertTrue(result.isEmpty());
+    }
 
-//         // Then
-//         assertNull(result);
-//         verify(participantRepository).findById(userId);
-//         verify(participantRepository, never()).save(any(Participant.class));
-//     }
-// }
+    @Test
+    void testSaveParticipantSuccess() {
+        Participant participant = new Participant();
+        when(participantRepository.save(participant)).thenReturn(participant);
+
+        Participant result = participantService.saveParticipant(participant);
+
+        assertNotNull(result);
+        verify(participantRepository, times(1)).save(participant);
+    }
+
+    @Test
+    void testDeleteByIdSuccess() {
+        ParticipantId participantId = new ParticipantId(1L, 1L);
+        doNothing().when(participantRepository).deleteById(participantId);
+
+        participantService.deleteById(participantId);
+
+        verify(participantRepository, times(1)).deleteById(participantId);
+    }
+}
