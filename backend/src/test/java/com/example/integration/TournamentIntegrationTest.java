@@ -1,7 +1,6 @@
-package com.example.integration.tournament;
+package com.example.integration;
 
 import com.example.tournament.Tournament;
-import com.example.integration.utils.CognitoAuthUtils;
 import com.example.tournament.TournamentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

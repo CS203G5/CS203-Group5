@@ -1,4 +1,4 @@
-package com.example.integration.participant;
+package com.example.integration;
 
 import com.example.participant.Participant;
 import com.example.participant.ParticipantId;
@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
-import com.example.integration.utils.CognitoAuthUtils;
 
 import java.net.URI;
 import java.util.List;

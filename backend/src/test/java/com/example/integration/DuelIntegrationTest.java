@@ -1,4 +1,4 @@
-package com.example.integration.duel;
+package com.example.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import com.example.duel.*;
 import com.example.profile.*;
 import com.example.tournament.*;
-import com.example.integration.utils.CognitoAuthUtils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
