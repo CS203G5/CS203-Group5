@@ -27,11 +27,7 @@ public class ProfileServiceImpl implements ProfileService {
     public Profile saveProfile(Profile profile) {
         if (profile.getUsername() == null || profile.getUsername().trim().isEmpty() ||
             profile.getEmail() == null || !profile.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-<<<<<<< HEAD
-            return null; // Return null for invalid profiles
-=======
             return null;
->>>>>>> main
         }
         return profileRepository.save(profile);
     }
