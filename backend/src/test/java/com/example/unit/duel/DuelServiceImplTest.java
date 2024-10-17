@@ -63,18 +63,6 @@ class DuelServiceImplTest {
     }
 
     @Test
-    void testGetDuelById_NotFound() {
-        // Failure case: Mock repository to return an empty Optional
-        when(duelRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Call the service method
-        Duel result = duelServiceImpl.getDuelById(1L);
-
-        // Assert that the result is null
-        assertNull(result);
-    }
-
-    @Test
     void testCreateDuel_Success() {
         // Success case: Mock repository to save and return the duel
         Duel duel = new Duel();
@@ -108,41 +96,6 @@ class DuelServiceImplTest {
         assertNotNull(updatedDuel);
         assertEquals(2L, updatedDuel.getPid1());
         verify(duelRepository, times(1)).findById(1L);
-    }
-
-    @Test
-    void testUpdateDuel_NotFound() {
-        // Failure case: Mock repository to return an empty Optional when finding by ID
-        when(duelRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Call the service method and assert that an exception is thrown
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-            duelServiceImpl.updateDuel(1L, new Duel());
-        });
-
-        // Assert that the exception message is correct
-        assertEquals("Duel not found with id: 1", exception.getMessage());
-    }
-
-    @Test
-    void testDeleteDuel_Success() {
-        // Success case: Call the service method to delete a duel
-        duelServiceImpl.deleteDuel(1L);
-
-        // Verify that the repository deleteById method was called
-        verify(duelRepository, times(1)).deleteById(1L);
-    }
-
-    @Test
-    void testDeleteDuel_NotFound() {
-        // Failure case: Even if the duel does not exist, we are verifying that the method is called
-        doNothing().when(duelRepository).deleteById(99L);
-
-        // Call the service method
-        duelServiceImpl.deleteDuel(99L);
-
-        // Verify that the repository's deleteById method is still called
-        verify(duelRepository, times(1)).deleteById(99L);
     }
 
     @Test

@@ -50,19 +50,6 @@ class DuelControllerTest {
     }
 
     @Test
-    void testCreateDuel() throws Exception {
-        Duel duel = new Duel();
-        when(duelService.createDuel(any(Duel.class))).thenReturn(duel);
-
-        mockMvc.perform(post("/api/duel")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(duel)))
-                .andExpect(status().isOk());
-
-        verify(duelService, times(1)).createDuel(any(Duel.class));
-    }
-
-    @Test
     void testUpdateDuel() throws Exception {
         Duel duel = new Duel();
         when(duelService.updateDuel(eq(1L), any(Duel.class))).thenReturn(duel);

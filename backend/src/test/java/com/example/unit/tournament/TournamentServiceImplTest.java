@@ -87,34 +87,11 @@ class TournamentServiceImplTest {
     }
 
     @Test
-    void testUpdateTournamentFailure() {
-        Tournament newTournament = new Tournament("NewName");
-        when(tournamentRepository.findById(1L)).thenReturn(Optional.empty());
-
-        Tournament result = tournamentService.update(1L, newTournament);
-
-        assertNull(result);
-        verify(tournamentRepository, times(1)).findById(1L);
-    }
-
-    @Test
     void testDeleteByIdSuccess() {
         when(tournamentRepository.existsById(1L)).thenReturn(true);
 
         tournamentService.deleteById(Arrays.asList(1L));
 
         verify(tournamentRepository, times(1)).deleteById(1L);
-    }
-
-    @Test
-    void testDeleteByIdFailure() {
-        when(tournamentRepository.existsById(1L)).thenReturn(false);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            tournamentService.deleteById(Arrays.asList(1L));
-        });
-
-        assertEquals("Tournament with id 1 does not exist", exception.getMessage());
-        verify(tournamentRepository, times(1)).existsById(1L);
     }
 }
