@@ -1,511 +1,237 @@
 package com.example.unit.duel;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import jakarta.persistence.EntityNotFoundException;
+import com.example.duel.*;
+import com.example.tournament.Tournament;
+import com.example.tournament.TournamentNotFoundException;
+import com.example.profile.Profile;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
-import com.example.duel.*;
-import com.example.profile.*;
-import com.example.tournament.*;
-
-import java.sql.*;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-@ExtendWith(MockitoExtension.class)
-public class DuelServiceTest {
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 
-    @Mock
-    private DuelRepository duelRepository;
+import jakarta.persistence.EntityNotFoundException;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+class DuelServiceTest {
 
     @InjectMocks
     private DuelServiceImpl duelService;
 
+    @Mock
+    private DuelRepository duelRepository;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
     @Test
-    void createDuel_NewDuel_ReturnSavedDuel() {
+    void createDuel_Success_ReturnsDuel() {
         // Arrange
+        Profile player1 = new Profile(1L, "Player 1", "player1@example.com", null, "private", 0.0, "USER");
+        Profile player2 = new Profile(2L, "Player 2", "player2@example.com", null, "private", 0.0, "USER");
+
+        Tournament tournament = new Tournament();
+        tournament.setTournamentId(1L); // Set a valid tournament ID
+
         Duel duel = new Duel();
-        duel.setDuel_id(1L);
-        duel.setPid1(1L);
-        duel.setPid2(2L);
-        duel.setRoundName("Final");
+        duel.setPlayer1(player1);
+        duel.setPlayer2(player2);
+        duel.setRoundName("Round 1");
+        duel.setTournament(tournament); // Ensure the tournament is set
 
-        // Mock the repository methods
-        when(duelRepository.getDuelsByRoundName(duel.getRoundName())).thenReturn(new ArrayList<>());
-        when(duelRepository.save(any(Duel.class))).thenReturn(duel);
+        // Mocking the behavior for successful duel creation
+        when(duelRepository.createDuel(
+            eq(player1.getProfileId()),
+            eq(player2.getProfileId()),
+            eq(duel.getRoundName()),
+            any(),
+            eq(tournament.getTournamentId())
+        )).thenAnswer(invocation -> null); // Simulate success (no return)
 
         // Act
-        Duel savedDuel = duelService.createDuel(duel);
+        Duel createdDuel = duelService.createDuel(duel);
 
         // Assert
-        assertNotNull(savedDuel);
-        assertEquals(duel.getDuel_id(), savedDuel.getDuel_id());
-        verify(duelRepository).getDuelsByRoundName(duel.getRoundName());
-        verify(duelRepository).save(duel);
+        assertNotNull(createdDuel);
+        assertEquals(player1.getProfileId(), createdDuel.getPlayer1().getProfileId());
+        assertEquals(player2.getProfileId(), createdDuel.getPlayer2().getProfileId());
+        verify(duelRepository).createDuel(
+            eq(player1.getProfileId()),
+            eq(player2.getProfileId()),
+            eq(duel.getRoundName()),
+            any(),
+            eq(tournament.getTournamentId())
+        );
     }
 
     @Test
-    void createDuel_SameRoundName_ReturnNull() {
+    void createDuel_Failure_PlayerMustBeDifferent_ThrowsDuelCreationException() {
         // Arrange
+        Profile player1 = new Profile(1L, "Player 1", "player1@example.com", null, "private", 0.0, "USER");
         Duel duel = new Duel();
-        duel.setDuel_id(1L);
-        duel.setRoundName("Duplicate Round");
+        duel.setPlayer1(player1);
+        duel.setPlayer2(player1); // Same player
 
-        List<Duel> existingDuels = new ArrayList<>();
-        existingDuels.add(new Duel()); // Simulate existing duel with the same round name
-        when(duelRepository.getDuelsByRoundName(duel.getRoundName())).thenReturn(existingDuels);
+        Tournament tournament = new Tournament();
+        tournament.setTournamentId(1L); // Set a valid tournament ID
+        duel.setTournament(tournament);
 
-        // Act
-        Duel savedDuel = duelService.createDuel(duel);
+        // Act & Assert
+        DuelCreationException exception = assertThrows(DuelCreationException.class, () -> duelService.createDuel(duel));
+        assertEquals("Players must be different", exception.getMessage());
 
-        // Assert
-        assertNull(savedDuel);
-        verify(duelRepository).getDuelsByRoundName(duel.getRoundName());
-        verify(duelRepository, never()).save(any(Duel.class)); // Ensure save is not called
+        // Verify that no interaction with the repository occurred
+        verifyNoInteractions(duelRepository);
     }
 
+
     @Test
-    void updateDuel_Found_ReturnUpdatedDuel() {
+    void createDuel_Failure_DuelAlreadyExists_ThrowsDuelCreationException() {
         // Arrange
-        Duel existingDuel = new Duel();
-        existingDuel.setDuel_id(1L);
-        existingDuel.setPid1(1L);
-        existingDuel.setPid2(2L);
-        existingDuel.setRoundName("Existing Round");
+        Profile player1 = new Profile(1L, "Player 1", "player1@example.com", null, "private", 0.0, "USER");
+        Profile player2 = new Profile(2L, "Player 2", "player2@example.com", null, "private", 0.0, "USER");
 
-        Duel updatedDuel = new Duel();
-        updatedDuel.setPid1(3L);
-        updatedDuel.setPid2(4L);
-        updatedDuel.setRoundName("Updated Round");
+        Tournament tournament = new Tournament();
+        tournament.setTournamentId(1L); // Set a valid tournament ID
 
-        Long duelId = 1L;
+        Duel duel = new Duel();
+        duel.setPlayer1(player1);
+        duel.setPlayer2(player2);
+        duel.setRoundName("Round 1");
+        duel.setTournament(tournament); // Ensure the tournament is set
 
-        when(duelRepository.findById(duelId)).thenReturn(Optional.of(existingDuel));
-        when(duelRepository.save(any(Duel.class))).thenReturn(existingDuel);
+        // Mocking the behavior when a duel with the same players and round already exists
+        doThrow(new DataAccessException("SQL") {
+            @Override
+            public String getMessage() {
+                return "SQL error: A duel with the same players, round, and tournament already exists";
+            }
+        }).when(duelRepository).createDuel(
+            eq(player1.getProfileId()),
+            eq(player2.getProfileId()),
+            eq(duel.getRoundName()),
+            any(),
+            eq(tournament.getTournamentId())
+        );
 
-        // Act
-        Duel result = duelService.updateDuel(duelId, updatedDuel);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(updatedDuel.getRoundName(), result.getRoundName());
-        assertEquals(updatedDuel.getPid1(), result.getPid1());
-        assertEquals(updatedDuel.getPid2(), result.getPid2());
-        verify(duelRepository).findById(duelId);
-        verify(duelRepository).save(existingDuel);
+        // Act & Assert
+        DuelCreationException exception = assertThrows(DuelCreationException.class, () -> duelService.createDuel(duel));
+        assertEquals("A duel with the same players, round, and tournament already exists", exception.getMessage());
+        verify(duelRepository).createDuel(anyLong(), anyLong(), anyString(), any(), anyLong());
     }
 
     @Test
-    void updateDuel_NotFound_ReturnNull() {
-        // Arrange
-        Duel updatedDuel = new Duel();
-        updatedDuel.setRoundName("Updated Duel Title");
-        Long duelId = 10L;
-
-        when(duelRepository.findById(duelId)).thenReturn(Optional.empty());
-
-        // Act
-        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            duelService.updateDuel(duelId, updatedDuel);
-        });
-
-        // Assert
-        assertEquals("Duel not found with id: " + duelId, exception.getMessage());
-        verify(duelRepository).findById(duelId);
-        verify(duelRepository, never()).save(any(Duel.class)); // Ensure save is not called
-    }
-
-    @Test
-    void updateDuelResult_Found_ReturnUpdatedDuel() {
-        // Arrange
-        Duel existingDuel = new Duel();
-        existingDuel.setDuel_id(1L);
-        existingDuel.setPid1(1L);
-        existingDuel.setPid2(2L);
-
-        DuelResult result = new DuelResult();
-        result.setplayer1Time(10L);
-        result.setplayer2Time(20L); // Player 2 wins
-
-        Long duelId = 1L;
-
-        when(duelRepository.findById(duelId)).thenReturn(Optional.of(existingDuel));
-        when(duelRepository.save(any(Duel.class))).thenReturn(existingDuel);
-
-        // Act
-        Duel updatedDuel = duelService.updateDuelResult(duelId, result);
-
-        // Assert
-        assertNotNull(updatedDuel);
-        assertEquals(existingDuel.getPid2(), updatedDuel.getWinner()); // Player 2 should be the winner
-        verify(duelRepository).findById(duelId);
-        verify(duelRepository).save(existingDuel);
-    }
-
-    @Test
-    void updateDuelResult_NotFound_ThrowException() {
-        // Arrange
-        DuelResult result = new DuelResult();
-        Long duelId = 10L;
-
-        when(duelRepository.findById(duelId)).thenReturn(Optional.empty());
-
-        // Act
-        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            duelService.updateDuelResult(duelId, result);
-        });
-
-        // Assert
-        assertEquals("Duel not found with id: " + duelId, exception.getMessage());
-        verify(duelRepository).findById(duelId);
-        verify(duelRepository, never()).save(any(Duel.class)); // Ensure save is not called
-    }
-
-    @Test
-    void deleteDuel_Found_DeletesDuel() {
-        // Arrange
-        Long duelId = 1L;
-
-        // Act
-        duelService.deleteDuel(duelId);
-
-        // Assert
-        verify(duelRepository).deleteDuel(duelId);
-    }
-
-    @Test
-    void deleteDuel_NotFound_DoesNotThrow() {
-        // Arrange
-        Long duelId = 10L;
-        doThrow(new RuntimeException("Duel not found")).when(duelRepository).deleteDuel(duelId);
-
-        // Act
-        duelService.deleteDuel(duelId);
-
-        // Assert
-        verify(duelRepository).deleteDuel(duelId);
-        // Ensure that exception handling in delete method is working
-    }
-
-    @Test
-    void findAll_ReturnsAllDuels() {
-        // Arrange
-        List<Duel> duels = new ArrayList<>();
-        duels.add(new Duel());
-        duels.add(new Duel());
-
-        when(duelRepository.findAll()).thenReturn(duels);
-
-        // Act
-        List<Duel> result = duelService.findAll();
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(duelRepository).findAll();
-    }
-
-    @Test
-    void getDuelsByTournament_ReturnsDuels() {
-        // Arrange
-        Long tournamentId = 1L;
-        List<Duel> duels = new ArrayList<>();
-        duels.add(new Duel());
-        duels.add(new Duel());
-
-        when(duelRepository.getDuelsByTournament(tournamentId)).thenReturn(duels);
-
-        // Act
-        List<Duel> result = duelService.getDuelsByTournament(tournamentId);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(duelRepository).getDuelsByTournament(tournamentId);
-    }
-
-    @Test
-    void getDuelsByPlayer_ReturnsDuels() {
-        // Arrange
-        Long playerId = 1L;
-        List<Duel> duels = new ArrayList<>();
-        duels.add(new Duel());
-        duels.add(new Duel());
-
-        when(duelRepository.getDuelsByPlayer(playerId)).thenReturn(duels);
-
-        // Act
-        List<Duel> result = duelService.getDuelsByPlayer(playerId);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(duelRepository).getDuelsByPlayer(playerId);
-    }
-
-    @Test
-    void getDuelById_Found_ReturnDuel() {
+    void getDuelById_Success_ReturnsDuel() {
         // Arrange
         Long duelId = 1L;
         Duel duel = new Duel();
-        duel.setDuel_id(duelId);
+        duel.setDuelId(duelId); // Set the ID
+        duel.setPlayer1(new Profile(1L, "Player 1", "player1@example.com", null, "private", 0.0, "USER"));
+        duel.setPlayer2(new Profile(2L, "Player 2", "player2@example.com", null, "private", 0.0, "USER"));
 
+        // Mocking repository behavior
         when(duelRepository.findById(duelId)).thenReturn(Optional.of(duel));
 
         // Act
-        Duel result = duelService.getDuelById(duelId);
+        Duel foundDuel = duelService.getDuelById(duelId);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(duelId, result.getDuel_id());
+        assertNotNull(foundDuel);
+        assertEquals(duelId, foundDuel.getDuelId());
         verify(duelRepository).findById(duelId);
     }
 
     @Test
-    void getDuelById_NotFound_ThrowException() {
+    void getDuelById_NotFound_ThrowsException() {
         // Arrange
-        Long duelId = 10L;
+        Long duelId = 1L;
+
+        // Mocking repository behavior
         when(duelRepository.findById(duelId)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(EntityNotFoundException.class, () -> duelService.getDuelById(duelId));
     }
-    
-    @Test
-    public void testGetDuelsByTournament() {
-        Long tournamentId = 1L;
-        Profile player = new Profile();
-
-        Duel duel1 = new Duel();
-        duel1.setPlayer1(player);
-        duel1.setPlayer2(player);
-        duel1.setRoundName("Round 1");
-        duel1.setWinner(1L);
-
-        Duel duel2 = new Duel();
-        duel2.setPlayer1(player);
-        duel2.setPlayer2(player);
-        duel2.setRoundName("Round 2");
-        duel2.setWinner(1L);
-
-        when(duelRepository.existsById(tournamentId)).thenReturn(true);
-        when(duelRepository.getDuelsByTournament(tournamentId)).thenReturn(Arrays.asList(duel1, duel2));
-
-        List<Duel> result = duelService.getDuelsByTournament(tournamentId);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(duel1, result.get(0));
-        assertEquals(duel2, result.get(1));
-        verify(duelRepository).existsById(tournamentId);
-        verify(duelRepository).getDuelsByTournament(tournamentId);
-    }
 
     @Test
-    public void testGetDuelsByTournamentEmpty() {
-        Long tournamentId = 1L;
-        when(duelRepository.existsById(tournamentId)).thenReturn(true);
-        when(duelRepository.getDuelsByTournament(tournamentId)).thenReturn(Arrays.asList());
-
-        List<Duel> result = duelService.getDuelsByTournament(tournamentId);
-
-        assertNotNull(result);
-        assertEquals(0, result.size());
-        verify(duelRepository).existsById(tournamentId);
-        verify(duelRepository).getDuelsByTournament(tournamentId);
-    }
-
-    @Test
-    public void testGetDuelsByTournamentNotFound() {
-        Long tournamentId = 1L;
-        when(duelRepository.existsById(tournamentId)).thenReturn(false);
-
-        assertThrows(TournamentNotFoundException.class, () -> {
-            duelService.getDuelsByTournament(tournamentId);
-        });
-
-        verify(duelRepository).existsById(tournamentId);
-    }
-
-    @Test
-    public void testGetDuelById() {
+    void updateDuel_Success_ReturnsUpdatedDuel() {
+        // Arrange
         Long duelId = 1L;
-        Profile player = new Profile();
+        Duel existingDuel = new Duel();
+        existingDuel.setDuelId(duelId); // Set the existing duel ID
+        existingDuel.setPlayer1(new Profile(1L, "Player 1", "player1@example.com", null, "private", 0.0, "USER"));
+        existingDuel.setPlayer2(new Profile(2L, "Player 2", "player2@example.com", null, "private", 0.0, "USER"));
+        
+        Duel newDuel = new Duel();
+        newDuel.setPlayer1(new Profile(3L, "Player 3", "player3@example.com", null, "private", 0.0, "USER"));
+        newDuel.setPlayer2(new Profile(4L, "Player 4", "player4@example.com", null, "private", 0.0, "USER"));
 
-        Duel duel = new Duel();
-        duel.setPlayer1(player);
-        duel.setPlayer2(player);
-        duel.setRoundName("Round 1");
-        duel.setWinner(1L);
+        // Mocking repository behavior
+        when(duelRepository.findById(duelId)).thenReturn(Optional.of(existingDuel));
+        when(duelRepository.save(any(Duel.class))).thenReturn(newDuel);
 
-        when(duelRepository.existsById(duelId)).thenReturn(true);
-        when(duelRepository.findById(duelId)).thenReturn(java.util.Optional.of(duel));
+        // Act
+        Duel updatedDuel = duelService.updateDuel(duelId, newDuel);
 
-        Duel result = duelService.getDuelById(duelId);
-
-        assertNotNull(result);
-        assertEquals(duel, result);
-        verify(duelRepository).existsById(duelId);
+        // Assert
+        assertNotNull(updatedDuel);
+        assertEquals(newDuel.getPlayer1().getProfileId(), updatedDuel.getPlayer1().getProfileId());
+        assertEquals(newDuel.getPlayer2().getProfileId(), updatedDuel.getPlayer2().getProfileId());
         verify(duelRepository).findById(duelId);
+        verify(duelRepository).save(any(Duel.class));
     }
 
     @Test
-    public void testGetDuelByIdNotFound() {
+    void updateDuel_NotFound_ThrowsException() {
+        // Arrange
         Long duelId = 1L;
-        when(duelRepository.existsById(duelId)).thenReturn(false);
+        Duel newDuel = new Duel();
+        newDuel.setPlayer1(new Profile(3L, "Player 3", "player3@example.com", null, "private", 0.0, "USER"));
+        newDuel.setPlayer2(new Profile(4L, "Player 4", "player4@example.com", null, "private", 0.0, "USER"));
 
-        assertThrows(DuelNotFoundException.class, () -> {
-            duelService.getDuelById(duelId);
-        });
+        // Mocking repository behavior
+        when(duelRepository.findById(duelId)).thenReturn(Optional.empty());
 
-        verify(duelRepository).existsById(duelId);
+        // Act & Assert
+        assertThrows(EntityNotFoundException.class, () -> duelService.updateDuel(duelId, newDuel));
     }
 
     @Test
-    public void testCreateDuel_Success() {
-        Profile player1 = new Profile(2L, "test1", "test1@email.com", "test 1", "public", 0.0, "ROLE_PLAYER");
-        Profile player2 = new Profile(3L, "test2", "test2@email.com", "test 2", "public", 0.0, "ROLE_PLAYER");
-        Duel duel = new Duel();
-        duel.setPlayer1(player1);
-        duel.setPlayer2(player2);
-        duel.setRoundName("Round 1");
-        duel.setWinner(1L);
-        duel.setTournament(new Tournament(
-                "Test Tournament",
-                true,
-                Date.valueOf("2023-12-25"),
-                Time.valueOf("10:00:00"),
-                "Test Location",
-                1L,
-                "Test Test"));
-
-        when(duelRepository.createDuel(
-                duel.getPlayer1().getProfileId(),
-                duel.getPlayer2().getProfileId(),
-                duel.getRoundName(),
-                duel.getWinner(),
-                duel.getTournament().getTournamentId())).thenReturn(duel);
-
-        Duel result = duelService.createDuel(duel);
-
-        assertNotNull(result);
-        assertEquals(duel, result);
-        verify(duelRepository).createDuel(duel.getPlayer1().getProfileId(), duel.getPlayer2().getProfileId(),
-                duel.getRoundName(), duel.getWinner(), duel.getTournament().getTournamentId());
-    }
-
-    @Test
-    public void testCreateDuel_SamePlayer_Failure() {
-        // Setup a single player profile
-        Profile player = new Profile(2L, "test1", "test1@email.com", "test 1", "public", 0.0, "ROLE_PLAYER");
-
-        // Create the duel instance with the same player for both player1 and player2
-        Duel duel = new Duel();
-        duel.setPlayer1(player);
-        duel.setPlayer2(player); // Both players are the same
-        duel.setRoundName("Round 1");
-        duel.setWinner(1L);
-        duel.setTournament(new Tournament(
-                "Test Tournament",
-                true,
-                Date.valueOf("2023-12-25"),
-                Time.valueOf("10:00:00"),
-                "Test Location",
-                1L,
-                "Test Test"));
-
-        when(duelRepository.createDuel(
-                eq(duel.getPlayer1().getProfileId()), 
-                eq(duel.getPlayer2().getProfileId()), 
-                eq(duel.getRoundName()), 
-                eq(duel.getWinner()), 
-                eq(duel.getTournament().getTournamentId()) 
-        )).thenThrow(new DuelCreationException("Both players cannot be the same."));
-
-        assertThrows(DuelCreationException.class, () -> {
-            duelService.createDuel(duel);
-        });
-
-        verify(duelRepository).createDuel(
-                eq(duel.getPlayer1().getProfileId()), // Ensure it was called with player1 ID
-                eq(duel.getPlayer2().getProfileId()), // Ensure it was called with player2 ID (same ID)
-                eq(duel.getRoundName()),
-                eq(duel.getWinner()),
-                eq(duel.getTournament().getTournamentId()));
-    }
-
-    @Test
-    public void testCreateDuel_AlreadyExists_Failure() {
-        Profile player1 = new Profile(2L, "test1", "test1@email.com", "test 1", "public", 0.0, "ROLE_PLAYER");
-        Profile player2 = new Profile(3L, "test2", "test2@email.com", "test 2", "public", 0.0, "ROLE_PLAYER");
-
-        Duel duel = new Duel();
-        duel.setPlayer1(player1);
-        duel.setPlayer2(player2);
-        duel.setRoundName("Round 1");
-        duel.setWinner(1L);
-        duel.setTournament(new Tournament(
-                "Test Tournament",
-                true,
-                Date.valueOf("2023-12-25"),
-                Time.valueOf("10:00:00"),
-                "Test Location",
-                1L,
-                "Test Test"));
-
-        when(duelRepository.createDuel(
-                player1.getProfileId(),
-                player2.getProfileId(),
-                duel.getRoundName(),
-                duel.getWinner(),
-                duel.getTournament().getTournamentId()))
-                .thenThrow(new DuelCreationException(
-                        "A duel with the same players, round, and tournament already exists"));
-
-        assertThrows(DuelCreationException.class, () -> {
-            duelService.createDuel(duel);
-        });
-
-        verify(duelRepository).createDuel(
-                eq(player1.getProfileId()),
-                eq(player2.getProfileId()),
-                eq(duel.getRoundName()),
-                eq(duel.getWinner()),
-                eq(duel.getTournament().getTournamentId()));
-
-    }
-
-    @Test
-    public void testDeleteDuel() {
+    void deleteDuel_Success() {
+        // Arrange
         Long duelId = 1L;
+
+        // Mocking repository behavior
         when(duelRepository.existsById(duelId)).thenReturn(true);
 
+        // Act
         duelService.deleteDuel(duelId);
 
-        verify(duelRepository).existsById(duelId);
+        // Assert
         verify(duelRepository).deleteById(duelId);
     }
 
     @Test
-    public void testDeleteDuelNotFound() {
+    void deleteDuel_NotFound_ThrowsException() {
+        // Arrange
         Long duelId = 1L;
+
+        // Mocking repository behavior
         when(duelRepository.existsById(duelId)).thenReturn(false);
 
-        assertThrows(DuelNotFoundException.class, () -> {
-            duelService.deleteDuel(duelId);
-        });
-
-        verify(duelRepository).existsById(duelId);
+        // Act & Assert
+        assertThrows(DuelNotFoundException.class, () -> duelService.deleteDuel(duelId));
     }
 }

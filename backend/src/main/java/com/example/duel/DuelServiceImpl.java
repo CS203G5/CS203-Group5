@@ -45,7 +45,12 @@ public class DuelServiceImpl implements DuelService{
         return duelRepository.getDuelsByPlayer(pid);
     }
     
+    @Override
     public Duel createDuel(Duel duel) {
+        if (duel.getPlayer1().getProfileId().equals(duel.getPlayer2().getProfileId())) {
+            throw new DuelCreationException("Players must be different");
+        }
+
         try {
             // Call the stored procedure that handles the validation logic
             duelRepository.createDuel(
@@ -57,17 +62,16 @@ public class DuelServiceImpl implements DuelService{
             );
             return duel;
         } catch (DataAccessException e) {
-            if (e.getCause() instanceof BadSqlGrammarException) {
-                String sqlErrorMessage = e.getCause().getMessage();
-                if (sqlErrorMessage.contains("Players must be different")) {
-                    throw new DuelCreationException("Players must be different");
-                } else if (sqlErrorMessage.contains("A duel with the same players, round, and tournament already exists")) {
-                    throw new DuelCreationException("A duel with the same players, round, and tournament already exists");
-                }
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("A duel with the same players, round, and tournament already exists")) {
+                throw new DuelCreationException("A duel with the same players, round, and tournament already exists");
+            } else if (errorMessage.contains("Players must be different")) {
+                throw new DuelCreationException("Players must be different");
             }
             throw new DuelCreationException("Failed to create duel due to a database error", e);
         }
     }
+
     
 
 

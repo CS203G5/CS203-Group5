@@ -41,6 +41,10 @@ public class Duel {
         return duel_id;
     }
 
+    public void setDuelId(Long duel_id){
+        this.duel_id = duel_id;
+    }
+
     public void setTournament(Tournament tournament){
         this.tournament = tournament;
     }
