@@ -21,7 +21,7 @@ def initialize_session_state():
 def main():
     initialize_session_state()
     
-    if 'jwt_token' not in st.session_state:
+    if 'jwt_token' not in st.session_state or st.session_state['jwt_token'] is None:
         st.sidebar.title("Authentication")
         auth_choice = st.sidebar.radio("Choose an option", ["Login", "Register"])
         if auth_choice == "Login":
