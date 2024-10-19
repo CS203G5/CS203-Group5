@@ -18,7 +18,7 @@ def update_profile(username, email, bio, privacy_settings, role):
         "username": username,
         "email": email,
         "bio": bio,
-        "privacySettings": privacy_settings,
+        "privacy_settings": privacy_settings,
         "role": role
     }
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -52,7 +52,7 @@ def profile_page():
         privacy_settings_input = st.selectbox(
             "Privacy Settings", 
             ["Public", "Private", "Friends Only"], 
-            index=["Public", "Private", "Friends Only"].index(profile.get('privacySettings', 'Public'))
+            index=["Public", "Private", "Friends Only"].index(profile.get('privacy_settings', 'Public'))
         )
         role_input = st.selectbox(
             "Role",

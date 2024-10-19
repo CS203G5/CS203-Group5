@@ -17,7 +17,7 @@ public class ProfileController {
     @Autowired
     private ProfileService profileService;
 
-    @GetMapping("/{profileId}")
+    @GetMapping("/{profile_id}")
     public ResponseEntity<Profile> getProfile(@PathVariable Long profileId) {
         return profileService.getProfile(profileId)
                 .map(ResponseEntity::ok)
@@ -36,14 +36,14 @@ public class ProfileController {
         return ResponseEntity.ok(createdProfile);
     }
 
-    @PutMapping("/{profileId}")
+    @PutMapping("/{profile_id}")
     public ResponseEntity<Profile> updateProfile(@PathVariable Long profileId, @Valid @RequestBody Profile updatedProfile) {
         return profileService.updateProfile(profileId, updatedProfile)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{profileId}")
+    @DeleteMapping("/{profile_id}")
     public ResponseEntity<Void> deleteProfile(@PathVariable Long profileId) {
         try {
             profileService.deleteProfile(profileId);
@@ -53,7 +53,7 @@ public class ProfileController {
         }
     }
 
-    @PutMapping("/{profileId}/rating")
+    @PutMapping("/{profile_id}/rating")
     @PreAuthorize("hasRole('ADMIN')") // Ensure only admins can access this endpoint
     public ResponseEntity<Profile> updateRating(@PathVariable Long profileId, @RequestParam Double newRating) {
         Optional<Profile> updatedProfile = profileService.getProfile(profileId);
