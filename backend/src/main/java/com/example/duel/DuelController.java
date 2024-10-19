@@ -1,6 +1,8 @@
 package com.example.duel;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +24,13 @@ public class DuelController {
     @GetMapping()
     public ResponseEntity<List<Duel>> getDuelsByTournament(@RequestParam(required = false) Long tid) {
         if (tid == null) {
-            return ResponseEntity.ok(ds.findAll());
+            throw new TournamentNotFoundException(tid);
         }
 
         List<Duel> duels = ds.getDuelsByTournament(tid);
 
         if (duels.isEmpty()) {
-            throw new TournamentNotFoundException(tid);
+            return ResponseEntity.ok(ds.findAll());
         }
 
         return ResponseEntity.ok(duels);
@@ -57,9 +59,18 @@ public class DuelController {
         }
     }
 
-    @PostMapping()
-    public ResponseEntity<Duel> createDuel(@RequestBody Duel duel) {
-        return ResponseEntity.ok(ds.createDuel(duel));
+    // @PostMapping()
+    // public ResponseEntity<Duel> createDuel(@RequestBody Duel duel) {
+    //     return ResponseEntity.ok(ds.createDuel(duel));
+    // }
+    @PostMapping
+    public ResponseEntity<?> createDuel(@RequestBody Duel duel) {
+        try {
+            Duel createdDuel = ds.createDuel(duel);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdDuel);
+        } catch (DuelCreationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PutMapping("/{did}")

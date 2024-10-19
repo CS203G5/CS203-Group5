@@ -69,8 +69,8 @@ def tournaments_avail_page():
         with st.expander(f"{tournament['name']} - {tournament['date']}"):
             st.write(f"**Description:** {tournament['description']}")
             st.write(f"**Location:** {tournament['location']}")
-            st.write(f"**Rating Type:** {'Random' if tournament['isRandom'] == 1 else 'Similar Rated'}")
-            st.write(f"**Organizer:** {tournament['organizer']}")
+            st.write(f"**Rating Type:** {'Random' if tournament['is_random'] == 1 else 'Similar Rated'}")
+            st.write(f"**Organizer:** {tournament['organizer_id']}")
             
             user_id = st.session_state['profile_id']
             

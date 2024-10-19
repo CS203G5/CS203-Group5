@@ -10,8 +10,6 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
-import com.example.tournament.TournamentNotFoundException;
-
 @Transactional
 @Service
 public class DuelServiceImpl implements DuelService{
@@ -24,9 +22,6 @@ public class DuelServiceImpl implements DuelService{
     }
 
     public List<Duel> getDuelsByTournament(Long tid) {
-        if (!duelRepository.existsById(tid)) {
-            throw new TournamentNotFoundException(tid);
-        }
         return duelRepository.getDuelsByTournament(tid);
     }
 
@@ -46,37 +41,22 @@ public class DuelServiceImpl implements DuelService{
     }
     
     public Duel createDuel(Duel duel) {
-        try {
-            // Call the stored procedure that handles the validation logic
-            duelRepository.createDuel(
-                duel.getPlayer1().getProfileId(),
-                duel.getPlayer2().getProfileId(),
-                duel.getRoundName(),
-                duel.getWinner(),
-                duel.getTournament().getTournamentId()
-            );
-            return duel;
-        } catch (DataAccessException e) {
-            if (e.getCause() instanceof BadSqlGrammarException) {
-                String sqlErrorMessage = e.getCause().getMessage();
-                if (sqlErrorMessage.contains("Players must be different")) {
-                    throw new DuelCreationException("Players must be different");
-                } else if (sqlErrorMessage.contains("A duel with the same players, round, and tournament already exists")) {
-                    throw new DuelCreationException("A duel with the same players, round, and tournament already exists");
-                }
-            }
-            throw new DuelCreationException("Failed to create duel due to a database error", e);
-        }
+        duelRepository.createDuel(
+            duel.getPid1().getProfileId(),
+            duel.getPid2().getProfileId(),
+            duel.getRoundName(),
+            duel.getWinner(),
+            duel.getTournament().getTournamentId()
+        );
+        return duel;
     }
-    
-
 
     public Duel updateDuel(Long did, Duel newDuel) {
         // duelRepository.updateDuel(did, duel.getPid1(), duel.getPid2(), duel.getRoundName(), duel.getWinner());
 
         return duelRepository.findById(did).map(duel -> {
-            duel.setPlayer1(newDuel.getPlayer1());
-            duel.setPlayer2(newDuel.getPlayer2());
+            duel.setPid1(newDuel.getPid1());
+            duel.setPid2(newDuel.getPid2());
             duel.setRoundName(newDuel.getRoundName());
             return duelRepository.save(duel);
         }).orElseThrow(() -> new EntityNotFoundException("Duel not found with id: " + did));

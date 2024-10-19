@@ -14,19 +14,24 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Duel {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long duel_id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long duel_id;
 
-    private String roundName;
-    @Embedded private DuelResult result;
+    private String round_name;
+
+    @Embedded
+    private DuelResult result; // Ensure this class is defined properly
+
     private Long winner;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "pid1")
-    private Profile player1;    
+    private Profile pid1;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "pid2")
-    private Profile player2;    
+    private Profile pid2;
 
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false)
@@ -46,5 +51,13 @@ public class Duel {
 
     public void setWinner(Long winner){
         this.winner = winner;
+    }
+
+    public String getRoundName(){
+        return round_name;
+    }
+
+    public void setRoundName(String round_name){
+        this.round_name = round_name;
     }
 }

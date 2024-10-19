@@ -132,7 +132,7 @@ def tournament_page():
             if submitted:
                 payload = {
                     "name": name,
-                    "isRandom": is_random,
+                    "is_random": is_random,
                     "date": date.strftime("%Y-%m-%d"),
                     "time": time.strftime("%H:%M:%S"),
                     "location": location,
@@ -151,7 +151,7 @@ def tournament_page():
     if tournament_data:
         df = pd.DataFrame(
             tournament_data, 
-            columns=["select", "tournament_id", "name", "date", "time", "location", "description", "isRandom", "modifiedAt"],
+            columns=["select", "tournament_id", "name", "date", "time", "location", "description", "is_random", "modifiedAt"],
         )
         
         # 'Select' column to the DataFrame
@@ -216,7 +216,7 @@ def tournament_page():
                     disabled=True,
                     width="large"
                 ),
-                "isRandom": st.column_config.CheckboxColumn(
+                "is_random": st.column_config.CheckboxColumn(
                     "Randomized",
                     disabled=True,
                     width="small"
@@ -228,7 +228,7 @@ def tournament_page():
                     help="DateTime in YYYY-MM-DD, HH:MM:SS format"
                 ),
             },
-            disabled=["name", "isRandom", "date", "location", "description", "modifiedAt"],  # Disable all columns except 'select'
+            disabled=["name", "is_random", "date", "location", "description", "modifiedAt"],  # Disable all columns except 'select'
             hide_index=True,
             use_container_width=True,
             height=df.shape[0] * 30 + 100
@@ -257,7 +257,7 @@ def tournament_page():
                     if duels:
                         st.write("Matching was done, no more matching can be done.")
                     else:
-                        if tournament_data["isRandom"]:
+                        if tournament_data["is_random"]:
                             st.write("Randomizing matches...")
                             participants = fetch_participants_by_tournament(selected_tournament_id)
                             if not participants:
@@ -334,7 +334,7 @@ def tournament_page():
         with st.form("update_tournament_form"):
             st.subheader("Update Tournament")
             name = st.text_input("Tournament Name", tournament_data["name"])
-            is_random = st.checkbox("Randomized Matching", value=tournament_data["isRandom"])
+            is_random = st.checkbox("Randomized Matching", value=tournament_data["is_random"])
             description = st.text_area("Description", tournament_data["description"])
             location = st.text_input("Location", tournament_data["location"])
             date = st.date_input("Date", value=datetime.datetime.strptime(tournament_data["date"], "%Y-%m-%d").date())
@@ -344,7 +344,7 @@ def tournament_page():
             if submitted:
                 payload = {
                     "name": name,
-                    "isRandom": is_random,
+                    "is_random": is_random,
                     "date": date.strftime("%Y-%m-%d"),
                     "time": time.strftime("%H:%M:%S"),
                     "location": location,

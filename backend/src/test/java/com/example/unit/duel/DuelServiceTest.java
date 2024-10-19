@@ -34,14 +34,14 @@ public class DuelServiceTest {
         Profile player = new Profile();
 
         Duel duel1 = new Duel();
-        duel1.setPlayer1(player);
-        duel1.setPlayer2(player);
+        duel1.setPid1(player);
+        duel1.setPid2(player);
         duel1.setRoundName("Round 1");
         duel1.setWinner(1L);
 
         Duel duel2 = new Duel();
-        duel2.setPlayer1(player);
-        duel2.setPlayer2(player);
+        duel2.setPid1(player);
+        duel2.setPid2(player);
         duel2.setRoundName("Round 2");
         duel2.setWinner(1L);
 
@@ -90,8 +90,8 @@ public class DuelServiceTest {
         Profile player = new Profile();
 
         Duel duel = new Duel();
-        duel.setPlayer1(player);
-        duel.setPlayer2(player);
+        duel.setPid1(player);
+        duel.setPid2(player);
         duel.setRoundName("Round 1");
         duel.setWinner(1L);
 
@@ -123,8 +123,8 @@ public class DuelServiceTest {
         Profile player1 = new Profile(2L, "test1", "test1@email.com", "test 1", "public", 0.0, "ROLE_PLAYER");
         Profile player2 = new Profile(3L, "test2", "test2@email.com", "test 2", "public", 0.0, "ROLE_PLAYER");
         Duel duel = new Duel();
-        duel.setPlayer1(player1);
-        duel.setPlayer2(player2);
+        duel.setPid1(player1);
+        duel.setPid2(player2);
         duel.setRoundName("Round 1");
         duel.setWinner(1L);
         duel.setTournament(new Tournament(
@@ -137,8 +137,8 @@ public class DuelServiceTest {
                 "Test Test"));
 
         when(duelRepository.createDuel(
-                duel.getPlayer1().getProfileId(),
-                duel.getPlayer2().getProfileId(),
+                duel.getPid1().getProfileId(),
+                duel.getPid2().getProfileId(),
                 duel.getRoundName(),
                 duel.getWinner(),
                 duel.getTournament().getTournamentId())).thenReturn(duel);
@@ -147,7 +147,7 @@ public class DuelServiceTest {
 
         assertNotNull(result);
         assertEquals(duel, result);
-        verify(duelRepository).createDuel(duel.getPlayer1().getProfileId(), duel.getPlayer2().getProfileId(),
+        verify(duelRepository).createDuel(duel.getPid1().getProfileId(), duel.getPid2().getProfileId(),
                 duel.getRoundName(), duel.getWinner(), duel.getTournament().getTournamentId());
     }
 
@@ -158,8 +158,8 @@ public class DuelServiceTest {
 
         // Create the duel instance with the same player for both player1 and player2
         Duel duel = new Duel();
-        duel.setPlayer1(player);
-        duel.setPlayer2(player); // Both players are the same
+        duel.setPid1(player);
+        duel.setPid2(player); // Both players are the same
         duel.setRoundName("Round 1");
         duel.setWinner(1L);
         duel.setTournament(new Tournament(
@@ -172,8 +172,8 @@ public class DuelServiceTest {
                 "Test Test"));
 
         when(duelRepository.createDuel(
-                eq(duel.getPlayer1().getProfileId()), 
-                eq(duel.getPlayer2().getProfileId()), 
+                eq(duel.getPid1().getProfileId()), 
+                eq(duel.getPid2().getProfileId()), 
                 eq(duel.getRoundName()), 
                 eq(duel.getWinner()), 
                 eq(duel.getTournament().getTournamentId()) 
@@ -184,8 +184,8 @@ public class DuelServiceTest {
         });
 
         verify(duelRepository).createDuel(
-                eq(duel.getPlayer1().getProfileId()), // Ensure it was called with player1 ID
-                eq(duel.getPlayer2().getProfileId()), // Ensure it was called with player2 ID (same ID)
+                eq(duel.getPid1().getProfileId()), // Ensure it was called with player1 ID
+                eq(duel.getPid2().getProfileId()), // Ensure it was called with player2 ID (same ID)
                 eq(duel.getRoundName()),
                 eq(duel.getWinner()),
                 eq(duel.getTournament().getTournamentId()));
@@ -197,8 +197,8 @@ public class DuelServiceTest {
         Profile player2 = new Profile(3L, "test2", "test2@email.com", "test 2", "public", 0.0, "ROLE_PLAYER");
 
         Duel duel = new Duel();
-        duel.setPlayer1(player1);
-        duel.setPlayer2(player2);
+        duel.setPid1(player1);
+        duel.setPid2(player2);
         duel.setRoundName("Round 1");
         duel.setWinner(1L);
         duel.setTournament(new Tournament(
