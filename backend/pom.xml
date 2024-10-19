@@ -138,12 +138,11 @@
 			<version>2.17.89</version> <!-- Ensure you use the latest version -->
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>io.github.cdimascio</groupId>
 			<artifactId>java-dotenv</artifactId>
 			<version>5.2.2</version>
-		</dependency>
-
+		</dependency> -->
 	</dependencies>
 
 	<build>
