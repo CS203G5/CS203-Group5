@@ -38,7 +38,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
                 // .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
-                // .requestMatchers(ADMIN_MATCHERS).permitAll()   
+                // .requestMatchers(ADMIN_MATCHERS).permitAll()  
                 .requestMatchers("/api/duel/**").permitAll()
                 .anyRequest().authenticated()
             )

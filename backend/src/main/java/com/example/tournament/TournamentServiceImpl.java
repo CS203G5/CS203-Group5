@@ -22,7 +22,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     public Tournament findById(Long tid) {
         return tournamentRepository.findById(tid).orElse(null);
-    }
+    }   
 
     public List<Tournament> getOngoingTournaments() {
         java.time.LocalDate today = java.time.LocalDate.now();
@@ -70,8 +70,8 @@ public class TournamentServiceImpl implements TournamentService {
             tournament.setDescription(newTournamentInfo.getDescription());
             tournament.setModifiedAt(LocalDateTime.now());
             return tournamentRepository.save(tournament);
-        }).orElse(null);
-    }
+        }).orElseThrow(() -> new TournamentNotFoundException(tid));  // Throw exception if not found
+    }    
 
     public void deleteById(List<Long> deleteList) {
         for (Long tid : deleteList) {

@@ -21,7 +21,11 @@ public class TournamentController {
 
     @GetMapping("/{tid}")
     public Tournament getTournamentById(@PathVariable Long tid) {
-        return ts.findById(tid);
+        Tournament tournament = ts.findById(tid);
+        if (tournament == null) {
+            throw new TournamentNotFoundException(tid); // Throw the custom exception if tournament is not found
+        }
+        return tournament;
     }
 
     @GetMapping("/organizer/{aid}")
