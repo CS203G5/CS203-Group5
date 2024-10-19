@@ -151,7 +151,7 @@ def tournament_page():
     if tournament_data:
         df = pd.DataFrame(
             tournament_data, 
-            columns=["select", "tournament_id", "name", "date", "time", "location", "description", "is_random", "modifiedAt"],
+            columns=["select", "tournament_id", "name", "date", "time", "location", "description", "is_random", "modified_at"],
         )
         
         # 'Select' column to the DataFrame
@@ -221,14 +221,14 @@ def tournament_page():
                     disabled=True,
                     width="small"
                 ),
-                "modifiedAt": st.column_config.DatetimeColumn(
+                "modified_at": st.column_config.DatetimeColumn(
                     "Last Modified",
                     disabled=True,
-                    width="small",
+                    width="medium",
                     help="DateTime in YYYY-MM-DD, HH:MM:SS format"
                 ),
             },
-            disabled=["name", "is_random", "date", "location", "description", "modifiedAt"],  # Disable all columns except 'select'
+            disabled=["name", "is_random", "date", "location", "description", "modified_at"],  # Disable all columns except 'select'
             hide_index=True,
             use_container_width=True,
             height=df.shape[0] * 30 + 100

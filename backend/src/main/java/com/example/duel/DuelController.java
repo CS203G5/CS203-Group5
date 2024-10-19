@@ -23,13 +23,13 @@ public class DuelController {
     @GetMapping()
     public ResponseEntity<List<Duel>> getDuelsByTournament(@RequestParam(required = false) Long tid) {
         if (tid == null) {
-            throw new TournamentNotFoundException(tid);
+            return ResponseEntity.ok(ds.findAll());
         }
 
         List<Duel> duels = ds.getDuelsByTournament(tid);
 
         if (duels.isEmpty()) {
-            return ResponseEntity.ok(ds.findAll());
+            throw new TournamentNotFoundException(tid);
         }
 
         return ResponseEntity.ok(duels);
