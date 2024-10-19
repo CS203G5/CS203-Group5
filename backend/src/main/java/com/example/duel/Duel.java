@@ -60,4 +60,12 @@ public class Duel {
     public void setRoundName(String round_name){
         this.round_name = round_name;
     }
+
+    public void setPid1(Profile pid1) {
+        this.pid1 = pid1;
+    }
+
+    public void setPid2(Profile pid2) {
+        this.pid2 = pid2;
+    }
 }

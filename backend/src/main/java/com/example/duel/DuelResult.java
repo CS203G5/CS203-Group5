@@ -2,10 +2,9 @@ package com.example.duel;
 
 import jakarta.persistence.Embeddable;
 
-
 @Embeddable
 public class DuelResult {
-    // timing in milliseconds
+    // Timing in milliseconds
     private Long player1Time;
     private Long player2Time;
 
@@ -33,11 +32,18 @@ public class DuelResult {
         this.player2Time = player2Time;
     }
 
+    // Determine winner based on times
     public Long getWinnerId() {
+        if (player1Time == null || player2Time == null) {
+            return null; // Handle null values
+        }
         return player1Time < player2Time ? 1L : 2L;
     }
 
     public Long getLoserId() {
+        if (player1Time == null || player2Time == null) {
+            return null; // Handle null values
+        }
         return player1Time < player2Time ? 2L : 1L;
     }
 }

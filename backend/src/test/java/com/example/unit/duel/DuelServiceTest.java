@@ -136,19 +136,21 @@ public class DuelServiceTest {
                 1L,
                 "Test Test"));
 
+        String message = "";
         when(duelRepository.createDuel(
+                duel.getTournament().getTournamentId(),
+                duel.getRoundName(),
                 duel.getPid1().getProfileId(),
                 duel.getPid2().getProfileId(),
-                duel.getRoundName(),
-                duel.getWinner(),
-                duel.getTournament().getTournamentId())).thenReturn(duel);
+                duel.getWinner())).thenReturn(message);
 
-        Duel result = duelService.createDuel(duel);
+        String result = duelService.createDuel(duel);
 
         assertNotNull(result);
         assertEquals(duel, result);
-        verify(duelRepository).createDuel(duel.getPid1().getProfileId(), duel.getPid2().getProfileId(),
-                duel.getRoundName(), duel.getWinner(), duel.getTournament().getTournamentId());
+        verify(duelRepository).createDuel(duel.getTournament().getTournamentId(), duel.getRoundName(),
+                duel.getPid1().getProfileId(),
+                duel.getPid2().getProfileId(), duel.getWinner());
     }
 
     @Test
@@ -172,23 +174,23 @@ public class DuelServiceTest {
                 "Test Test"));
 
         when(duelRepository.createDuel(
-                eq(duel.getPid1().getProfileId()), 
-                eq(duel.getPid2().getProfileId()), 
-                eq(duel.getRoundName()), 
-                eq(duel.getWinner()), 
-                eq(duel.getTournament().getTournamentId()) 
-        )).thenThrow(new DuelCreationException("Both players cannot be the same."));
+                eq(duel.getTournament().getTournamentId()),
+                eq(duel.getRoundName()),
+                eq(duel.getPid1().getProfileId()),
+                eq(duel.getPid2().getProfileId()),
+                eq(duel.getWinner())))
+                .thenThrow(new DuelCreationException("Both players cannot be the same"));
 
         assertThrows(DuelCreationException.class, () -> {
             duelService.createDuel(duel);
         });
 
         verify(duelRepository).createDuel(
-                eq(duel.getPid1().getProfileId()), // Ensure it was called with player1 ID
-                eq(duel.getPid2().getProfileId()), // Ensure it was called with player2 ID (same ID)
+                eq(duel.getTournament().getTournamentId()),
                 eq(duel.getRoundName()),
-                eq(duel.getWinner()),
-                eq(duel.getTournament().getTournamentId()));
+                eq(duel.getPid1().getProfileId()),
+                eq(duel.getPid2().getProfileId()),
+                eq(duel.getWinner()));
     }
 
     @Test
@@ -211,11 +213,11 @@ public class DuelServiceTest {
                 "Test Test"));
 
         when(duelRepository.createDuel(
+                duel.getTournament().getTournamentId(),
+                duel.getRoundName(),
                 player1.getProfileId(),
                 player2.getProfileId(),
-                duel.getRoundName(),
-                duel.getWinner(),
-                duel.getTournament().getTournamentId()))
+                duel.getWinner()))
                 .thenThrow(new DuelCreationException(
                         "A duel with the same players, round, and tournament already exists"));
 
@@ -224,11 +226,11 @@ public class DuelServiceTest {
         });
 
         verify(duelRepository).createDuel(
+                eq(duel.getTournament().getTournamentId()),
+                eq(duel.getRoundName()),
                 eq(player1.getProfileId()),
                 eq(player2.getProfileId()),
-                eq(duel.getRoundName()),
-                eq(duel.getWinner()),
-                eq(duel.getTournament().getTournamentId()));
+                eq(duel.getWinner()));
 
     }
 

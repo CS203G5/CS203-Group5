@@ -14,15 +14,20 @@ public interface DuelRepository extends JpaRepository<Duel, Long> {
     List<Duel> getDuelsByTournament(@Param("p_tid") Long tid);
 
     @Procedure(name = "getDuelsByRoundName")
-    List<Duel> getDuelsByRoundName(@Param("p_round_name") String roundName);
+    List<Duel> getDuelsByRoundName(@Param("p_round_name") String round_name);
 
     @Procedure(name = "getDuelsByPlayer")
     List<Duel> getDuelsByPlayer(@Param("p_pid") Long pid);
-    
-    @Procedure(name="createDuel")
-    Duel createDuel(@Param("p_pid1") Long pid1, @Param("p_pid2") Long pid2, @Param("p_round_name") String roundName, @Param("p_winner") Long winner, @Param("p_tid") Long tid);
-    
-    @Procedure(name = "deleteDuel")
-    void deleteDuel(@Param("p_did") Long did); 
-}
 
+    @Procedure(procedureName = "createDuel")
+    String createDuel(
+            @Param("p_tournament_id") Long tournament_id,
+            @Param("p_round_name") String round_name,
+            @Param("p_pid1") Long pid1,
+            @Param("p_pid2") Long pid2,
+            @Param("p_winner") Long winner
+    );
+
+    @Procedure(name = "deleteDuel")
+    void deleteDuel(@Param("p_did") Long did);
+}

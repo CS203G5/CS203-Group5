@@ -38,11 +38,9 @@ public class ProfileController {
 
     @PutMapping("/{profileId}")
     public ResponseEntity<Profile> updateProfile(@PathVariable Long profileId, @Valid @RequestBody Profile updatedProfile) {
-        Profile profile = profileService.updateProfile(profileId, updatedProfile);
-        if (profile == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(profile);
+        return profileService.updateProfile(profileId, updatedProfile)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{profileId}")
@@ -65,4 +63,12 @@ public class ProfileController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/by-username/{username}")
+    public ResponseEntity<Profile> getProfileByUsername(@PathVariable String username) {
+        return profileService.getProfileByUsername(username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

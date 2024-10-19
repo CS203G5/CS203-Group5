@@ -1,6 +1,8 @@
 package com.example.duel;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +14,7 @@ import jakarta.transaction.Transactional;
 
 @Transactional
 @Service
-public class DuelServiceImpl implements DuelService{
+public class DuelServiceImpl implements DuelService {
 
     @Autowired
     DuelRepository duelRepository;
@@ -28,7 +30,7 @@ public class DuelServiceImpl implements DuelService{
     public List<Duel> getDuelsByRoundName(String roundName) {
         return duelRepository.getDuelsByRoundName(roundName);
     }
-    
+
     public Duel getDuelById(Long did) {
         if (!duelRepository.existsById(did)) {
             throw new DuelNotFoundException(did);
@@ -39,20 +41,22 @@ public class DuelServiceImpl implements DuelService{
     public List<Duel> getDuelsByPlayer(Long pid) {
         return duelRepository.getDuelsByPlayer(pid);
     }
-    
-    public Duel createDuel(Duel duel) {
-        duelRepository.createDuel(
+
+    public String createDuel(Duel duel) {
+        String message = duelRepository.createDuel(
+            duel.getTournament().getTournamentId(),
+            duel.getRoundName(),
             duel.getPid1().getProfileId(),
             duel.getPid2().getProfileId(),
-            duel.getRoundName(),
-            duel.getWinner(),
-            duel.getTournament().getTournamentId()
+            duel.getWinner()
         );
-        return duel;
+
+        return message;
     }
 
     public Duel updateDuel(Long did, Duel newDuel) {
-        // duelRepository.updateDuel(did, duel.getPid1(), duel.getPid2(), duel.getRoundName(), duel.getWinner());
+        // duelRepository.updateDuel(did, duel.getPid1(), duel.getPid2(),
+        // duel.getRoundName(), duel.getWinner());
 
         return duelRepository.findById(did).map(duel -> {
             duel.setPid1(newDuel.getPid1());
@@ -79,5 +83,5 @@ public class DuelServiceImpl implements DuelService{
             throw new DuelNotFoundException(did);
         }
         duelRepository.deleteById(did);
-    }  
+    }
 }
