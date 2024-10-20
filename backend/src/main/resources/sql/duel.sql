@@ -52,11 +52,12 @@ BEGIN
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `createDuel`(
+    IN p_tid BIGINT,
+    IN p_round_name VARCHAR(255), 
     IN p_pid1 BIGINT, 
     IN p_pid2 BIGINT, 
-    IN p_round_name VARCHAR(255), 
-    IN p_winner BIGINT, 
-    IN p_tid BIGINT
+    IN p_winner BIGINT,
+    OUT p_duel_id BIGINT 
 )
 BEGIN
     IF p_pid1 = p_pid2 THEN
@@ -72,8 +73,9 @@ BEGIN
         ) THEN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A duel with the same players, round, and tournament already exists';
         ELSE
-            INSERT INTO Duel (pid1, pid2, round_name, winner, tournament_id) 
-            VALUES (p_pid1, p_pid2, p_round_name, p_winner, p_tid);
+            INSERT INTO Duel (tournament_id, round_name, pid1, pid2, winner) 
+            VALUES (p_tid, p_round_name, p_pid1, p_pid2, p_winner);
+            SELECT 'Duel created successfully' AS message;
         END IF;
     END IF;
 END$$
