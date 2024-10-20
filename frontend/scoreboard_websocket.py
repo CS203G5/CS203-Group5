@@ -4,6 +4,7 @@ import websocket
 import json
 import threading
 import pandas as pd
+from algorithms import rand_match_afterwards
 
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -111,6 +112,7 @@ def update_scoreboard():
             "player2Time": player2Time,
         }
         update_duel_result(did, result_data)
+        rand_match_afterwards()
 
 def live_scoreboard():
     st.title("Live Duel Scoreboard")

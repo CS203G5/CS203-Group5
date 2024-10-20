@@ -29,7 +29,7 @@ def main():
         elif auth_choice == "Register":
             register_user()
     else:
-        rand_match_afterwards()
+        # rand_match_afterwards()
         st.sidebar.success(f"Logged in as {st.session_state['username']}")
         page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Available Tournaments", "Update Scoreboard", "Scoreboard", "AI Assistant", "Logout"])
 
