@@ -51,6 +51,11 @@ Before you begin, make sure you have the following installed on your machine:
        # OR, if you're using Maven installed globally:
        mvn spring-boot:run
        ```
+4. **Run the tests:**
+    ```bash
+   cd backend
+   mvn test
+   ```
 
 ## Database Setup
 
