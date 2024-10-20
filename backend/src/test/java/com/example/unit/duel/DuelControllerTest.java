@@ -4,6 +4,8 @@ import com.example.duel.DuelController;
 import com.example.duel.Duel;
 import com.example.duel.DuelResult;
 import com.example.duel.DuelService;
+import com.example.tournament.TournamentNotFoundException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -37,6 +39,24 @@ class DuelControllerTest {
     }
 
     @Test
+    void testGetDuelsByTournament_WithValidTid() {
+        Long tid = 1L;
+        List<Duel> duels = new ArrayList<>();
+        Duel duel = new Duel(); // Create a Duel object for testing
+        duels.add(duel);
+        
+        when(duelService.getDuelsByTournament(tid)).thenReturn(duels);
+
+        ResponseEntity<List<Duel>> response = duelController.getDuelsByTournament(tid);
+        List<Duel> result = response.getBody();
+
+        assertNotNull(result);
+        assertEquals(1, result.size()); // Ensure that the list contains the expected duels
+        assertEquals(duels, result);
+        verify(duelService, times(1)).getDuelsByTournament(tid);
+    }   
+
+    @Test
     void testGetDuelsByTournament_NoTid() {
         List<Duel> duels = new ArrayList<>();
         when(duelService.findAll()).thenReturn(duels);
@@ -49,25 +69,20 @@ class DuelControllerTest {
         verify(duelService, times(1)).findAll();
     }
 
-    // @Test
-    // void testGetDuelsByTournament_WithTid() {
-    //     Long tid = 1L;
-    //     List<Duel> duels = new ArrayList<>();
+    @Test
+    void testGetDuelsByTournament_EmptyListThrowsException() {
+        Long tid = 1L;
+        List<Duel> emptyDuels = new ArrayList<>();
         
-    //     // Mock the duelService to return an empty list or a list of duels
-    //     when(duelService.getDuelsByTournament(tid)).thenReturn(duels);
-    
-    //     // Call the controller method
-    //     ResponseEntity<List<Duel>> response = duelController.getDuelsByTournament(tid);
-    //     List<Duel> result = response.getBody();
-    
-    //     // Assert that the result is not null and equals the mocked result
-    //     assertNotNull(result);
-    //     assertEquals(duels, result);
+        when(duelService.getDuelsByTournament(tid)).thenReturn(emptyDuels);
+
+        TournamentNotFoundException exception = assertThrows(TournamentNotFoundException.class, 
+            () -> duelController.getDuelsByTournament(tid));
         
-    //     // Verify that the service was called once with the correct ID
-    //     verify(duelService, times(1)).getDuelsByTournament(tid);
-    // }    
+        assertEquals("Tournament with ID " + tid + " not found", exception.getMessage());
+        verify(duelService, times(1)).getDuelsByTournament(tid);
+    }
+
 
     @Test
     void testGetDuelById() {
@@ -158,6 +173,55 @@ class DuelControllerTest {
         // Verify the service method was called once
         verify(duelService, times(1)).createDuel(any(Duel.class));
     }
+
+    @Test
+    void testCreateDuel_Pid1AndPid2CannotBeSame() {
+        String errorMessage = "pid1 and pid2 cannot be the same";
+        Duel duel = new Duel();
+        
+        when(duelService.createDuel(any(Duel.class))).thenReturn(errorMessage);
+        
+        ResponseEntity<String> result = duelController.createDuel(duel);
+        
+        assertNotNull(result);
+        assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
+        assertEquals(errorMessage, result.getBody());
+        
+        verify(duelService, times(1)).createDuel(any(Duel.class));
+    }
+
+    @Test
+    void testCreateDuel_ExactPairingAlreadyExists() {
+        String errorMessage = "An exact pairing with the same round_name already exists";
+        Duel duel = new Duel();
+        
+        when(duelService.createDuel(any(Duel.class))).thenReturn(errorMessage);
+        
+        ResponseEntity<String> result = duelController.createDuel(duel);
+        
+        assertNotNull(result);
+        assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
+        assertEquals(errorMessage, result.getBody());
+        
+        verify(duelService, times(1)).createDuel(any(Duel.class));
+    }
+
+    @Test
+    void testCreateDuel_OtherError() {
+        String errorMessage = "Some other error occurred";
+        Duel duel = new Duel();
+        
+        when(duelService.createDuel(any(Duel.class))).thenReturn(errorMessage);
+        
+        ResponseEntity<String> result = duelController.createDuel(duel);
+        
+        assertNotNull(result);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertEquals(errorMessage, result.getBody());
+        
+        verify(duelService, times(1)).createDuel(any(Duel.class));
+    }
+
 
     @Test
     void testUpdateDuel() {

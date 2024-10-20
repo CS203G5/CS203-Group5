@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 class DuelServiceImplTest {
@@ -120,26 +121,27 @@ class DuelServiceImplTest {
         verify(duelRepository, times(1)).getDuelsByPlayer(1L);
     }
 
-    // @Test
-    // void testGetDuelById_Success() {
-    //     // Create and set up a mock duel object
-    //     Duel duel = new Duel();
-    //     duel.setDuel_id(1L);  // Make sure the duel has the correct ID set
+    @Test
+    void testGetDuelById_Success() {
+        // Create and set up a mock duel object
+        Duel duel = new Duel();
+        duel.setDuel_id(1L);  // Ensure the duel has the correct ID set
     
-    //     // Mock the repository to return the duel when findById(1L) is called
-    //     when(duelRepository.findById(1L)).thenReturn(Optional.of(duel));
+        // Mock the repository to return true for existsById and the duel for findById
+        when(duelRepository.existsById(1L)).thenReturn(true);
+        when(duelRepository.findById(1L)).thenReturn(Optional.of(duel));
     
-    //     // Call the service method
-    //     Duel result = duelServiceImpl.getDuelById(1L);
+        // Call the service method
+        Duel result = duelServiceImpl.getDuelById(1L);
     
-    //     // Assertions to verify the returned result
-    //     assertNotNull(result);  // Ensure the duel is not null
-    //     assertEquals(1L, result.getDuel_id());  // Ensure the duel ID is correct
+        // Assert the result
+        assertNotNull(result);
+        assertEquals(1L, result.getDuel_id());
     
-    //     // Verify the repository interaction
-    //     verify(duelRepository, times(1)).findById(1L);
-    // }
-    
+        // Verify the repository interaction
+        verify(duelRepository, times(1)).existsById(1L);
+        verify(duelRepository, times(1)).findById(1L);
+    }    
     
 
     @Test
@@ -154,60 +156,80 @@ class DuelServiceImplTest {
         verify(duelRepository, times(1)).existsById(1L);
     }
 
-    // @Test
-    // void testCreateDuel_Success() {
-    //     when(profile1.getProfileId()).thenReturn(1L);
-    //     when(profile2.getProfileId()).thenReturn(2L);
-    
-    //     Duel duel = new Duel();
-    //     duel.setPid1(profile1);
-    //     duel.setPid2(profile2);
-        
-    //     Tournament mockTournament = new Tournament();
-    //     mockTournament.setTournamentId(1L); // Set a valid ID
-    //     duel.setTournament(mockTournament);
-        
-    //     // Fix: Make sure the mock returns the expected success message
-    //     when(duelRepository.createDuel(anyLong(), anyString(), anyLong(), anyLong(), any())).thenReturn("Duel created successfully");
-    
-    //     String result = duelServiceImpl.createDuel(duel);
-    
-    //     // Fix: Check that the result matches the correct success message
-    //     assertNotNull(result);
-    //     assertEquals("Duel created successfully", result);
-    
-    //     // Fix: Verify that the createDuel method in the repository was called
-    //     verify(duelRepository, times(1)).createDuel(anyLong(), anyString(), eq(1L), eq(2L), any());
-    // }
-    
+    @Test
+    void testCreateDuel_Success() {
+        // Set up a valid Profile object with valid IDs
+        when(profile1.getProfileId()).thenReturn(1L);
+        when(profile2.getProfileId()).thenReturn(2L);
 
-    // @Test
-    // void testUpdateDuel_Success() {
-    //     // Mock profile IDs
-    //     when(profile1.getProfileId()).thenReturn(1L);
-    //     when(profile2.getProfileId()).thenReturn(2L);
+        // Set up a valid Duel object
+        Duel duel = new Duel();
+        duel.setPid1(profile1);  // Profile 1
+        duel.setPid2(profile2);  // Profile 2
+        duel.setRoundName("Round 1");
+        duel.setWinner(null);  // Assuming winner is not yet decided
+
+        // Set up a valid Tournament object
+        Tournament tournament = new Tournament();
+        tournament.setTournamentId(100L);  // Set a valid tournament ID
+        duel.setTournament(tournament);
+
+        // Mock the repository method to return a success message
+        when(duelRepository.createDuel(
+            eq(100L),  // Tournament ID
+            eq("Round 1"),  // Round name
+            eq(1L),  // Profile 1 ID
+            eq(2L),  // Profile 2 ID
+            isNull()  // Winner (assuming null, can change based on actual scenario)
+        )).thenReturn("Duel created successfully");
+
+        // Call the service method
+        String result = duelServiceImpl.createDuel(duel);
+
+        // Assert the result
+        assertNotNull(result, "Expected non-null message, but got null.");
+        assertEquals("Duel created successfully", result);
+
+        // Verify the repository interaction
+        verify(duelRepository, times(1)).createDuel(eq(100L), eq("Round 1"), eq(1L), eq(2L), isNull());
+    }
     
-    //     Duel existingDuel = new Duel();
-    //     existingDuel.setDuel_id(1L);
     
-    //     // Ensure the repository returns the existing duel when ID is 1L
-    //     when(duelRepository.findById(1L)).thenReturn(Optional.of(existingDuel));
+    @Test
+    void testUpdateDuel_Success() {
+        // Mock profile IDs
+        when(profile1.getProfileId()).thenReturn(1L);
+        when(profile2.getProfileId()).thenReturn(2L);
     
-    //     Duel newDuel = new Duel();
-    //     newDuel.setPid1(profile1);  // Use mocked profile1
-    //     newDuel.setPid2(profile2);  // Use mocked profile2
-    //     newDuel.setRoundName("Semifinal");
+        // Mock existing Duel
+        Duel existingDuel = new Duel();
+        existingDuel.setDuel_id(1L);
     
-    //     Duel updatedDuel = duelServiceImpl.updateDuel(1L, newDuel);
+        // Ensure the repository returns the existing duel
+        when(duelRepository.findById(1L)).thenReturn(Optional.of(existingDuel));
     
-    //     assertNotNull(updatedDuel);
-    //     assertEquals(1L, updatedDuel.getPid1().getProfileId());
-    //     assertEquals(2L, updatedDuel.getPid2().getProfileId());
-    //     assertEquals("Semifinal", updatedDuel.getRoundName());
+        // Create a new Duel object with updated data
+        Duel newDuel = new Duel();
+        newDuel.setPid1(profile1);  // Use mocked profile1
+        newDuel.setPid2(profile2);  // Use mocked profile2
+        newDuel.setRoundName("Semifinal");
     
-    //     verify(duelRepository, times(1)).findById(1L);
-    //     verify(duelRepository, times(1)).save(any(Duel.class));
-    // }    
+        // Ensure save operation works correctly
+        when(duelRepository.save(any(Duel.class))).thenReturn(existingDuel);
+    
+        // Call the service method
+        Duel updatedDuel = duelServiceImpl.updateDuel(1L, newDuel);
+    
+        // Assert the updated duel
+        assertNotNull(updatedDuel);
+        assertEquals(1L, updatedDuel.getPid1().getProfileId());
+        assertEquals(2L, updatedDuel.getPid2().getProfileId());
+        assertEquals("Semifinal", updatedDuel.getRoundName());
+    
+        // Verify the repository interaction
+        verify(duelRepository, times(1)).findById(1L);
+        verify(duelRepository, times(1)).save(any(Duel.class));
+    }       
     
 
     @Test
