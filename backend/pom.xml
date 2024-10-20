@@ -168,6 +168,13 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<excludes>
+								<!-- Exclude security and websocket packages -->
+								<exclude>com/example/security/**</exclude>
+								<exclude>com/example/websocket/**</exclude>
+							</excludes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
