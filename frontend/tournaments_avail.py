@@ -52,7 +52,7 @@ def has_duels(tournament_id):
             duels = response.json()
             return len(duels) > 0
         else:
-            st.error(f"Failed to fetch duels data: {response.status_code}")
+            # st.error(f"Failed to fetch duels data: {response.status_code}")
             return False
     except requests.exceptions.RequestException as e:
         st.error(f"Request failed: {e}")
