@@ -1,79 +1,87 @@
-package com.example.duel;
+    package com.example.duel;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.messaging.simp.SimpMessagingTemplate;
+    import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
+    import jakarta.validation.Valid;
+
+    import java.util.List;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/duel")
-public class DuelController {
+    @RestController
+    @RequestMapping("/api/duel")
+    public class DuelController {
 
-    @Autowired
-    private DuelService ds;
+        @Autowired
+        DuelService ds;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
-    @GetMapping
-    public List<Duel> getDuelsByTournament(@RequestParam(required = false) Long tid) {
-        if (tid == null) {
-            return ds.findAll();
-        } else {
-            List<Duel> duels = ds.getDuelsByTournament(tid);
-            if (duels.isEmpty()) {
-                throw new TournamentNotFoundException(tid);
+        @Autowired
+        private SimpMessagingTemplate messagingTemplate;
+        
+        @GetMapping()
+        public List<Duel> getDuelsByTournament(@RequestParam(required = false) Long tid) {
+            if (tid == null) {
+                return ds.findAll();
+            } else {
+                return ds.getDuelsByTournament(tid);
             }
-            return duels;
         }
-    }
 
-    @GetMapping("/{did}")
-    public Duel getDuelById(@PathVariable Long did) {
-        return ds.getDuelById(did);
-    }
-
-    @GetMapping("/round")
-    public List<Duel> getDuelsByRoundName(@RequestParam(required = false) String roundName) {
-        if (roundName == null) {
-            return ds.findAll();
-        } else {
-            return ds.getDuelsByRoundName(roundName);
+        @GetMapping("/{did}")
+        public Duel getDuelById(@PathVariable Long did) {
+            return ds.getDuelById(did);
         }
-    }
 
-    @GetMapping("/player")
-    public List<Duel> getDuelsByPlayer(@RequestParam(required = false) Long pid) {
-        if (pid == null) {
-            return ds.findAll();
-        } else {
-            return ds.getDuelsByPlayer(pid);
+        @GetMapping("/round")
+        public List<Duel> getDuelsByRoundName(@RequestParam(required = false) String roundName) {
+            if (roundName == null) {
+                return ds.findAll();
+            } else {
+                return ds.getDuelsByRoundName(roundName);
+            }
         }
-    }
 
-    @PostMapping
-    public Duel createDuel(@Valid @RequestBody Duel duel) {
-        return ds.createDuel(duel);
-    }
+        @GetMapping("/player")
+        public List<Duel> getDuelsByPlayer(@RequestParam(required = false) Long pid) {
+            if (pid == null) {
+                return ds.findAll();
+            } else {
+                return ds.getDuelsByPlayer(pid);
+            }
+        }
 
-    @PutMapping("/{did}")
-    public Duel updateDuel(@PathVariable Long did, @RequestBody Duel duel) {
-        return ds.updateDuel(did, duel);
-    }
+        @PostMapping()
+        public Duel createDuel(@Valid @RequestBody Duel duel) {
+            return ds.createDuel(duel);
+        }
 
-    @PutMapping("/{did}/result")
-    public Duel updateDuelResult(@PathVariable Long did, @RequestBody DuelResult result) {
-        Duel updatedDuel = ds.updateDuelResult(did, result);
-        messagingTemplate.convertAndSend("/topic/duel/" + did + "/score", updatedDuel);
-        return updatedDuel;
-    }
+        @PutMapping("/{did}")
+        public Duel updateDuel(@PathVariable Long did, @RequestBody Duel duel) {
+            Duel updatedDuel = ds.updateDuel(did, duel);
 
-    @DeleteMapping("/{did}")
-    public void deleteDuel(@PathVariable Long did) {
-        ds.deleteDuel(did);
+            return updatedDuel;
+        }
+        
+        @PutMapping("/{did}/result")
+        public Duel updateDuelResult(@PathVariable Long did, @RequestBody DuelResult result) {
+            Duel updatedDuel = ds.updateDuelResult(did, result);
+            messagingTemplate.convertAndSend("/topic/duel" + did + "/score", updatedDuel);
+
+            return updatedDuel;
+        }
+        
+        @DeleteMapping("/{did}")
+        public void deleteDuel(@PathVariable Long did) {
+            ds.deleteDuel(did);
+        }
+
+        List<Duel> duels = ds.getDuelsByTournament(tid);
+
+        if (duels.isEmpty()) {
+            throw new TournamentNotFoundException(tid);
+        }
+
+        return ResponseEntity.ok(duels);
     }
-}
