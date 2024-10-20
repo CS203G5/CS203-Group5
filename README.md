@@ -51,11 +51,18 @@ Before you begin, make sure you have the following installed on your machine:
        # OR, if you're using Maven installed globally:
        mvn spring-boot:run
        ```
-4. **Run the tests:**
-    ```bash
-   cd backend
-   mvn test
-   ```
+4. **Run tests:**
+   - RUn all tests:
+     ```bash
+     cd backend
+     mvn test
+     ```
+   - View test coverage in Jacoco:
+     ```bash
+     cd backend
+     mvn verify
+     ```
+     Navigate to target/site/index.html, and open it in browser.
 
 ## Database Setup
 
