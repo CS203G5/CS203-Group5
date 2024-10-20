@@ -231,26 +231,4 @@ class ParticipantServiceTest {
         assertThrows(RuntimeException.class, () -> participantService.getParticipantsByTournamentId(1L));
         verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
     }
-<<<<<<< HEAD
-
-    @Test
-    void testDeleteById() {
-        ParticipantId participantId = new ParticipantId(1L, 1L);
-        doNothing().when(participantRepository).deleteById(participantId);
-
-        participantService.deleteById(participantId);
-
-        verify(participantRepository, times(1)).deleteById(participantId);
-    }
-
-    @Test
-    void testDeleteById_WhenRepositoryThrowsException() {
-        ParticipantId participantId = new ParticipantId(1L, 1L);
-        mockRepositoryThrowException("deleteById", 1L);
-
-        assertThrows(RuntimeException.class, () -> participantService.deleteById(participantId));
-        verify(participantRepository, times(1)).deleteById(participantId);
-    }
-=======
->>>>>>> dev/tests2
 }
