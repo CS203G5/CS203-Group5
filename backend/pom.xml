@@ -136,7 +136,14 @@
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>cognitoidentityprovider</artifactId>
 			<version>2.17.89</version> <!-- Ensure you use the latest version -->
+		
 		</dependency>
+
+		<dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
 		<!-- <dependency>
 			<groupId>io.github.cdimascio</groupId>
@@ -151,6 +158,36 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.8</version> <!-- Ensure you use the latest version -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<!-- Exclude security and websocket packages -->
+								<exclude>com/example/security/**</exclude>
+								<exclude>com/example/websocket/**</exclude>
+								<exclude>com/example/duel/DuelCreationException.class</exclude>
+								<exclude>com/example/duel/DuelNotFoundException.class</exclude>
+								<exclude>com/example/Main*</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

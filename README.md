@@ -8,7 +8,6 @@
 - [Running the Application](#running-the-application)
   - [Frontend](#frontend)
   - [Backend](#backend)
-  - [Tests](#tests)
 - [Database Setup](#database-setup)
 - [Using the Application](#using-the-application)
 
@@ -52,18 +51,6 @@ Before you begin, make sure you have the following installed on your machine:
        # OR, if you're using Maven installed globally:
        mvn spring-boot:run
        ```
-4. **Run tests:**
-   - Run all tests:
-     ```bash
-     cd backend
-     mvn test
-     ```
-   - View test coverage in Jacoco:
-     ```bash
-     cd backend
-     mvn verify
-     ```
-     Navigate to /backend/target/site/index.html, and open it in browser.
 
 ## Database Setup
 
