@@ -173,6 +173,9 @@
 								<!-- Exclude security and websocket packages -->
 								<exclude>com/example/security/**</exclude>
 								<exclude>com/example/websocket/**</exclude>
+								<exclude>com/example/duel/DuelCreationException.class</exclude>
+								<exclude>com/example/duel/DuelNotFoundException.class</exclude>
+								<exclude>com/example/Main*</exclude>
 							</excludes>
 						</configuration>
 					</execution>
