@@ -53,7 +53,7 @@ Before you begin, make sure you have the following installed on your machine:
        mvn spring-boot:run
        ```
 4. **Run tests:**
-   - RUn all tests:
+   - Run all tests:
      ```bash
      cd backend
      mvn test
