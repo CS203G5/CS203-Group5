@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import trueskill as ts
 import random
+import json
 
 # Initialize TrueSkill environment
 env = ts.TrueSkill()
@@ -62,18 +63,21 @@ def get_next_round_name(tournament_id):
             return "1"
 
 def get_player_profile(player_id):
-    try:
-        headers = get_headers()
-        response = requests.get(f"http://localhost:8080/profile/{player_id}", headers=headers)
-        response.raise_for_status()
-        if response.status_code == 200:
-            return response.json()
-        else:
-            st.error(f"Failed to get player profile: {response.status_code} - {response.text}")
+    if player_id is None or player_id is 0:
+        return {}
+    else:
+        try:
+            headers = get_headers()
+            response = requests.get(f"http://localhost:8080/profile/{player_id}", headers=headers)
+            response.raise_for_status()
+            if response.status_code == 200:
+                return response.json()
+            else:
+                st.error(f"Failed to get player profile: {response.status_code} - {response.text}")
+                return []
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error getting player profile: {e}")
             return []
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error getting player profile: {e}")
-        return []
 
 def post_rand_match(tournament_id, player1, player2, round_name, winner):
     profile1 = get_player_profile(player1)
@@ -116,31 +120,107 @@ def rand_match_afterwards():
                 continue
             
             # Find the latest round name
-            latest_round = max(duel["roundName"] for duel in duels)
-            latest_round_duels = [duel for duel in duels if duel["roundName"] == latest_round]
+            latest_round = max(duel["round_name"] for duel in duels)
+            latest_round_duels = [duel for duel in duels if duel["round_name"] == latest_round]
 
-            winners = [duel["winner"] for duel in latest_round_duels if duel["winner"] not in (None, 0)]
+            # winners = [duel["winner"] for duel in latest_round_duels if duel["winner"] not in (None, 0)]
+            # st.write(winners)
+
+            # Initialize an empty list to store the winners
+            winners = []
+
+            # Iterate over each duel in the latest round duels
+            for duel in latest_round_duels:
+                # Check the winner of the duel
+                if duel["winner"] == 1:
+                    # Add pid1 to the winners list if winner is 1
+                    winners.append(duel["pid1"])
+                elif duel["winner"] == 2:
+                    # Add pid2 to the winners list if winner is 2
+                    winners.append(duel["pid2"])
 
             if len(latest_round_duels) == 1 and latest_round_duels[0]["winner"] not in (None, 0):
-                # st.write(f"Player {latest_round_duels[0]['winner']} won 1st place in {tournament["name"]}!")
+                # Ending here means the last duel winner is the whole tournament's winner
                 st.write()           
             elif len(winners) == len(latest_round_duels) and len(winners) > 1:
-                # for duel in latest_round_duels: st.write(f"{duel["duel_id"]} winner=numofduels")
                 pairs, unmatched = randomly_pair_participants(winners)
                 next_round_number = int(latest_round) + 1
                 next_round_name = str(next_round_number)
                 for player1, player2 in pairs:
-                    post_rand_match(tournament_id, player1, player2, next_round_name, winner=None)
+                    post_rand_match(tournament_id, player1["profileId"], player2["profileId"], next_round_name, winner=None)
                 
                 if unmatched:
                     # st.info(f"Unmatched Participant: {unmatched}")
-                    post_rand_match(tournament_id, unmatched, None, next_round_name, winner=unmatched)
-                    st.info(f"Player {unmatched} has a buy into the next round")
+                    post_rand_match(tournament_id, unmatched["profileId"], None, next_round_name, winner=1)
+                    st.info(f"Player {unmatched["profileId"]} has a buy into the next round")
             # else:
             #     for duel in latest_round_duels: st.write(f"{duel["duel_id"]} - {len(winners)} and {len(latest_round_duels)}")
         
     except requests.exceptions.RequestException as e:
         st.error(f"Error: {e}")
+
+def update_ratings(did, player1_time, player2_time):
+    env = ts.TrueSkill(draw_probability=0)  # Initialize TrueSkill environment
+
+    try:
+        response = requests.get(f"http://localhost:8080/api/duel/{did}", headers=get_headers())
+        duel = response.json() if response.status_code == 200 else []
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching duel info: {e}")
+        return []
+
+    try:
+        response = requests.get(f"http://localhost:8080/profile/{duel['pid1']['profileId']}", headers=get_headers())
+        player1_profile = response.json() if response.status_code == 200 else []
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching player1 profile: {e}")
+        return []
+    
+    player1_rating = player1_profile['rating']
+
+    try:
+        response = requests.get(f"http://localhost:8080/profile/{duel['pid2']['profileId']}", headers=get_headers())
+        player2_profile = response.json() if response.status_code == 200 else []
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching player2 profile: {e}")
+        return []
+    
+    # Check if the rating is 0 and initialize accordingly
+    if player1_profile['rating'] == 0:
+        player1_rating = env.create_rating(0)
+        st.write(player1_rating)
+    else:
+        player1_rating = env.Rating(player1_profile['rating'], env.sigma)
+    
+    if player2_profile['rating'] == 0:
+        player2_rating = env.create_rating(0)
+        st.write(player2_rating)
+    else:
+        player2_rating = env.Rating(player2_profile['rating'], env.sigma)
+    
+    # Determine the winner based on lesser time
+    if player1_time < player2_time:
+        winner_rating, loser_rating = env.rate_1vs1(player1_rating, player2_rating)
+        winner_id = duel['pid1']
+        loser_id = duel['pid2']
+    else:
+        winner_rating, loser_rating = env.rate_1vs1(player2_rating, player1_rating)
+        winner_id = duel['pid2']
+        loser_id = duel['pid1']
+    
+    try:
+        winner_response = requests.put(f"http://localhost:8080/profile/{winner_id['profileId']}/rating?newRating={winner_rating.mu}", headers=get_headers())
+    except requests.exceptions.RequestException as e:
+        st.error(e)
+    try:
+        loser_response = requests.put(f"http://localhost:8080/profile/{loser_id['profileId']}/rating?newRating={loser_rating.mu}", headers=get_headers())
+    except requests.exceptions.RequestException as e:
+        st.error(e)
+
+    if winner_response.status_code == 201 or 200 and loser_response.status_code == 201 or 200:
+        st.write(f"Ratings updated successfully for player {winner_id['profileId']} with rating {winner_rating.mu} and player {loser_id['profileId']} with rating {loser_rating.mu}")
+    else:
+        st.write(f"Error updating ratings: {winner_response.status_code}, {loser_response.status_code}")
 
 def display_tournament_bracket(tid):
     rounds = {}
@@ -157,9 +237,9 @@ def display_tournament_bracket(tid):
         st.write(f"### Round {round_name}")
         for duel in rounds[round_name]:
             player1 = duel["pid1"]["profileId"]
-            player2 = duel["pid2"]["profileId"]
             winner = duel["winner"]
-            if player2 in (None, 0):
+            if duel["pid2"] in (None, 0):
                 st.write(f"Player {player1} gets a buy into the next round")
             else:
+                player2 = duel["pid2"]["profileId"]
                 st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner if winner else 'TBD'}")
