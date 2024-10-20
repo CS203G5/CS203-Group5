@@ -1,4 +1,4 @@
-    package com.example.integration.utils;
+    package com.example.integration;
 
     import software.amazon.awssdk.regions.Region;
     import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
