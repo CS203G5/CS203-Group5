@@ -35,4 +35,11 @@ public class Profile {
     @Column(name = "role")
     @NotNull(message = "Authorities should not be null")
     private String role;
+
+    public String getPrivacySettings() {
+        return this.privacy_settings;
+    }
+    public void setPrivacySettings(String privacy_settings) {
+        this.privacy_settings = privacy_settings;
+    }
 }
