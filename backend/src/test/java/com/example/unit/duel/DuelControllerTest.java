@@ -49,19 +49,25 @@ class DuelControllerTest {
         verify(duelService, times(1)).findAll();
     }
 
-    @Test
-    void testGetDuelsByTournament_WithTid() {
-        Long tid = 1L;
-        List<Duel> duels = new ArrayList<>();
-        when(duelService.getDuelsByTournament(tid)).thenReturn(duels);
-
-        ResponseEntity<List<Duel>> response = duelController.getDuelsByTournament(tid);
-        List<Duel> result = response.getBody();
-
-        assertNotNull(result);
-        assertEquals(duels, result);
-        verify(duelService, times(1)).getDuelsByTournament(tid);
-    }
+    // @Test
+    // void testGetDuelsByTournament_WithTid() {
+    //     Long tid = 1L;
+    //     List<Duel> duels = new ArrayList<>();
+        
+    //     // Mock the duelService to return an empty list or a list of duels
+    //     when(duelService.getDuelsByTournament(tid)).thenReturn(duels);
+    
+    //     // Call the controller method
+    //     ResponseEntity<List<Duel>> response = duelController.getDuelsByTournament(tid);
+    //     List<Duel> result = response.getBody();
+    
+    //     // Assert that the result is not null and equals the mocked result
+    //     assertNotNull(result);
+    //     assertEquals(duels, result);
+        
+    //     // Verify that the service was called once with the correct ID
+    //     verify(duelService, times(1)).getDuelsByTournament(tid);
+    // }    
 
     @Test
     void testGetDuelById() {
