@@ -60,7 +60,7 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     public Tournament update(Long tid, Tournament newTournamentInfo) {
-        return tournamentRepository.findById(tid).map(tournament -> {
+        return tournamentRepository.findById(tid).map(tournament -> {       
             tournament.setName(newTournamentInfo.getName());
             tournament.setIsRandom(newTournamentInfo.getIsRandom());
             tournament.setDate(newTournamentInfo.getDate());

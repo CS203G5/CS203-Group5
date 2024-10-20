@@ -1,16 +1,20 @@
 package com.example.duel;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Transactional
 @Service
-public class DuelServiceImpl implements DuelService{
+public class DuelServiceImpl implements DuelService {
 
     @Autowired
     DuelRepository duelRepository;
@@ -26,8 +30,11 @@ public class DuelServiceImpl implements DuelService{
     public List<Duel> getDuelsByRoundName(String roundName) {
         return duelRepository.getDuelsByRoundName(roundName);
     }
-    
+
     public Duel getDuelById(Long did) {
+        if (!duelRepository.existsById(did)) {
+            throw new DuelNotFoundException(did);
+        }
         return duelRepository.findById(did).orElse(null);
     }
 
@@ -35,12 +42,21 @@ public class DuelServiceImpl implements DuelService{
         return duelRepository.getDuelsByPlayer(pid);
     }
 
-    public Duel createDuel(Duel duel) {
-        return duelRepository.save(duel);
+    public String createDuel(Duel duel) {
+        String message = duelRepository.createDuel(
+            duel.getTournament().getTournamentId(),
+            duel.getRoundName(),
+            duel.getPid1().getProfileId(),
+            duel.getPid2().getProfileId(),
+            duel.getWinner()
+        );
+
+        return message;
     }
 
     public Duel updateDuel(Long did, Duel newDuel) {
-        // duelRepository.updateDuel(did, duel.getPid1(), duel.getPid2(), duel.getRoundName(), duel.getWinner());
+        // duelRepository.updateDuel(did, duel.getPid1(), duel.getPid2(),
+        // duel.getRoundName(), duel.getWinner());
 
         return duelRepository.findById(did).map(duel -> {
             duel.setPid1(newDuel.getPid1());
@@ -53,10 +69,8 @@ public class DuelServiceImpl implements DuelService{
     public Duel updateDuelResult(Long did, DuelResult result) {
         return duelRepository.findById(did).map(duel -> {
             duel.setResult(result);
-            if (result.getplayer1Time() < result.getplayer2Time()) {
-                duel.setWinner(duel.getPid1());
-            } else if (result.getplayer1Time() > result.getplayer2Time()) {
-                duel.setWinner(duel.getPid2());
+            if (result.getWinnerId() != null) {
+                duel.setWinner(result.getWinnerId());
             } else {
                 duel.setWinner(null);
             }
@@ -65,10 +79,9 @@ public class DuelServiceImpl implements DuelService{
     }
 
     public void deleteDuel(Long did) {
-        try{
-            duelRepository.deleteById(did);
-        } catch (Exception e) {
-            System.out.println("Duel not found with id: " + did);
+        if (!duelRepository.existsById(did)) {
+            throw new DuelNotFoundException(did);
         }
-    }  
+        duelRepository.deleteById(did);
+    }
 }

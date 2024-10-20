@@ -16,7 +16,7 @@ def get_duels(tournament_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching duels: {e}")
+        # st.error(f"Error fetching duels: {e}")
         return []
 
 def fetch_participants_by_tournament(tournament_id):
@@ -26,6 +26,7 @@ def fetch_participants_by_tournament(tournament_id):
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to retrieve participants by tournament: {e}")
+        return []
 
 def randomly_pair_participants(participants):
     if not participants:
@@ -49,38 +50,56 @@ def randomly_pair_participants(participants):
 
 def get_next_round_name(tournament_id):
     duels = get_duels(tournament_id)
-    rounds = [duel["roundName"] for duel in duels if duel["winner"] not in (None, 0)]
-    if rounds:
-        last_round = max(rounds)
-        next_round_number = int(last_round) + 1
-        return str(next_round_number)
-    else:
+    if duels == []:
         return "1"
+    else:
+        rounds = [duel["round_name"] for duel in duels if duel["winner"] not in (None, 0)]
+        if rounds:
+            last_round = max(rounds)
+            next_round_number = int(last_round) + 1
+            return str(next_round_number)
+        else:
+            return "1"
+
+def get_player_profile(player_id):
+    try:
+        headers = get_headers()
+        response = requests.get(f"http://localhost:8080/profile/{player_id}", headers=headers)
+        response.raise_for_status()
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error(f"Failed to get player profile: {response.status_code} - {response.text}")
+            return []
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error getting player profile: {e}")
+        return []
 
 def post_rand_match(tournament_id, player1, player2, round_name, winner):
+    profile1 = get_player_profile(player1)
+    profile2 = get_player_profile(player2)
     round_name = get_next_round_name(tournament_id)
     duel = {
-        "tournament": {"tournament_id": tournament_id},
-        "pid1": player1,
-        "pid2": player2,
-        "result": {
-            "plater1time": 0,
-            "plater2time": 0,
+        "tournament": {
+            "tournament_id": tournament_id
         },
-        "roundName": round_name,
+        "pid1": profile1,
+        "pid2": profile2,
+        "round_name": round_name,
         "winner": winner
     }
+
     try:
         headers = get_headers()
         response = requests.post("http://localhost:8080/api/duel", json=duel, headers=headers)
         response.raise_for_status()
-        if response.status_code == 200:
+        if response.status_code == 201:
             return True
         else:
-            st.error(f"Failed to post match: {response.status_code} - {response.text}")
+            st.error(f"Failed to post duel: {response.status_code} - {response.text}")
             return False
     except requests.exceptions.RequestException as e:
-        st.error(f"Error posting match: {e}")
+        st.error(f"Error posting duel: {e}")
         return False
 
 def rand_match_afterwards():
@@ -116,17 +135,18 @@ def rand_match_afterwards():
                 if unmatched:
                     # st.info(f"Unmatched Participant: {unmatched}")
                     post_rand_match(tournament_id, unmatched, None, next_round_name, winner=unmatched)
-                    # st.info(f"Player {unmatched} has a bye into the next round")
+                    st.info(f"Player {unmatched} has a buy into the next round")
             # else:
             #     for duel in latest_round_duels: st.write(f"{duel["duel_id"]} - {len(winners)} and {len(latest_round_duels)}")
         
     except requests.exceptions.RequestException as e:
         st.error(f"Error: {e}")
 
-def display_tournament_bracket(duels):
+def display_tournament_bracket(tid):
     rounds = {}
+    duels = get_duels(tid)
     for duel in duels:
-        round_name = duel["roundName"]
+        round_name = duel["round_name"]
         if round_name not in rounds:
             rounds[round_name] = []
         rounds[round_name].append(duel)
@@ -136,10 +156,10 @@ def display_tournament_bracket(duels):
     for round_name in sorted(rounds.keys(), key=int):
         st.write(f"### Round {round_name}")
         for duel in rounds[round_name]:
-            player1 = duel["pid1"]
-            player2 = duel["pid2"]
+            player1 = duel["pid1"]["profileId"]
+            player2 = duel["pid2"]["profileId"]
             winner = duel["winner"]
             if player2 in (None, 0):
-                st.write(f"Player {player1} gets a bye into the next round")
+                st.write(f"Player {player1} gets a buy into the next round")
             else:
                 st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner if winner else 'TBD'}")

@@ -30,6 +30,22 @@ def login_user():
                 }
             )
 
+            if 'AuthenticationResult' in response:
+                token = response['AuthenticationResult']['IdToken']
+                st.session_state['jwt_token'] = token
+                st.session_state['username'] = username
+                st.success('Login successful.')
+                
+                # Fetch user's profile information
+                profile_info = fetch_profile_by_username(username)
+                if profile_info:
+                    st.session_state['profile_id'] = profile_info['profileId']
+                    st.success(f"Welcome, {profile_info['username']}!")
+                else:
+                    st.warning("Profile not found. Please create a profile.")
+
+                make_authenticated_request()
+
             # MFA login
             if 'ChallengeName' in response and response['ChallengeName'] == 'SES_MFA':
                 st.session_state['username'] = username
@@ -68,6 +84,25 @@ def login_user():
         except ClientError as e:
             st.error(f"Login failed: {e.response['Error']['Message']}")
 
+def get_headers():
+    if 'jwt_token' in st.session_state:
+        return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
+    else:
+        st.error("JWT token not found in session state.")
+        return {}
+
+def fetch_profile_by_username(username):
+    try:
+        headers = get_headers()
+        response = requests.get(f"http://localhost:8080/profile/by-username/{username}", headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error(f"Failed to fetch profile: {response.status_code}")
+            return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching profile: {e}")
+        return None
 
 def register_user():
     st.title('Register')

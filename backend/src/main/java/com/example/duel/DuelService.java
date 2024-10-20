@@ -8,7 +8,7 @@ public interface DuelService {
     List<Duel> getDuelsByRoundName(String roundName);
     List<Duel> getDuelsByPlayer(Long pid);
     Duel getDuelById(Long did);
-    Duel createDuel(Duel duel);
+    String createDuel(Duel duel);
     Duel updateDuel(Long did, Duel duel);
     Duel updateDuelResult(Long did, DuelResult result);
     void deleteDuel(Long did);  

@@ -70,15 +70,56 @@ GET http://localhost:8080/duel/player?pid=5
 POST http://localhost:8080/duel
 Content-Type: application/json
 Authorization: Basic admin goodpassword
-{
-    "pid1": 1,
-    "pid2": 2,
-    "roundName": "Qualifiers",
-    "winner": 1,
+{    "roundName": "Quarter-Finals",
+    "player1": {
+        "username": "test",
+        "email": "123@gmail.com",
+        "bio": "hi there",
+        "privacySettings": "on",
+        "rating": 0.0,
+        "role": "ROLE_PLAYER"
+    },
+    "player2": {
+        "username": "test1",
+        "email": "123@gmail.com",
+        "bio": "hi there",
+        "privacySettings": "on",
+        "rating": 0.0,
+        "role": "ROLE_PLAYER"
+    },
     "tournament": {
-        "tournament_id": 2
+        "tournament_id": 1
     }
 }
+
+# {
+#     "roundName": "Quarter-Finals",
+#     "player1": {
+#         "username": "test",
+#         "email": "123@gmail.com",
+#         "bio": "hi there",
+#         "privacySettings": "on",
+#         "rating": 0.0,
+#         "role": "ROLE_PLAYER"
+#     },
+#     "player2": {
+#         "username": "test1",
+#         "email": "123@gmail.com",
+#         "bio": "hi there",
+#         "privacySettings": "on",
+#         "rating": 0.0,
+#         "role": "ROLE_PLAYER"
+#     },
+#     "tournament": {
+#         "tournament_id": 1
+#     },
+#     "result": {
+#         "player1Time": 5231,
+#         "player2Time": 13384
+#     },
+#     "winner": 3
+# }
+
 
 ###
 PUT http://localhost:8080/duel/4
@@ -91,6 +132,13 @@ Content-Type: application/json
     "tournament": {
         "tournament_id": 2
     }
+}
+
+###
+PUT http://localhost:8080/duel/4/result
+{
+    "player1Time": 5231,
+    "player2Time": 13384
 }
 
 ###

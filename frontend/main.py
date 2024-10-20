@@ -21,7 +21,7 @@ def initialize_session_state():
 def main():
     initialize_session_state()
     
-    if 'jwt_token' not in st.session_state:
+    if 'jwt_token' not in st.session_state or st.session_state['jwt_token'] is None:
         st.sidebar.title("Authentication")
         auth_choice = st.sidebar.radio("Choose an option", ["Login", "Register"])
         if auth_choice == "Login":
@@ -29,7 +29,7 @@ def main():
         elif auth_choice == "Register":
             register_user()
     else:
-        rand_match_afterwards()
+        # rand_match_afterwards()
         st.sidebar.success(f"Logged in as {st.session_state['username']}")
         page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Available Tournaments", "Update Scoreboard", "Scoreboard", "AI Assistant", "Logout"])
 
