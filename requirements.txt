@@ -2,6 +2,7 @@ boto3
 botocore
 datetime
 pandas
+pymysql
 requests
 streamlit
 langchain
