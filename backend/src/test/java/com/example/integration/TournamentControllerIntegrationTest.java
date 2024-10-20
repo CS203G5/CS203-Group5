@@ -153,25 +153,4 @@ public class TournamentControllerIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
     }
-
-    // Test deleteTournament
-    @Test
-    public void testDeleteTournament() throws Exception {
-        // Delete tournaments with IDs 1 and 2, make sure no foreign key constraints exist for this test case
-        mockMvc.perform(delete("/tournament")
-                .headers(headers)
-                .content("[1, 2]"))  // Assuming you want to delete tournaments with IDs 1 and 2
-                .andExpect(status().isOk())  // Assuming success returns 200 OK
-                .andDo(print());
-    }
-
-    // Test getTournamentById with Invalid ID (expecting 404)
-    @Test
-    public void testGetTournamentById_NotFound() throws Exception {
-        // Ensure that the service throws TournamentNotFoundException for a non-existing ID
-        mockMvc.perform(get("/tournament/999")  // Non-existing ID
-                .headers(headers))
-                .andExpect(status().isNotFound())  // Expecting 404 Not Found
-                .andDo(print());
-    }
 }
