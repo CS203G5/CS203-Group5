@@ -27,16 +27,16 @@ BEGIN
         OR description LIKE CONCAT('%', p_search_term, '%');
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getTournamentByDate`(IN p_startDate VARCHAR(255), p_endDate VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getTournamentByDate`(IN p_start_date VARCHAR(255), p_end_date VARCHAR(255))
 BEGIN
 	SELECT *
     FROM Tournament 
-    WHERE date BETWEEN p_startDate and p_endDate;
+    WHERE date BETWEEN p_start_date and p_end_date;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getTournamentBySorted`(IN p_sortBy VARCHAR(255), IN p_order VARCHAR(4))
 BEGIN
-    SET @sql = CONCAT('SELECT * FROM Tournament ORDER BY ', p_sortBy, ' ', p_order);
+    SET @sql = CONCAT('SELECT * FROM Tournament ORDER BY ', p_sort_by, ' ', p_order);
     
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
@@ -44,9 +44,9 @@ BEGIN
 END$$
 
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getTournamentByMatchingAlgo`(IN p_isRandom boolean)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getTournamentByMatchingAlgo`(IN p_is_random boolean)
 BEGIN
-	SELECT * FROM Tournament WHERE is_random = p_isRandom;
+	SELECT * FROM Tournament WHERE is_random = p_is_random;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteTournament`(IN p_tournament_id BIGINT)

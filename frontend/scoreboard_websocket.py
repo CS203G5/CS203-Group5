@@ -5,6 +5,7 @@ import json
 import threading
 import pandas as pd
 import trueskill as ts
+from algorithms import rand_match_afterwards
 
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -100,9 +101,9 @@ def update_ratings(did, player1_time, player2_time):
         st.write(f"Error updating ratings: {winner_response.status_code}, {loser_response.status_code}")
 
 # Function to fetch all duels
-def fetch_duels():
+def fetch_duels(tid):
     try: # Add error handling
-        url = "http://localhost:8080/api/duel"
+        url = f"http://localhost:8080/api/duel?tid={tid}"
         response = requests.get(url)
         return response.json() if response.status_code == 200 else []
     except requests.exceptions.RequestException as e:
@@ -114,19 +115,19 @@ def prepare_duel_data(duels):
     if duels:
         for duel in duels:
             # Convert milliseconds to seconds
-            player1_time_s = duel['result']['player1Time'] / 1000 if duel['result'] else "N/A"
-            player2_time_s = duel['result']['player2Time'] / 1000 if duel['result'] else "N/A"
+            player1Time_s = duel['result'].get('player1Time', None) / 1000 if duel['result'] and 'player1Time' in duel['result'] else "N/A"
+            player2Time_s = duel['result'].get('player2Time', None) / 1000 if duel['result'] and 'player2Time' in duel['result'] else "N/A"
 
             duel_info = {
                 "Duel ID": duel['duel_id'],
                 "Round": duel['roundName'],
-                "Player 1 Username": duel['player1']['username'],
-                "Player 2 Username": duel['player2']['username'],
-                "Player 1 Time (s)": player1_time_s,
-                "Player 2 Time (s)": player2_time_s,
+                "Player 1 Username": duel['pid1']['username'],
+                "Player 2 Username": duel['pid2']['username'],
+                "Player 1 Time (s)": player1Time_s,
+                "Player 2 Time (s)": player2Time_s,
                 "Winner": (
-                    duel['player1']['username'] if duel['winner'] == duel['player1']['profileId']
-                    else duel['player2']['username'] if duel['winner'] == duel['player2']['profileId']
+                    duel['pid1']['username'] if duel['winner'] == duel['pid1']['profileId']
+                    else duel['pid2']['username'] if duel['winner'] == duel['pid2']['profileId']
                     else "Not determined"
                 )
             }
@@ -167,17 +168,18 @@ def update_scoreboard():
         player2_milliseconds = st.number_input("Player 2 Time (milliseconds):", min_value=0)
 
     # Convert seconds and milliseconds to total milliseconds
-    player1_time = player1_seconds * 1000 + player1_milliseconds
-    player2_time = player2_seconds * 1000 + player2_milliseconds
+    player1Time = player1_seconds * 1000 + player1_milliseconds
+    player2Time = player2_seconds * 1000 + player2_milliseconds
 
     # Update Duel Result Form
     if st.button("Update Duel Result"):
         result_data = {
-            "player1Time": player1_time,
-            "player2Time": player2_time,
+            "player1Time": player1Time,
+            "player2Time": player2Time,
         }
         update_duel_result(did, result_data)
         update_ratings(did, player1_time, player2_time)
+        rand_match_afterwards()
 
 def live_scoreboard():
     st.title("Live Duel Scoreboard")
@@ -189,8 +191,9 @@ def live_scoreboard():
 
     # Refresh button
     if st.button("Refresh Results"):
+        tid = 152
         with st.spinner("Fetching latest results..."):
-            st.session_state.duels = fetch_duels() 
+            st.session_state.duels = fetch_duels(tid) 
             duel_data = prepare_duel_data(st.session_state.duels) 
 
             # Update the cached table

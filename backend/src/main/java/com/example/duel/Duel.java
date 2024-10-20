@@ -4,12 +4,8 @@ import com.example.tournament.Tournament;
 import com.example.profile.Profile;
 
 import jakarta.persistence.*;
-<<<<<<< HEAD
-import lombok.*;
-=======
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
->>>>>>> dev/tests2
 
 @Entity
 @Table(name = "duel")
@@ -19,29 +15,24 @@ import lombok.Data;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Duel {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long duel_id;
 
-    @NotNull
-    private Long pid1;
+    private String round_name;
 
-    @NotNull
-    private Long pid2;
+    @Embedded
+    private DuelResult result; // Ensure this class is defined properly
 
-    private String roundName;
-    
-    @Embedded 
-    private DuelResult result;
-    
     private Long winner;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "pid1")
-    private Profile player1;    
+    private Profile pid1;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "pid2")
-    private Profile player2;    
+    private Profile pid2;
 
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false)
@@ -63,7 +54,19 @@ public class Duel {
         this.pid1 = pid1;
     }
 
-    public void setPid2(Long pid2) {
+    public String getRoundName(){
+        return round_name;
+    }
+
+    public void setRoundName(String round_name){
+        this.round_name = round_name;
+    }
+
+    public void setPid1(Profile pid1) {
+        this.pid1 = pid1;
+    }
+
+    public void setPid2(Profile pid2) {
         this.pid2 = pid2;
     }
 }

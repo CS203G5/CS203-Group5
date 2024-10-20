@@ -1,6 +1,8 @@
 package com.example.duel;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,11 +12,9 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
-import com.example.tournament.TournamentNotFoundException;
-
 @Transactional
 @Service
-public class DuelServiceImpl implements DuelService{
+public class DuelServiceImpl implements DuelService {
 
     @Autowired
     DuelRepository duelRepository;
@@ -24,74 +24,43 @@ public class DuelServiceImpl implements DuelService{
     }
 
     public List<Duel> getDuelsByTournament(Long tid) {
-        if (!duelRepository.existsById(tid)) {
-            throw new TournamentNotFoundException(tid);
-        }
         return duelRepository.getDuelsByTournament(tid);
     }
 
     public List<Duel> getDuelsByRoundName(String roundName) {
         return duelRepository.getDuelsByRoundName(roundName);
     }
-    
+
     public Duel getDuelById(Long did) {
-<<<<<<< HEAD
-        if (!duelRepository.existsById(did)) {
-            throw new DuelNotFoundException(did);
-        }
-        return duelRepository.findById(did).orElse(null);
-    }
-=======
         return duelRepository.findById(did).orElseThrow(() -> new DuelNotFoundException("Duel not found with id: " + did));
     }    
->>>>>>> dev/tests2
 
     public List<Duel> getDuelsByPlayer(Long pid) {
         return duelRepository.getDuelsByPlayer(pid);
     }
-    
-    public Duel createDuel(Duel duel) {
-        try {
-            // Call the stored procedure that handles the validation logic
-            duelRepository.createDuel(
-                duel.getPlayer1().getProfileId(),
-                duel.getPlayer2().getProfileId(),
-                duel.getRoundName(),
-                duel.getWinner(),
-                duel.getTournament().getTournamentId()
-            );
-            return duel;
-        } catch (DataAccessException e) {
-            if (e.getCause() instanceof BadSqlGrammarException) {
-                String sqlErrorMessage = e.getCause().getMessage();
-                if (sqlErrorMessage.contains("Players must be different")) {
-                    throw new DuelCreationException("Players must be different");
-                } else if (sqlErrorMessage.contains("A duel with the same players, round, and tournament already exists")) {
-                    throw new DuelCreationException("A duel with the same players, round, and tournament already exists");
-                }
-            }
-            throw new DuelCreationException("Failed to create duel due to a database error", e);
-        }
-    }
-    
 
+    public String createDuel(Duel duel) {
+        String message = duelRepository.createDuel(
+            duel.getTournament().getTournamentId(),
+            duel.getRoundName(),
+            duel.getPid1().getProfileId(),
+            duel.getPid2().getProfileId(),
+            duel.getWinner()
+        );
+
+        return message;
+    }
 
     @Override
     public Duel updateDuel(Long did, Duel newDuelInfo) {
         return duelRepository.findById(did).map(duel -> {
-<<<<<<< HEAD
-            duel.setPlayer1(newDuel.getPlayer1());
-            duel.setPlayer2(newDuel.getPlayer2());
-            duel.setRoundName(newDuel.getRoundName());
-=======
             duel.setPid1(newDuelInfo.getPid1());
             duel.setPid2(newDuelInfo.getPid2());
             duel.setRoundName(newDuelInfo.getRoundName());
->>>>>>> dev/tests2
             return duelRepository.save(duel);
         }).orElseThrow(() -> new DuelNotFoundException("Duel not found with id: " + did));
     }
-
+    
     public Duel updateDuelResult(Long did, DuelResult result) {
         return duelRepository.findById(did).map(duel -> {
             duel.setResult(result);
@@ -103,13 +72,12 @@ public class DuelServiceImpl implements DuelService{
             return duelRepository.save(duel);
         }).orElseThrow(() -> new EntityNotFoundException("Duel not found with id: " + did));
     }
-
+    
     public void deleteDuel(Long did) {
         if (!duelRepository.existsById(did)) {
             throw new DuelNotFoundException("Duel not found with id: " + did);
         }
         duelRepository.deleteById(did);
     }
-    
     
 }

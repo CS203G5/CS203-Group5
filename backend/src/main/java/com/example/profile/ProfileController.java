@@ -17,8 +17,8 @@ public class ProfileController {
     @Autowired
     private ProfileService profileService;
 
-    @GetMapping("/{profileId}")
-    public ResponseEntity<Profile> getProfile(@PathVariable Long profileId) {
+    @GetMapping("/{profile_id}")
+    public ResponseEntity<Profile> getProfile(@PathVariable("profile_id") Long profileId) {
         return profileService.getProfile(profileId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -36,15 +36,15 @@ public class ProfileController {
         return ResponseEntity.ok(createdProfile);
     }
 
-    @PutMapping("/{profileId}")
-    public ResponseEntity<Profile> updateProfile(@PathVariable Long profileId, @Valid @RequestBody Profile updatedProfile) {
+    @PutMapping("/{profile_id}")
+    public ResponseEntity<Profile> updateProfile(@PathVariable("profile_id") Long profileId, @Valid @RequestBody Profile updatedProfile) {
         return profileService.updateProfile(profileId, updatedProfile)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{profileId}")
-    public ResponseEntity<Void> deleteProfile(@PathVariable Long profileId) {
+    @DeleteMapping("/{profile_id}")
+    public ResponseEntity<Void> deleteProfile(@PathVariable("profile_id") Long profileId) {
         try {
             profileService.deleteProfile(profileId);
             return ResponseEntity.noContent().build();
@@ -53,9 +53,9 @@ public class ProfileController {
         }
     }
 
-    @PutMapping("/{profileId}/rating")
+    @PutMapping("/{profile_id}/rating")
     @PreAuthorize("hasRole('ADMIN')") // Ensure only admins can access this endpoint
-    public ResponseEntity<Profile> updateRating(@PathVariable Long profileId, @RequestParam Double newRating) {
+    public ResponseEntity<Profile> updateRating(@PathVariable("profile_id") Long profileId, @RequestParam Double newRating) {
         Optional<Profile> updatedProfile = profileService.getProfile(profileId);
         if (updatedProfile.isPresent()) {
             profileService.updateRating(profileId, newRating);

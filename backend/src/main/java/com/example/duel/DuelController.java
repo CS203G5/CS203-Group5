@@ -2,6 +2,7 @@
 
 <<<<<<< HEAD
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -120,8 +121,22 @@ import java.util.List;
     }
 
     @PostMapping()
-    public ResponseEntity<Duel> createDuel(@RequestBody Duel duel) {
-        return ResponseEntity.ok(ds.createDuel(duel));
+    public ResponseEntity<String> createDuel(@RequestBody Duel duel) {
+        // Call the service method to create the duel
+        String message = ds.createDuel(duel);
+
+        // Check the returned message and set the appropriate HTTP status code
+        if (message.equals("Duel created successfully")) {
+            // Return 201 Created for successful creation
+            return ResponseEntity.status(HttpStatus.CREATED).body(message);
+        } else if (message.equals("pid1 and pid2 cannot be the same") ||
+                message.equals("An exact pairing with the same round_name already exists")) {
+            // Return 409 Conflict for specific error messages
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
+        } else {
+            // Return 400 Bad Request for other types of errors
+            return ResponseEntity.badRequest().body(message);
+        }
     }
 
     @PutMapping("/{did}")
