@@ -63,7 +63,7 @@ Before you begin, make sure you have the following installed on your machine:
      cd backend
      mvn verify
      ```
-     Navigate to target/site/index.html, and open it in browser.
+     Navigate to /backend/target/site/index.html, and open it in browser.
 
 ## Database Setup
 
