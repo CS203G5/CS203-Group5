@@ -3,7 +3,6 @@ import requests
 
 API_URL = "http://localhost:8080/profile"
 
-
 def get_profile(profile_id):
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
     response = requests.get(f"{API_URL}/{st.session_state['profile_id']}", headers=headers)
@@ -19,7 +18,7 @@ def update_profile(username, email, bio, privacy_settings, role):
         "email": email,
         "bio": bio,
         "privacy_settings": privacy_settings,
-        "role": role
+        "role": role  # Send the role back to the server even though users can't edit it
     }
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
     response = requests.put(f"{API_URL}/{st.session_state['profile_id']}", json=data, headers=headers)
@@ -45,21 +44,26 @@ def profile_page():
     st.title("Player Profile")
     st.subheader(f"Current Rating: {profile.get('rating', 0.0)}")
 
+    # Handle the case where 'privacy_settings' may not be in the expected list
+    privacy_options = ["Public", "Private", "Friends Only"]
+
+    privacy_settings = profile.get('privacy_settings', 'Public')
+    if privacy_settings not in privacy_options:
+        privacy_settings = "Public"  # Fallback if an unexpected value is present
+
+    # Get the current role from the profile (but don't allow it to be edited)
+    role = profile.get('role', 'PLAYER')
+    st.text(f"Role: {role}")  # Display the role but don't allow editing
+
     with st.form("profile_form"):
         username_input = st.text_input("Username", value=profile.get('username', ''))
         email_input = st.text_input("Email", value=profile.get('email', ''))
         bio_input = st.text_area("Bio", value=profile.get('bio', ''))
         privacy_settings_input = st.selectbox(
             "Privacy Settings", 
-            ["Public", "Private", "Friends Only"], 
-            index=["Public", "Private", "Friends Only"].index(profile.get('privacy_settings', 'Public'))
-        )
-        role_input = st.selectbox(
-            "Role",
-            ["PLAYER", "ADMIN"],  # Add more roles if needed
-            index=["PLAYER", "ADMIN"].index(profile.get('role', 'PLAYER'))
+            privacy_options, 
+            index=privacy_options.index(privacy_settings)
         )
 
         if st.form_submit_button("Save"):
-            update_profile(username_input, email_input, bio_input, privacy_settings_input, role_input)
-
+            update_profile(username_input, email_input, bio_input, privacy_settings_input, role)
