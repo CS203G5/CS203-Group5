@@ -251,10 +251,8 @@ def tournament_page():
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
                     response = requests.get(f"http://localhost:8080/api/duel?tid={selected_tournament_id}", headers=headers)
-                    response.raise_for_status()
                     duels = response.json()
-                    
-                    if duels:
+                    if response.status_code == 200:
                         st.write("Matching was done, no more matching can be done.")
                     else:
                         if tournament_data["is_random"]:
@@ -308,7 +306,7 @@ def tournament_page():
                                         st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
                                     else:
                                         st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
-                    display_tournament_bracket(duels)
+                    display_tournament_bracket(selected_tournament_id)
 
             if st.button("Edit Selected Tournament"):
                 selected_tournament_id = selected_tournaments[0]
