@@ -119,14 +119,6 @@ class ParticipantServiceTest {
     }
 
     @Test
-    void testGetAllParticipants_WhenRepositoryThrowsException() {
-        mockRepositoryThrowException("findAll", null);
-
-        assertThrows(RuntimeException.class, () -> participantService.getAllParticipants());
-        verify(participantRepository, times(1)).findAll();
-    }
-
-    @Test
     void testSaveParticipant() {
         when(participantRepository.save(participant)).thenReturn(participant);
 
@@ -239,6 +231,7 @@ class ParticipantServiceTest {
         assertThrows(RuntimeException.class, () -> participantService.getParticipantsByTournamentId(1L));
         verify(participantRepository, times(1)).getParticipantsByTournamentId(1L);
     }
+<<<<<<< HEAD
 
     @Test
     void testDeleteById() {
@@ -258,4 +251,6 @@ class ParticipantServiceTest {
         assertThrows(RuntimeException.class, () -> participantService.deleteById(participantId));
         verify(participantRepository, times(1)).deleteById(participantId);
     }
+=======
+>>>>>>> dev/tests2
 }

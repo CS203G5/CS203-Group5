@@ -27,13 +27,21 @@
             return tournament;
         }
 
-        public Profile getProfile() {
-            return profile;
-        }
+    public void setTournament(Tournament tournament) {
+        this.tournament = tournament;
+    }
 
-        public int getWin() {
-            return win;
-        }
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
+    public int getWin() {
+        return win;
+    }
 
         public void setWin(int win) {
             this.win = win;

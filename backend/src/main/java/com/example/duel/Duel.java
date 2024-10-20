@@ -4,7 +4,12 @@ import com.example.tournament.Tournament;
 import com.example.profile.Profile;
 
 import jakarta.persistence.*;
+<<<<<<< HEAD
 import lombok.*;
+=======
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+>>>>>>> dev/tests2
 
 @Entity
 @Table(name = "duel")
@@ -14,15 +19,20 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Duel {
-    @Id 
-    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) 
     private Long duel_id;
 
-    private String roundName;
+    @NotNull
+    private Long pid1;
 
+    @NotNull
+    private Long pid2;
+
+    private String roundName;
+    
     @Embedded 
     private DuelResult result;
-
+    
     private Long winner;
 
     @OneToOne(cascade = CascadeType.PERSIST)
@@ -49,16 +59,11 @@ public class Duel {
         return tournament;
     }
 
-    public void setWinner(Long winner){
-        this.winner = winner;
+    public void setPid1(Long pid1) {
+        this.pid1 = pid1;
     }
 
-    // New methods to set the player1 and player2 via their profile IDs
-    public void setPid1(Profile player1) {
-        this.player1 = player1;
-    }
-
-    public void setPid2(Profile player2) {
-        this.player2 = player2;
+    public void setPid2(Long pid2) {
+        this.pid2 = pid2;
     }
 }

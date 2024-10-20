@@ -35,11 +35,16 @@ public class DuelServiceImpl implements DuelService{
     }
     
     public Duel getDuelById(Long did) {
+<<<<<<< HEAD
         if (!duelRepository.existsById(did)) {
             throw new DuelNotFoundException(did);
         }
         return duelRepository.findById(did).orElse(null);
     }
+=======
+        return duelRepository.findById(did).orElseThrow(() -> new DuelNotFoundException("Duel not found with id: " + did));
+    }    
+>>>>>>> dev/tests2
 
     public List<Duel> getDuelsByPlayer(Long pid) {
         return duelRepository.getDuelsByPlayer(pid);
@@ -71,15 +76,20 @@ public class DuelServiceImpl implements DuelService{
     
 
 
-    public Duel updateDuel(Long did, Duel newDuel) {
-        // duelRepository.updateDuel(did, duel.getPid1(), duel.getPid2(), duel.getRoundName(), duel.getWinner());
-
+    @Override
+    public Duel updateDuel(Long did, Duel newDuelInfo) {
         return duelRepository.findById(did).map(duel -> {
+<<<<<<< HEAD
             duel.setPlayer1(newDuel.getPlayer1());
             duel.setPlayer2(newDuel.getPlayer2());
             duel.setRoundName(newDuel.getRoundName());
+=======
+            duel.setPid1(newDuelInfo.getPid1());
+            duel.setPid2(newDuelInfo.getPid2());
+            duel.setRoundName(newDuelInfo.getRoundName());
+>>>>>>> dev/tests2
             return duelRepository.save(duel);
-        }).orElseThrow(() -> new EntityNotFoundException("Duel not found with id: " + did));
+        }).orElseThrow(() -> new DuelNotFoundException("Duel not found with id: " + did));
     }
 
     public Duel updateDuelResult(Long did, DuelResult result) {
@@ -96,8 +106,10 @@ public class DuelServiceImpl implements DuelService{
 
     public void deleteDuel(Long did) {
         if (!duelRepository.existsById(did)) {
-            throw new DuelNotFoundException(did);
+            throw new DuelNotFoundException("Duel not found with id: " + did);
         }
         duelRepository.deleteById(did);
-    }  
+    }
+    
+    
 }
