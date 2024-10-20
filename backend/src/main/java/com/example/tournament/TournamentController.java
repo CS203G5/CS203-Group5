@@ -1,12 +1,8 @@
 package com.example.tournament;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.sql.Date;
@@ -24,12 +20,8 @@ public class TournamentController {
     }
 
     @GetMapping("/{tid}")
-    public ResponseEntity<Tournament> getTournamentById(@PathVariable Long tid) {
-        Tournament tournament = ts.findById(tid);
-        if (tournament == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if not found
-        }
-        return ResponseEntity.ok(tournament); // Return 200 and the tournament if found
+    public Tournament getTournamentById(@PathVariable Long tid) {
+        return ts.findById(tid);
     }
 
     @GetMapping("/organizer/{aid}")
@@ -86,14 +78,9 @@ public class TournamentController {
     }
 
     @PutMapping("/{tid}")
-    public ResponseEntity<Tournament> updateTournament(@PathVariable Long tid, @Valid @RequestBody Tournament tournament) {
-        try {
-            tournament.setModifiedAt(LocalDateTime.now());
-            Tournament updatedTournament = ts.update(tid, tournament);
-            return ResponseEntity.ok(updatedTournament);  // Return 200 OK if successful
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Return 404 Not Found if not found
-        }
+    public Tournament updateTournament(@PathVariable Long tid, @Valid @RequestBody Tournament tournament) {
+        tournament.setModifiedAt(LocalDateTime.now());
+        return ts.update(tid, tournament);
     }
 
     @DeleteMapping()

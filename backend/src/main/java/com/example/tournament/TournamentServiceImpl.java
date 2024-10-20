@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -71,16 +70,15 @@ public class TournamentServiceImpl implements TournamentService {
             tournament.setDescription(newTournamentInfo.getDescription());
             tournament.setModifiedAt(LocalDateTime.now());
             return tournamentRepository.save(tournament);
-        }).orElseThrow(() -> new EntityNotFoundException("Tournament not found with id: " + tid));
+        }).orElse(null);
     }
 
     public void deleteById(List<Long> deleteList) {
         for (Long tid : deleteList) {
             if (!tournamentRepository.existsById(tid)) {
-                throw new TournamentNotFoundException("Tournament with id " + tid + " does not exist");
+                throw new IllegalArgumentException("Tournament with id " + tid + " does not exist");
             }
             tournamentRepository.deleteById(tid);
         }
-    }  
-    
+    }
 }

@@ -32,11 +32,6 @@ public class ParticipantService {
     }
 
     public void deleteById(ParticipantId participantId) {
-        // Check if the participant exists before trying to delete
-        boolean exists = participantRepository.existsById(participantId);
-        if (!exists) {
-            throw new ParticipantNotFoundException(participantId.getProfile(), participantId.getTournament());
-        }
         participantRepository.deleteById(participantId);
     }
 }

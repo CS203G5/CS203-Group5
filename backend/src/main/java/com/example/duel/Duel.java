@@ -4,8 +4,7 @@ import com.example.tournament.Tournament;
 import com.example.profile.Profile;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "duel")
@@ -50,8 +49,8 @@ public class Duel {
         return tournament;
     }
 
-    public void setPid1(Long pid1) {
-        this.pid1 = pid1;
+    public void setWinner(Long winner){
+        this.winner = winner;
     }
 
     public String getRoundName(){
