@@ -8,6 +8,7 @@
 - [Running the Application](#running-the-application)
   - [Frontend](#frontend)
   - [Backend](#backend)
+  - [Tests](#tests)
 - [Database Setup](#database-setup)
 - [Using the Application](#using-the-application)
 
