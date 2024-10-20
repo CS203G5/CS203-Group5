@@ -283,29 +283,29 @@ def tournament_page():
                         else:
                             # Use TrueSkill for matching
                             st.write("Using TrueSkill for matching...")
-                            participants = fetch_participants_by_tournament(selected_tournament_id)
-                            if not participants:
-                                st.write("No participants registered to match.")
-                            else:
-                                pairs, unmatched = true_skill_pair_participants(participants)
+                            # participants = fetch_participants_by_tournament(selected_tournament_id)
+                            # if not participants:
+                            #     st.write("No participants registered to match.")
+                            # else:
+                            #     pairs, unmatched = true_skill_pair_participants(participants)
                                 
-                                st.write(f"Tournament ID: {selected_tournament_id}")
+                            #     st.write(f"Tournament ID: {selected_tournament_id}")
                                 
-                                for pair in pairs:
-                                    player1 = pair[0]['profile']['profileId']
-                                    player2 = pair[1]['profile']['profileId']
-                                    if post_rand_match(selected_tournament_id, player1, player2, round_name=1, winner=0):
-                                        st.write(f"Player {unmatched['profile']['profileId']} has a bye into the next round")
-                                    else:
-                                        st.error(f"Error matching Player {unmatched['profile']['profileId']}")
+                            #     for pair in pairs:
+                            #         player1 = pair[0]['profile']['profileId']
+                            #         player2 = pair[1]['profile']['profileId']
+                            #         if post_rand_match(selected_tournament_id, player1, player2, round_name=1, winner=0):
+                            #             st.write(f"Player {unmatched['profile']['profileId']} has a bye into the next round")
+                            #         else:
+                            #             st.error(f"Error matching Player {unmatched['profile']['profileId']}")
                                 
-                                if unmatched:
-                                    st.write(f"Unmatched Participant: {unmatched['profile']['profileId']}")
-                                    # Post the unmatched player as player 1 and set them as the winner
-                                    if post_rand_match(selected_tournament_id, unmatched['profile']['profileId'], player2=0, round_name=1, winner=unmatched['profile']['profileId']):
-                                        st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
-                                    else:
-                                        st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
+                            #     if unmatched:
+                            #         st.write(f"Unmatched Participant: {unmatched['profile']['profileId']}")
+                            #         # Post the unmatched player as player 1 and set them as the winner
+                            #         if post_rand_match(selected_tournament_id, unmatched['profile']['profileId'], player2=0, round_name=1, winner=unmatched['profile']['profileId']):
+                            #             st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
+                            #         else:
+                            #             st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
                     display_tournament_bracket(selected_tournament_id)
 
             if st.button("Edit Selected Tournament"):

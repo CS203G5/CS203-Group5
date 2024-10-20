@@ -4,6 +4,7 @@ import websocket
 import json
 import threading
 import pandas as pd
+import trueskill as ts
 from algorithms import rand_match_afterwards
 
 def get_headers():
@@ -33,6 +34,71 @@ def update_duel_result(did, result_data):
         st.success(F"Duel result updated successfully. {result_data}")
     except requests.exceptions.RequestException as e:
         st.warning({"error": "Failed to update duel result."})
+
+def update_ratings(did, player1_time, player2_time):
+    env = ts.TrueSkill(draw_probability=0)  # Initialize TrueSkill environment
+
+    try:
+        response = requests.get(f"http://localhost:8080/api/duel/{did}", headers=get_headers())
+        duel = response.json() if response.status_code == 200 else []
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching duel info: {e}")
+        return []
+
+    try:
+        response = requests.get(f"http://localhost:8080/profile/{duel['pid1']}", headers=get_headers())
+        player1_profile = response.json() if response.status_code == 200 else []
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching player1 profile: {e}")
+        return []
+    
+    player1_rating = player1_profile['rating']
+
+    try:
+        response = requests.get(f"http://localhost:8080/profile/{duel['pid2']}", headers=get_headers())
+        player2_profile = response.json() if response.status_code == 200 else []
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching player2 profile: {e}")
+        return []
+    
+    # Check if the rating is 0 and initialize accordingly
+    if player1_profile['rating'] == 0:
+        player1_rating = env.create_rating(0)
+        st.write(player1_rating)
+    else:
+        player1_rating = env.Rating(player1_profile['rating'], env.sigma)
+    
+    if player2_profile['rating'] == 0:
+        player2_rating = env.create_rating(0)
+        st.write(player2_rating)
+    else:
+        player2_rating = env.Rating(player2_profile['rating'], env.sigma)
+    
+    # Determine the winner based on lesser time
+    if player1_time < player2_time:
+        winner_rating, loser_rating = env.rate_1vs1(player1_rating, player2_rating)
+        winner_id = duel['pid1']
+        loser_id = duel['pid2']
+    else:
+        winner_rating, loser_rating = env.rate_1vs1(player2_rating, player1_rating)
+        winner_id = duel['pid2']
+        loser_id = duel['pid1']
+    
+    try:
+        # winner_response = requests.put(f"http://localhost:8080/profile/{winner_id}/rating", params={"newRating": winner_rating.mu}, headers=get_headers())
+        winner_response = requests.put(f"http://localhost:8080/profile/{winner_id}/rating?newRating={winner_rating.mu}", headers=get_headers())
+    except requests.exceptions.RequestException as e:
+        st.error(e)
+    try:
+        # loser_response = requests.put(f"http://localhost:8080/profile/{loser_id}/rating", params={"newRating": loser_rating.mu}, headers=get_headers())
+        loser_response = requests.put(f"http://localhost:8080/profile/{loser_id}/rating?newRating={loser_rating.mu}", headers=get_headers())
+    except requests.exceptions.RequestException as e:
+        st.error(e)
+
+    if winner_response.status_code == 201 or 200 and loser_response.status_code == 201 or 200:
+        st.write(f"Ratings updated successfully for {winner_id} with {winner_rating.mu} and {loser_id} with {loser_rating.mu}")
+    else:
+        st.write(f"Error updating ratings: {winner_response.status_code}, {loser_response.status_code}")
 
 # Function to fetch all duels
 def fetch_duels(tid):
@@ -112,6 +178,7 @@ def update_scoreboard():
             "player2Time": player2Time,
         }
         update_duel_result(did, result_data)
+        update_ratings(did, player1_time, player2_time)
         rand_match_afterwards()
 
 def live_scoreboard():
