@@ -79,7 +79,7 @@ def get_player_profile(player_id):
             st.error(f"Error getting player profile: {e}")
             return []
 
-def post_rand_match(tournament_id, player1, player2, round_name, winner):
+def post_matches(tournament_id, player1, player2, round_name, winner):
     profile1 = get_player_profile(player1)
     profile2 = get_player_profile(player2)
     round_name = get_next_round_name(tournament_id)
@@ -106,7 +106,7 @@ def post_rand_match(tournament_id, player1, player2, round_name, winner):
         st.error(f"Error posting duel: {e}")
         return False
 
-def rand_match_afterwards():
+def matchmaking_afterwards():
     try:
         headers = get_headers()
         response = requests.get("http://localhost:8080/tournament", headers=headers)
@@ -143,15 +143,18 @@ def rand_match_afterwards():
                 # Ending here means the last duel winner is the whole tournament's winner
                 st.write()           
             elif len(winners) == len(latest_round_duels) and len(winners) > 1:
-                pairs, unmatched = randomly_pair_participants(winners)
+                if tournament["is_random"] == 1:
+                    pairs, unmatched = randomly_pair_participants(winners)
+                else:
+                    pairs, unmatched = true_skill_pair_participants(winners)
                 next_round_number = int(latest_round) + 1
                 next_round_name = str(next_round_number)
                 for player1, player2 in pairs:
-                    post_rand_match(tournament_id, player1["profileId"], player2["profileId"], next_round_name, winner=None)
+                    post_matches(tournament_id, player1["profileId"], player2["profileId"], next_round_name, winner=None)
                 
                 if unmatched:
                     # st.info(f"Unmatched Participant: {unmatched}")
-                    post_rand_match(tournament_id, unmatched["profileId"], None, next_round_name, winner=1)
+                    post_matches(tournament_id, unmatched["profileId"], None, next_round_name, winner=1)
                     st.info(f"Player {unmatched["profileId"]} has a buy into the next round")
             # else:
             #     for duel in latest_round_duels: st.write(f"{duel["duel_id"]} - {len(winners)} and {len(latest_round_duels)}")
