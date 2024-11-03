@@ -5,7 +5,7 @@ import json
 import threading
 import pandas as pd
 import trueskill as ts
-from algorithms import rand_match_afterwards, update_ratings
+from algorithms import matchmaking_afterwards, update_ratings
 
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -114,7 +114,7 @@ def update_scoreboard():
         }
         update_duel_result(did, result_data)
         update_ratings(did, player1Time, player2Time)
-        rand_match_afterwards()
+        matchmaking_afterwards()
 
 def live_scoreboard():
     st.title("Live Duel Scoreboard")
