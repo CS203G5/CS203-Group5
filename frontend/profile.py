@@ -3,14 +3,32 @@ import requests
 
 API_URL = "http://localhost:8080/profile"
 
-def get_profile(profile_id):
+def get_profile():
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
     response = requests.get(f"{API_URL}/{st.session_state['profile_id']}", headers=headers)
     if response.status_code == 200:
-        return response.json()
+        profile_data = response.json()
+        # Rank based on rating
+        profile_data['rank'] = get_rank(profile_data.get('rating', 0))
+        return profile_data
     else:
         st.error("Failed to load profile.")
         return None
+    
+def get_rank(rating):
+    """Determine rank based on rating value."""
+    if rating < 200:
+        return "Beginner"
+    elif rating < 400:
+        return "Intermediate"
+    elif rating < 800:
+        return "Advanced"
+    elif rating < 1200:
+        return "Expert"
+    elif rating < 1400:
+        return "Master"
+    else:
+        return "Grandmaster"
 
 def update_profile(username, email, bio, privacy_settings, role):
     data = {
@@ -43,6 +61,8 @@ def profile_page():
 
     st.title("Player Profile")
     st.subheader(f"Current Rating: {profile.get('rating', 0.0)}")
+    st.subheader(f"Rank: {profile['rank']}")
+
 
     # Handle the case where 'privacy_settings' may not be in the expected list
     privacy_options = ["Public", "Private", "Friends Only"]
