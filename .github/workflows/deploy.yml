@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Trigger deployment only on pushes to the main branch
+      - ci-cd  # Also trigger deployment on pushes to the ci-cd branch for testing purposes
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
