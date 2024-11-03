@@ -246,3 +246,37 @@ def display_tournament_bracket(tid):
             else:
                 player2 = duel["pid2"]["profileId"]
                 st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner if winner else 'TBD'}")
+
+def true_skill_pair_participants(participants):
+    st.write(participants)
+    if not participants:
+        st.error("Participants list is empty or not initialized.")
+        return [], None
+
+    # Create a TrueSkill environment
+    env = ts.TrueSkill()
+
+    # Create a list of (participant, rating) tuples by getting the rating from get_player_profile
+    rated_participants = []
+    for par in participants:
+        # profile = get_player_profile(par["profile"]["profileId"])
+        profile = get_player_profile(par["profileId"])
+        if profile and "rating" in profile:
+            rating = env.create_rating(profile["rating"])
+            rated_participants.append((par, rating))
+        else:
+            # st.error(f"Could not get rating for participant {par["profile"]['profileId']}")
+            st.error(f"Could not get rating for participant {par['profileId']}")
+            return [], None
+
+    # Sort participants by their rating
+    rated_participants.sort(key=lambda x: x[1].mu, reverse=True)
+
+    pairs = []
+    unmatched = None
+    for i in range(0, len(rated_participants), 2):
+        if i + 1 < len(rated_participants):
+            pairs.append((rated_participants[i][0], rated_participants[i + 1][0]))
+        else:
+            unmatched = rated_participants[i][0]
+    return pairs, unmatched
