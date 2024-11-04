@@ -8,7 +8,7 @@ on:
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,36 +24,41 @@ jobs:
 
 
       - name: Build with Maven
-        run: mvn -B package --file backend/pom.xml -DskipTests=true
+        run:  |
+              mvn clean install -DskipTests
+              mkdir artifacts && cp target/*.jar artifacts
+              cd artifacts && ls
 
-    #   - name: Send Email on Failure
-    #     if: failure()
-    #     env:
-    #       SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
-    #       SMTP_PORT: ${{ secrets.SMTP_PORT }}
-    #       SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-    #       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-    #       TO_EMAIL: ${{ secrets.TO_EMAIL }}
-    #       FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
-    #     run: |
-    #       echo -e "Subject: GitHub Actions Pipeline Failed\n\nPipeline failed for Job: ${{ github.job }} in ${{ github.repository }}. Commit: ${{ github.sha }}" | \
-    #       sendmail -S $SMTP_SERVER -p $SMTP_PORT -au$SMTP_USERNAME -ap$SMTP_PASSWORD -f $FROM_EMAIL $TO_EMAIL
+      - name: Save artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: github-action-artifact
+          path: artifacts
 
-      - name: Set up SSH
-        env:
-          EC2_KEY: ${{ secrets.EC2_KEY }}
-        run: |
-          echo "$EC2_KEY" > ec2_key.pem
-          chmod 600 ec2_key.pem
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Copy JAR to EC2
-        run: |
-          scp -o StrictHostKeyChecking=no -i ec2_key.pem ./app.jar ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_PATH }}/app.jar
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Deploy on EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          sudo systemctl stop myapp.service || true  # Stop any running instance of the app
-          sudo mv ${EC2_APP_PATH}/app.jar /opt/myapp/app.jar
-          sudo systemctl start myapp.service  # Restart the service
-          EOF
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+            context: .
+            file: ./Dockerfile
+            push: true
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/spring-boot-github-action-demo:latest
+    
+  deploy:
+    needs: build
+    runs-on: [aws-ec2]
+    steps:
+      - name: Pull Image from docker hub
+        run: sudo docker pull mohibgazi/spring-boot-github-action-demo:latest
+      - name: Delete old container
+        run: sudo docker rm -f spring-boot-app-container
+      - name: Run Docker Image
+        run: sudo docker run -d -p 8080:8080 --name spring-boot-app-container mohibgazi/spring-boot-github-action-demo
