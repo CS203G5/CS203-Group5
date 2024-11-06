@@ -1,0 +1,37 @@
+name: Deploy SQL to EC2 MySQL
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy SQL files to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -r backend/src/main/resources/sql/*.sql ${{ secrets.EC2_USER }}@${{ secrets.EC2_MYSQL_HOST }}:/tmp
+
+      - name: Create Database and Execute SQL files on EC2 MySQL
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_MYSQL_HOST }} << 'EOF'
+          # Check if the database exists; create it if it doesn't
+          echo "Checking for database 'cs203_db'"
+          mysql -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS cs203_db;"
+          
+          # Run all SQL files in the /tmp directory
+          for file in /tmp/*.sql; do
+            echo "Executing $file on 'cs203_db'"
+            mysql -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} cs203_db < "$file"
+          done
+          EOF
