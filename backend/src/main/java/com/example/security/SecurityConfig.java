@@ -38,6 +38,10 @@ public class SecurityConfig {
         http
             // Authorize HTTP requests using the new authorizeHttpRequests method
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/swagger-ui/**", 
+                               "/swagger-ui.html", 
+                               "/v3/api-docs/**", 
+                               "/api-docs/**").permitAll()
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
                 // .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
                 // .requestMatchers(ADMIN_MATCHERS).permitAll()   
