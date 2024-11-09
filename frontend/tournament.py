@@ -84,29 +84,6 @@ def delete_tournaments(tournament_ids):
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to delete tournaments: {e}")
         return None
-    
-def true_skill_pair_participants(participants):
-    if not participants:
-        st.error("Participants list is empty or not initialized.")
-        return [], None
-
-    # Create a TrueSkill environment
-    env = ts.TrueSkill()
-
-    # Create a list of (participant, rating) tuples
-    rated_participants = [(p, env.create_rating()) for p in participants]
-
-    # Sort participants by their rating
-    rated_participants.sort(key=lambda x: x[1].mu, reverse=True)
-
-    pairs = []
-    unmatched = None
-    for i in range(0, len(rated_participants), 2):
-        if i + 1 < len(rated_participants):
-            pairs.append((rated_participants[i][0], rated_participants[i + 1][0]))
-        else:
-            unmatched = rated_participants[i][0]
-    return pairs, unmatched
 
 def tournament_page():
     st.header("My Tournaments")
@@ -255,9 +232,9 @@ def tournament_page():
                     if response.status_code == 200:
                         st.write("Matching was done, no more matching can be done.")
                     else:
+                        participants = fetch_participants_by_tournament(selected_tournament_id)
                         if tournament_data["is_random"]:
                             st.write("Randomizing matches...")
-                            participants = fetch_participants_by_tournament(selected_tournament_id)
                             if not participants:
                                 st.write("No participants registered to match.")
                             else:
@@ -268,7 +245,7 @@ def tournament_page():
                                 for pair in pairs:
                                     player1 = pair[0]['profile']['profileId']
                                     player2 = pair[1]['profile']['profileId']
-                                    if post_rand_match(selected_tournament_id, player1, player2, round_name=1, winner=0):
+                                    if post_matches(selected_tournament_id, player1, player2, round_name=1, winner=0):
                                         st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
                                     # else:
                                     #     st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
@@ -276,36 +253,36 @@ def tournament_page():
                                 if unmatched:
                                     st.write(f"Unmatched Participant: {unmatched['profile']['profileId']}")
                                     # Post the unmatched player as player 1 and set them as the winner
-                                    if post_rand_match(selected_tournament_id, unmatched['profile']['profileId'], player2=0, round_name=1, winner=unmatched['profile']['profileId']):
+                                    if post_matches(selected_tournament_id, unmatched['profile']['profileId'], player2=0, round_name=1, winner=unmatched['profile']['profileId']):
                                         st.write(f"Player {unmatched['profile']['profileId']} has a buy into the next round")
                                     # else:
                                     #     st.error(f"Error matching Player {unmatched['profile']['profileId']}")
                         else:
                             # Use TrueSkill for matching
                             st.write("Using TrueSkill for matching...")
-                            # participants = fetch_participants_by_tournament(selected_tournament_id)
-                            # if not participants:
-                            #     st.write("No participants registered to match.")
-                            # else:
-                            #     pairs, unmatched = true_skill_pair_participants(participants)
+                            if not participants:
+                                st.write("No participants registered to match.")
+                            else:
+                                profiles = [p["profile"] for p in participants]
+                                pairs, unmatched = true_skill_pair_participants(profiles)
                                 
-                            #     st.write(f"Tournament ID: {selected_tournament_id}")
+                                st.write(f"Tournament ID: {selected_tournament_id}")
                                 
-                            #     for pair in pairs:
-                            #         player1 = pair[0]['profile']['profileId']
-                            #         player2 = pair[1]['profile']['profileId']
-                            #         if post_rand_match(selected_tournament_id, player1, player2, round_name=1, winner=0):
-                            #             st.write(f"Player {unmatched['profile']['profileId']} has a buy into the next round")
-                            #         else:
-                            #             st.error(f"Error matching Player {unmatched['profile']['profileId']}")
+                                for pair in pairs:
+                                    player1 = pair[0]['profileId']
+                                    player2 = pair[1]['profileId']
+                                    if post_matches(selected_tournament_id, player1, player2, round_name=1, winner=0):
+                                        st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
+                                    # else:
+                                    #     st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
                                 
-                            #     if unmatched:
-                            #         st.write(f"Unmatched Participant: {unmatched['profile']['profileId']}")
-                            #         # Post the unmatched player as player 1 and set them as the winner
-                            #         if post_rand_match(selected_tournament_id, unmatched['profile']['profileId'], player2=0, round_name=1, winner=unmatched['profile']['profileId']):
-                            #             st.write(f"Match: Player {player1} vs Player {player2} - Matched Successfully")
-                            #         else:
-                            #             st.write(f"Match: Player {player1} vs Player {player2} - Error Matching")
+                                if unmatched:
+                                    st.write(f"Unmatched Participant: {unmatched['profileId']}")
+                                    # Post the unmatched player as player 1 and set them as the winner
+                                    if post_matches(selected_tournament_id, unmatched['profileId'], player2=0, round_name=1, winner=unmatched['profileId']):
+                                        st.write(f"Player {unmatched['profileId']} has a buy into the next round")
+                                    # else:
+                                    #     st.error(f"Error matching Player {unmatched['profileId']}")
                     display_tournament_bracket(selected_tournament_id)
 
             if st.button("Edit Selected Tournament"):

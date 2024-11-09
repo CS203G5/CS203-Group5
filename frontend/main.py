@@ -4,7 +4,6 @@ from profile import profile_page
 from tournament import tournament_page
 from tournaments_avail import tournaments_avail_page
 from scoreboard_websocket import live_scoreboard, update_scoreboard
-from algorithms import rand_match_afterwards
 
 from RAG import show_rag_assistant
 
@@ -29,7 +28,6 @@ def main():
         elif auth_choice == "Register":
             register_user()
     else:
-        # rand_match_afterwards()
         st.sidebar.success(f"Logged in as {st.session_state['username']}")
         page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Available Tournaments", "Update Scoreboard", "Scoreboard", "AI Assistant", "Logout"])
 
