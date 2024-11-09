@@ -231,7 +231,6 @@ def tournament_page():
 
                     if response.status_code == 200:
                         st.write("Matching was done, no more matching can be done.")
-                        # display_tournament_bracket(selected_tournament_id)
                     else:
                         participants = fetch_participants_by_tournament(selected_tournament_id)
                         if tournament_data["is_random"]:
@@ -266,7 +265,6 @@ def tournament_page():
                             else:
                                 profiles = [p["profile"] for p in participants]
                                 pairs, unmatched = true_skill_pair_participants(profiles)
-                                # pairs, unmatched = true_skill_pair_participants(participants)
                                 
                                 st.write(f"Tournament ID: {selected_tournament_id}")
                                 
