@@ -120,16 +120,16 @@ def live_scoreboard():
     st.title("Live Duel Scoreboard")
 
     if 'duels' not in st.session_state:
-        st.session_state.duels = fetch_duels()
+        st.session_state.duels = fetch_duels(1)
 
     duel_data = prepare_duel_data(st.session_state.duels)
 
     # Refresh button
     if st.button("Refresh Results"):
-        tid = 152
+        tid = 1
         with st.spinner("Fetching latest results..."):
-            st.session_state.duels = fetch_duels(tid) 
-            duel_data = prepare_duel_data(st.session_state.duels) 
+            st.session_state.duels = fetch_duels(tid)
+            duel_data = prepare_duel_data(st.session_state.duels)
 
             # Update the cached table
             display_duel_table(duel_data)

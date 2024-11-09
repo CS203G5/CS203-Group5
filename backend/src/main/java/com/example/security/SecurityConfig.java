@@ -28,7 +28,9 @@ public class SecurityConfig {
         "/tournament/sorted", 
         "/tournament/matching", 
         "/duel", 
-        "/duel/player/**"
+        "/duel/player/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html"
     };
     
     @Bean

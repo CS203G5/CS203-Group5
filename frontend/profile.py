@@ -3,58 +3,72 @@ import requests
 
 API_URL = "http://localhost:8080/profile"
 
-def get_profile(profile_id):
-    headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.get(f"{API_URL}/{st.session_state['profile_id']}", headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        st.error("Failed to load profile.")
+def get_profile(profile_id, jwt_token):
+    """Fetch the profile data from the API for the given profile_id."""
+    headers = {"Authorization": f"Bearer {jwt_token}"}
+    try:
+        response = requests.get(f"{API_URL}/{profile_id}", headers=headers)
+        response.raise_for_status()
+        profile_data = response.json()
+        profile_data['rank'] = get_rank(profile_data.get('rating', 0))
+        return profile_data
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to load profile: {e}")
         return None
 
-def update_profile(username, email, bio, privacy_settings, role):
-    data = {
-        "username": username,
-        "email": email,
-        "bio": bio,
-        "privacy_settings": privacy_settings,
-        "role": role  # Send the role back to the server even though users can't edit it
-    }
-    headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.put(f"{API_URL}/{st.session_state['profile_id']}", json=data, headers=headers)
-    if response.status_code == 200:
+def get_rank(rating):
+    """Determine rank based on rating value."""
+    if rating < 200:
+        return "Beginner"
+    elif rating < 400:
+        return "Intermediate"
+    elif rating < 800:
+        return "Advanced"
+    elif rating < 1200:
+        return "Expert"
+    elif rating < 1400:
+        return "Master"
+    else:
+        return "Grandmaster"
+
+def update_profile(profile_id, jwt_token, data):
+    """Send a PUT request to update the profile data."""
+    headers = {"Authorization": f"Bearer {jwt_token}"}
+    try:
+        response = requests.put(f"{API_URL}/{profile_id}", json=data, headers=headers)
+        response.raise_for_status()
         st.success("Profile updated successfully.")
         return True
-    else:
-        st.error(f"Failed to update profile. Status code: {response.status_code}, Response: {response.text}")
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to update profile: {e}")
         return False
 
 def profile_page():
-    st.write(st.session_state)
-    if 'profile_id' not in st.session_state:
-        st.error("Profile ID not found. Please log in.")
+    """Display the profile page and handle profile updates."""
+    # Ensure required session state variables are present
+    if 'profile_id' not in st.session_state or 'jwt_token' not in st.session_state:
+        st.error("Profile ID or JWT token not found. Please log in.")
         return
 
     profile_id = st.session_state['profile_id']
-    profile = get_profile(profile_id)
-    if profile is None:
-        st.error("Failed to load profile.")
-        return
+    jwt_token = st.session_state['jwt_token']
+
+    # Fetch profile data
+    profile = get_profile(profile_id, jwt_token)
+    if not profile:
+        return  # Error message already displayed in get_profile
 
     st.title("Player Profile")
     st.subheader(f"Current Rating: {profile.get('rating', 0.0)}")
+    st.subheader(f"Rank: {profile.get('rank', 'Unknown')}")
+    # st.text(f"Role: {profile.get('role', 'PLAYER')}")
 
-    # Handle the case where 'privacy_settings' may not be in the expected list
     privacy_options = ["Public", "Private", "Friends Only"]
-
     privacy_settings = profile.get('privacy_settings', 'Public')
     if privacy_settings not in privacy_options:
-        privacy_settings = "Public"  # Fallback if an unexpected value is present
+        privacy_settings = "Public"
 
-    # Get the current role from the profile (but don't allow it to be edited)
-    role = profile.get('role', 'PLAYER')
-    st.text(f"Role: {role}")  # Display the role but don't allow editing
-
+    # Profile update form
     with st.form("profile_form"):
         username_input = st.text_input("Username", value=profile.get('username', ''))
         email_input = st.text_input("Email", value=profile.get('email', ''))
@@ -66,4 +80,17 @@ def profile_page():
         )
 
         if st.form_submit_button("Save"):
-            update_profile(username_input, email_input, bio_input, privacy_settings_input, role)
+            data = {
+                "username": username_input,
+                "email": email_input,
+                "bio": bio_input,
+                "privacy_settings": privacy_settings_input,
+                "role": profile.get('role', 'PLAYER')
+            }
+            if update_profile(profile_id, jwt_token, data):
+                # Optionally refresh the profile data after successful update
+                profile = get_profile(profile_id, jwt_token)
+
+# To run the profile page
+if __name__ == "__main__":
+    profile_page()
