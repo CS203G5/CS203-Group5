@@ -28,7 +28,8 @@ public class SecurityConfig {
         "/tournament/sorted", 
         "/tournament/matching", 
         "/duel", 
-        "/duel/player/**"
+        "/duel/player/**",
+        "/swagger-ui/**",
     };
     
     @Bean
@@ -36,11 +37,12 @@ public class SecurityConfig {
         http
             // Authorize HTTP requests using the new authorizeHttpRequests method
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/register", "/auth/login").permitAll()
-                // .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
-                // .requestMatchers(ADMIN_MATCHERS).permitAll()   
-                .requestMatchers("/api/duel/**").permitAll()
-                .anyRequest().authenticated()
+                // .requestMatchers("/auth/register", "/auth/login").permitAll()
+                // // .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
+                // // .requestMatchers(ADMIN_MATCHERS).permitAll()   
+                // .requestMatchers("/api/duel/**").permitAll()
+                // .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             // Enable OAuth2 Resource Server and configure JWT validation
             .oauth2ResourceServer(oauth2 -> oauth2
