@@ -30,7 +30,7 @@ def update_profile(username, email, bio, privacy_settings, role):
         return False
 
 def profile_page():
-    st.write(st.session_state)
+
     if 'profile_id' not in st.session_state:
         st.error("Profile ID not found. Please log in.")
         return
