@@ -6,6 +6,7 @@ API_URL = "http://localhost:8080/profile"
 def get_profile(profile_id, jwt_token):
     """Fetch the profile data from the API for the given profile_id."""
     headers = {"Authorization": f"Bearer {jwt_token}"}
+    st.write(f"jwt_token: {jwt_token}")
     try:
         response = requests.get(f"{API_URL}/{profile_id}", headers=headers)
         response.raise_for_status()
