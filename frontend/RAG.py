@@ -1,11 +1,11 @@
 import openai
 import streamlit as st
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
 from faiss import IndexFlatL2
-from langchain.docstore import InMemoryDocstore
+from langchain_community.docstore.in_memory import InMemoryDocstore
 from dotenv import load_dotenv
 import os
 
@@ -15,6 +15,8 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 model = "gpt-4o-mini" 
 store = {}
 
+if openai.api_key is None:
+    print("API key not found. Please set your API key in a .env file.")
 
 def generate_openai_response(system_prompt, user_prompt):
     response = openai.ChatCompletion.create(
