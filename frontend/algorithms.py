@@ -2,7 +2,9 @@ import streamlit as st
 import requests
 import trueskill as ts
 import random
-import json
+import os
+
+API_URL= os.getenv('API_URL')
 
 # Initialize TrueSkill environment
 env = ts.TrueSkill()
@@ -13,7 +15,7 @@ def get_headers():
 def get_duels(tournament_id):
     try:
         headers = get_headers()
-        response = requests.get(f"http://localhost:8080/api/duel?tid={tournament_id}", headers=headers)
+        response = requests.get(f"{API_URL}/api/duel?tid={tournament_id}", headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -23,7 +25,7 @@ def get_duels(tournament_id):
 def fetch_participants_by_tournament(tournament_id):
     try:
         headers = get_headers()
-        response = requests.get(f"http://localhost:8080/participants/tournament/{tournament_id}", headers=headers)
+        response = requests.get(f"{API_URL}/participants/tournament/{tournament_id}", headers=headers)
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to retrieve participants by tournament: {e}")
@@ -68,7 +70,7 @@ def get_player_profile(player_id):
     else:
         try:
             headers = get_headers()
-            response = requests.get(f"http://localhost:8080/profile/{player_id}", headers=headers)
+            response = requests.get(f"{API_URL}/profile/{player_id}", headers=headers)
             response.raise_for_status()
             if response.status_code == 200:
                 return response.json()
@@ -95,7 +97,7 @@ def post_rand_match(tournament_id, player1, player2, round_name, winner):
 
     try:
         headers = get_headers()
-        response = requests.post("http://localhost:8080/api/duel", json=duel, headers=headers)
+        response = requests.post("{API_URL}/api/duel", json=duel, headers=headers)
         response.raise_for_status()
         if response.status_code == 201:
             return True
@@ -109,7 +111,7 @@ def post_rand_match(tournament_id, player1, player2, round_name, winner):
 def rand_match_afterwards():
     try:
         headers = get_headers()
-        response = requests.get("http://localhost:8080/tournament", headers=headers)
+        response = requests.get("{API_URL}/tournament", headers=headers)
         response.raise_for_status()
         tournaments = response.json()
         
@@ -163,14 +165,14 @@ def update_ratings(did, player1_time, player2_time):
     env = ts.TrueSkill(draw_probability=0)  # Initialize TrueSkill environment
 
     try:
-        response = requests.get(f"http://localhost:8080/api/duel/{did}", headers=get_headers())
+        response = requests.get(f"{API_URL}/api/duel/{did}", headers=get_headers())
         duel = response.json() if response.status_code == 200 else []
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching duel info: {e}")
         return []
 
     try:
-        response = requests.get(f"http://localhost:8080/profile/{duel['pid1']['profileId']}", headers=get_headers())
+        response = requests.get(f"{API_URL}/profile/{duel['pid1']['profileId']}", headers=get_headers())
         player1_profile = response.json() if response.status_code == 200 else []
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching player1 profile: {e}")
@@ -179,7 +181,7 @@ def update_ratings(did, player1_time, player2_time):
     player1_rating = player1_profile['rating']
 
     try:
-        response = requests.get(f"http://localhost:8080/profile/{duel['pid2']['profileId']}", headers=get_headers())
+        response = requests.get(f"{API_URL}/profile/{duel['pid2']['profileId']}", headers=get_headers())
         player2_profile = response.json() if response.status_code == 200 else []
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching player2 profile: {e}")
@@ -209,11 +211,11 @@ def update_ratings(did, player1_time, player2_time):
         loser_id = duel['pid1']
     
     try:
-        winner_response = requests.put(f"http://localhost:8080/profile/{winner_id['profileId']}/rating?newRating={winner_rating.mu}", headers=get_headers())
+        winner_response = requests.put(f"{API_URL}/profile/{winner_id['profileId']}/rating?newRating={winner_rating.mu}", headers=get_headers())
     except requests.exceptions.RequestException as e:
         st.error(e)
     try:
-        loser_response = requests.put(f"http://localhost:8080/profile/{loser_id['profileId']}/rating?newRating={loser_rating.mu}", headers=get_headers())
+        loser_response = requests.put(f"{API_URL}/profile/{loser_id['profileId']}/rating?newRating={loser_rating.mu}", headers=get_headers())
     except requests.exceptions.RequestException as e:
         st.error(e)
 

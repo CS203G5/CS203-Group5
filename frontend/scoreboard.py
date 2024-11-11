@@ -3,6 +3,9 @@ import websocket
 import json
 import random
 import stomper
+import os
+
+API_URL= os.getenv('API_URL')
 
 def on_message(ws, message):
     score_update = json.loads(message)

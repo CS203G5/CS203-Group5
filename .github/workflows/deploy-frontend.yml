@@ -35,8 +35,8 @@ jobs:
           pip install -r requirements.txt  
 
           # Run Streamlit frontend in the background
-          cd ~/CS203-Group5/frontend
-          nohup streamlit run main.py &  
+          # cd ~/CS203-Group5/frontend
+          # nohup streamlit run main.py &  
 
           # Restart Nginx to apply changes
           sudo systemctl restart nginx

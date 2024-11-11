@@ -5,7 +5,9 @@ import requests
 import random
 import trueskill as ts
 from algorithms import *
+import os
 
+API_URL= os.getenv('API_URL')
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False
 if "show_update_form" not in st.session_state:
@@ -35,7 +37,7 @@ def toggle_update_tournament(tournament_id):
 # API functions
 def fetch_tournaments_by_admin(organizer_id):
     try:
-        url = f"http://localhost:8080/tournament/organizer/{organizer_id}"
+        url = f"{API_URL}/tournament/organizer/{organizer_id}"
         headers = get_headers()
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -46,7 +48,7 @@ def fetch_tournaments_by_admin(organizer_id):
     
 def fetch_tournament(tournament_id):
     try:
-        url = f"http://localhost:8080/tournament/{tournament_id}"   
+        url = f"{API_URL}/tournament/{tournament_id}"   
         headers = get_headers()
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -58,7 +60,7 @@ def fetch_tournament(tournament_id):
 def create_tournament(payload):
     try:
         headers = get_headers()
-        response = requests.post(f"http://localhost:8080/tournament", json=payload, headers=headers)
+        response = requests.post(f"{API_URL}/tournament", json=payload, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -68,7 +70,7 @@ def create_tournament(payload):
 def update_tournament(tournament_id, payload):
     try:
         headers = get_headers()
-        response = requests.put(f"http://localhost:8080/tournament/{tournament_id}", json=payload, headers=headers)
+        response = requests.put(f"{API_URL}/tournament/{tournament_id}", json=payload, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -78,7 +80,7 @@ def update_tournament(tournament_id, payload):
 def delete_tournaments(tournament_ids):
     try:
         headers = get_headers()
-        response = requests.delete(f"http://localhost:8080/tournament", json=tournament_ids, headers=headers)
+        response = requests.delete(f"{API_URL}/tournament", json=tournament_ids, headers=headers)
         if response.status_code == 200:
             return True
     except requests.exceptions.RequestException as e:
@@ -250,7 +252,7 @@ def tournament_page():
                 if tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
-                    response = requests.get(f"http://localhost:8080/api/duel?tid={selected_tournament_id}", headers=headers)
+                    response = requests.get(f"{API_URL}/api/duel?tid={selected_tournament_id}", headers=headers)
 
                     if response.status_code == 200:
                         st.write("Matching was done, no more matching can be done.")

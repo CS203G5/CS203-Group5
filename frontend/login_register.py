@@ -3,11 +3,13 @@ import os, boto3, requests
 from botocore.exceptions import ClientError
 import os
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 COGNITO_CLIENT_ID = os.getenv('AWS_COGNITO_CLIENT_ID')
 COGNITO_USER_POOL_ID = os.getenv('AWS_COGNITO_USER_POOL_ID') 
 AWS_REGION = os.getenv('AWS_REGION')
+API_URL= os.getenv('API_URL')
 
 # Set up AWS Cognito client
 client = boto3.client('cognito-idp', region_name=AWS_REGION)
@@ -94,7 +96,7 @@ def get_headers():
 def fetch_profile_by_username(username):
     try:
         headers = get_headers()
-        response = requests.get(f"http://localhost:8080/profile/by-username/{username}", headers=headers)
+        response = requests.get(f"{API_URL}/profile/by-username/{username}", headers=headers)
         if response.status_code == 200:
             return response.json()
         else:
@@ -173,7 +175,7 @@ def make_authenticated_request():
         headers = {
             'Authorization': f"Bearer {st.session_state['jwt_token']}"
         }
-        response = requests.get('http://localhost:8080/tournament', headers=headers)
+        response = requests.get('{API_URL}/tournament', headers=headers)
 
         # DEBUG REMOVE
         st.write(st.session_state['jwt_token'])
