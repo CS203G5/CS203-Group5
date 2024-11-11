@@ -152,7 +152,7 @@ def rand_match_afterwards():
                 if unmatched:
                     # st.info(f"Unmatched Participant: {unmatched}")
                     post_rand_match(tournament_id, unmatched["profileId"], None, next_round_name, winner=1)
-                    st.info(f"Player {unmatched["profileId"]} has a buy into the next round")
+                    st.info("Player " + {unmatched["profileId"]} + " has a buy into the next round")
             # else:
             #     for duel in latest_round_duels: st.write(f"{duel["duel_id"]} - {len(winners)} and {len(latest_round_duels)}")
         
