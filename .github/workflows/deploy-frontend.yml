@@ -1,0 +1,52 @@
+
+name: Deploy Streamlit App to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - ci-cd
+  workflow_dispatch:
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Runs on GitHub's Ubuntu runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_FRONTEND_HOST }} << 'EOF'
+          # Update and install dependencies
+          sudo apt update -y
+          sudo apt install -y python3-pip python3-venv nginx
+
+          # Set up a virtual environment and install dependencies
+          cd ~/CS203-Group5
+          git pull origin main
+          source venv/bin/activate
+          pip install -r requirements.txt  
+
+          # Run Streamlit frontend in the background
+          cd ~/CS203-Group5/frontend
+          nohup streamlit run main.py &  
+
+          # Restart Nginx to apply changes
+          sudo systemctl restart nginx
+
+          # Check if Nginx and Streamlit are running
+          sudo systemctl status nginx
+          ps aux | grep streamlit  # Check that Streamlit is running
+
+          exit
+        EOF
+
+    - name: Notify success
+      run: echo "Deployment Successful!"
