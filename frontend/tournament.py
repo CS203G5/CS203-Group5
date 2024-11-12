@@ -5,6 +5,7 @@ import requests
 import random
 import trueskill as ts
 from algorithms import *
+from scoreboard_websocket import live_scoreboard
 
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False
@@ -291,6 +292,9 @@ def tournament_page():
                 if tournament_data:
                     toggle_update_tournament(selected_tournament_id)
                     st.session_state["tournament_data"] = tournament_data
+
+            if st.button("Go to scoreboard"):
+                live_scoreboard(selected_tournaments[0])
 
         # Delete button
         if selected_count > 0 and not st.session_state["show_update_form"]:
