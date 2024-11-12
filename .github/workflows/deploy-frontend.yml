@@ -22,8 +22,14 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Deploy to EC2
+      env:
+        API_URL: ${{ secrets.API_URL }}
       run: |
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_FRONTEND_HOST }} << 'EOF'
+
+          # Export environment variables for use in the SSH session
+          export API_URL="$API_URL" 
+
           # Update and install dependencies
           sudo apt update -y
           sudo apt install -y python3-pip python3-venv nginx
@@ -31,12 +37,12 @@ jobs:
           # Set up a virtual environment and install dependencies
           cd ~/CS203-Group5
           git pull origin main
-          source myenv/bin/activate
+          source venv/bin/activate
           pip install -r requirements.txt  
 
           # Run Streamlit frontend in the background
-          # cd ~/CS203-Group5/frontend
-          # nohup streamlit run main.py &  
+          cd ~/CS203-Group5/frontend
+          nohup streamlit run main.py --server.port 8501 --server.headless true &
 
           # Restart Nginx to apply changes
           sudo systemctl restart nginx
