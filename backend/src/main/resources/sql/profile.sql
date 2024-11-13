@@ -5,6 +5,7 @@ DROP PROCEDURE IF EXISTS get_profile_by_id;
 DROP PROCEDURE IF EXISTS get_profiles_by_username;
 DROP PROCEDURE IF EXISTS get_profiles_by_email;
 DROP PROCEDURE IF EXISTS delete_profile;
+DROP PROCEDURE IF EXISTS create_profile_with_defaults;
 
 DELIMITER $$
 
@@ -30,6 +31,12 @@ END$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_profile`(IN p_profile_id BIGINT)
 BEGIN
     DELETE FROM profile WHERE profile_id = p_profile_id;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `create_profile_with_defaults`(IN p_username VARCHAR(255))
+BEGIN
+    INSERT INTO profile (bio, email, privacy_settings, rating, role, username)
+    VALUES (NULL, 'newuser@example.com', 'public', 0, 'USER', p_username);
 END$$
 
 DELIMITER ;
