@@ -32,22 +32,41 @@ jobs:
           BASTION_HOST: ${{ secrets.EC2_BACKEND_HOST }}
           MYSQL_PRIVATE_HOST: ${{ secrets.EC2_MYSQL_HOST }}
           MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          USER: ${{ secrets.EC2_GENERAL_USER }}
         run: |
           echo "$SSH_KEY" > ssh_key
           chmod 600 ssh_key
           # Establish SSH tunnel
-          ssh -N -L 3306:$MYSQL_PRIVATE_HOST:$MYSQL_PORT -i ssh_key -o "StrictHostKeyChecking=no" ${{ secrets.EC2_GENERAL_USER }}@$BASTION_HOST &
+          ssh -N -L 3306:$MYSQL_PRIVATE_HOST:$MYSQL_PORT -i ssh_key -o "StrictHostKeyChecking=no" $USER@$BASTION_HOST &
+          sleep 5 # Give the tunnel time to establish
+
+      # Build Docker image
+      - name: Build Docker Image
+        run: |
+          cd backend # Adjust this path if needed based on your repository structure
+          docker build -t spring-boot-app .
+
+      # Run Docker container for Spring Boot application
+      - name: Run Spring Boot Docker Container
+        env:
+          DB_URL: ${{ secrets.MYSQL_URL }}
+          DB_USERNAME: ${{ secrets.MYSQL_USER }}
+          DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        run: |
+          docker run -d --name spring-boot-app \
+            -e SPRING_DATASOURCE_URL=$DB_URL \
+            -e SPRING_DATASOURCE_USERNAME=$DB_USERNAME \
+            -e SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD \
+            -p 8080:8080 spring-boot-app
 
       # Run Integration Tests with Maven
       - name: Run Integration Tests with Maven
-        env:
-          DB_URL: ${{ secrets.MYSQL_URL }}
-          DB_USERNAME: ${{ secrets.MYSQL_DATABASE }}
-          DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
-          ssh -N -L 3306:$MYSQL_PRIVATE_HOST:$MYSQL_PORT -i ssh_key -o "StrictHostKeyChecking=no" ${{ secrets.EC2_GENERAL_USER }}@$BASTION_HOST &
-          # Run integration tests using Maven
-          cd ~/CS203-Group5/backend
-          mvn -B verify -Dspring.datasource.url=$DB_URL \
-                      -Dspring.datasource.username=$DB_USERNAME \
-                      -Dspring.datasource.password=$DB_PASSWORD
+          cd backend # Adjust this path if needed based on your repository structure
+          mvn -B verify
+          
+      # Clean up Docker container
+      - name: Clean up Docker Container
+        run: |
+          docker stop spring-boot-app
+          docker rm spring-boot-app
