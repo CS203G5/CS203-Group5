@@ -1,0 +1,67 @@
+name: Deploy Streamlit App to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - ci-cd-integration
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy to EC2
+      env:
+        API_URL: ${{ secrets.API_URL }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_FRONTEND_HOST }} << 'EOF'
+
+          # Export environment variables for use in the SSH session
+          export API_URL="$API_URL"
+          export OPENAI_API_KEY="$OPENAI_API_KEY"
+
+          # Update and install dependencies
+          sudo apt update -y
+          sudo apt install -y python3-pip python3-venv nginx
+
+          # Navigate to the project directory and pull latest code
+          cd ~/CS203-Group5
+          git pull origin ci-cd-integration          # testing branch
+          git checkout ci-cd-integration             # testing branch
+          git pull origin ci-cd-integration          # testing branch
+          # git pull origin main          # uncomment for main branch
+
+          # Set up the virtual environment and install dependencies
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+          # Restart Streamlit via pm2 (pm2 will reload the process)
+          cd ~/CS203-Group5/frontend
+          pm2 restart streamlit || pm2 start "venv/bin/python3 -m streamlit run frontend/main.py --server.port 8501 --server.headless true" --name streamlit --cwd ~/CS203-Group5
+
+          # Restart Nginx to apply changes
+          sudo systemctl restart nginx
+
+          # Confirm that services are running
+          sudo systemctl status nginx
+          pm2 status streamlit  # Check Streamlit status in pm2
+
+          exit
+        EOF
+
+    - name: Notify success
+      run: echo "Deployment Successful!"

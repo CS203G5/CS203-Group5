@@ -1,11 +1,15 @@
 import streamlit as st
 import requests
 
-PROFILE_URL = "http://localhost:8080/profile"
+from dotenv import load_dotenv
+import os
 
-def get_profile(profile_id, jwt_token):
-    headers = {"Authorization": f"Bearer {jwt_token}"}
-    # st.write(f"jwt_token: {jwt_token}")
+load_dotenv()
+API_URL= os.getenv('API_URL')
+PROFILE_URL = f"{API_URL}/profile"
+
+def get_profile(profile_id):
+    headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
     try:
         response = requests.get(f"{PROFILE_URL}/{profile_id}", headers=headers)
         response.raise_for_status()
@@ -49,7 +53,7 @@ def profile_page():
     profile_id = st.session_state['profile_id']
     jwt_token = st.session_state['jwt_token']
 
-    profile = get_profile(profile_id, jwt_token)
+    profile = get_profile(profile_id)
     if not profile:
         return  
 
@@ -65,8 +69,8 @@ def profile_page():
 
     # Profile update form
     with st.form("profile_form"):
-        username_input = st.text_input("Username", value=profile.get('username', ''))
-        email_input = st.text_input("Email", value=profile.get('email', ''))
+        username_input = st.text_input("Username", value=profile.get('username', ''), disabled=True)
+        email_input = st.text_input("Email", value=profile.get('email', ''), disabled=True)
         bio_input = st.text_area("Bio", value=profile.get('bio', ''))
         privacy_settings_input = st.selectbox(
             "Privacy Settings", 
@@ -84,7 +88,7 @@ def profile_page():
             }
             if update_profile(profile_id, jwt_token, data):
                 # Optionally refresh the profile data after successful update
-                profile = get_profile(profile_id, jwt_token)
+                profile = get_profile(profile_id)
 
 # To run the profile page
 if __name__ == "__main__":

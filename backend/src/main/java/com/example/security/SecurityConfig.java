@@ -3,11 +3,10 @@ package com.example.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
@@ -36,19 +35,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Authorize HTTP requests using the new authorizeHttpRequests method
+            .csrf(csrf -> csrf.disable())  // Disable CSRF for simplicity in REST APIs
             .authorizeHttpRequests(auth -> auth
+                // Public endpoints that don't require authentication
+                .requestMatchers(HttpMethod.POST, "/profile").permitAll()
                 .requestMatchers("/swagger-ui/**", 
                                "/swagger-ui.html", 
                                "/v3/api-docs/**", 
                                "/api-docs/**").permitAll()
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
-                // .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
-                // .requestMatchers(ADMIN_MATCHERS).permitAll()   
-                .requestMatchers("/api/duel/**").permitAll()
+                // Allow GET requests to public endpoints
+                .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
+                // Require authentication for admin endpoints
+                .requestMatchers(ADMIN_MATCHERS).authenticated()
+                .requestMatchers(ADMIN_MATCHERS).hasRole("ADMIN")
+                // All other requests need authentication
                 .anyRequest().authenticated()
             )
-            // Enable OAuth2 Resource Server and configure JWT validation
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(Customizer.withDefaults())
             );

@@ -2,11 +2,16 @@ import streamlit as st
 import requests
 import trueskill as ts
 import random
-import json
+from dotenv import load_dotenv
+import os
 
-DUEL_URL = "http://localhost:8080/api/duel"
-PARTICIPANT_URL = "http://localhost:8080/participants"
-PROFILE_URL = "http://localhost:8080/profile"
+load_dotenv()
+API_URL= os.getenv('API_URL')
+
+DUEL_URL = f"{API_URL}/api/duel"
+PARTICIPANT_URL = f"{API_URL}/participants"
+PROFILE_URL = f"{API_URL}/profile"
+TOURNAMENT_URL = f"{API_URL}/tournament"
 
 # Initialize TrueSkill environment
 env = ts.TrueSkill()
@@ -99,7 +104,7 @@ def post_matches(tournament_id, player1, player2, round_name, winner):
 
     try:
         headers = get_headers()
-        response = requests.post("{DUEL_URL}", json=duel, headers=headers)
+        response = requests.post(f"{DUEL_URL}", json=duel, headers=headers)
         response.raise_for_status()
         if response.status_code == 201:
             return True
@@ -113,7 +118,7 @@ def post_matches(tournament_id, player1, player2, round_name, winner):
 def matchmaking_afterwards():
     try:
         headers = get_headers()
-        response = requests.get("http://localhost:8080/tournament", headers=headers)
+        response = requests.get(f"{TOURNAMENT_URL}", headers=headers)
         response.raise_for_status()
         tournaments = response.json()
         
@@ -159,7 +164,7 @@ def matchmaking_afterwards():
                 if unmatched:
                     # st.info(f"Unmatched Participant: {unmatched}")
                     post_matches(tournament_id, unmatched["profileId"], None, next_round_name, winner=1)
-                    st.info(f"Player {unmatched["profileId"]} has a buy into the next round")
+                    st.info("Player " + unmatched["profileId"] + " has a buy into the next round")
             # else:
             #     for duel in latest_round_duels: st.write(f"{duel["duel_id"]} - {len(winners)} and {len(latest_round_duels)}")
         
