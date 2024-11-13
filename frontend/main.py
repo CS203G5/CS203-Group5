@@ -5,6 +5,9 @@ from tournament import tournament_page
 from tournaments_avail import tournaments_avail_page
 from scoreboard_websocket import update_scoreboard
 
+#### DEBUGGING ####
+# to keep the files up to date
+
 from RAG import show_rag_assistant
 
 def initialize_session_state():
