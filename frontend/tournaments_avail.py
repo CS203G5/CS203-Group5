@@ -1,8 +1,10 @@
 import streamlit as st
 import requests
 from datetime import datetime
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 API_URL= os.getenv('API_URL')
 def get_headers():
     if 'jwt_token' in st.session_state:

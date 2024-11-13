@@ -5,8 +5,10 @@ import requests
 import random
 import trueskill as ts
 from algorithms import *
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 API_URL= os.getenv('API_URL')
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False

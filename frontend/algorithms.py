@@ -2,8 +2,10 @@ import streamlit as st
 import requests
 import trueskill as ts
 import random
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 API_URL= os.getenv('API_URL')
 
 # Initialize TrueSkill environment

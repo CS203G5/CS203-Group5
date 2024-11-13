@@ -7,9 +7,6 @@ from scoreboard_websocket import live_scoreboard, update_scoreboard
 from algorithms import rand_match_afterwards
 
 from RAG import show_rag_assistant
-import os
-
-API_URL= os.getenv('API_URL')
 
 def initialize_session_state():
     if "username" not in st.session_state:

@@ -6,8 +6,10 @@ import threading
 import pandas as pd
 import trueskill as ts
 from algorithms import rand_match_afterwards, update_ratings
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 API_URL= os.getenv('API_URL')
 
 def get_headers():
