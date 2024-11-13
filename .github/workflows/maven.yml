@@ -45,6 +45,7 @@ jobs:
           DB_USERNAME: ${{ secrets.MYSQL_DATABASE }}
           DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
+          ssh -N -L 3306:$MYSQL_PRIVATE_HOST:$MYSQL_PORT -i ssh_key -o "StrictHostKeyChecking=no" ${{ secrets.EC2_GENERAL_USER }}@$BASTION_HOST &
           # Run integration tests using Maven
           cd ~/CS203-Group5/backend
           mvn -B verify -Dspring.datasource.url=$DB_URL \
