@@ -5,9 +5,9 @@ PROFILE_URL = "http://localhost:8080/profile"
 
 def get_profile(profile_id, jwt_token):
     headers = {"Authorization": f"Bearer {jwt_token}"}
-    st.write(f"jwt_token: {jwt_token}")
+    # st.write(f"jwt_token: {jwt_token}")
     try:
-        response = requests.get(f"{API_URL}/{profile_id}", headers=headers)
+        response = requests.get(f"{PROFILE_URL}/{profile_id}", headers=headers)
         response.raise_for_status()
         profile_data = response.json()
         profile_data['rank'] = get_rank(profile_data.get('rating', 0))
@@ -33,7 +33,7 @@ def get_rank(rating):
 def update_profile(profile_id, jwt_token, data):
     headers = {"Authorization": f"Bearer {jwt_token}"}
     try:
-        response = requests.put(f"{API_URL}/{profile_id}", json=data, headers=headers)
+        response = requests.put(f"{PROFILE_URL}/{profile_id}", json=data, headers=headers)
         response.raise_for_status()
         st.success("Profile updated successfully.")
         return True
