@@ -210,7 +210,7 @@ def make_authenticated_request():
         headers = {
             'Authorization': f"Bearer {st.session_state['jwt_token']}"
         }
-        response = requests.get('{API_URL}/tournament', headers=headers)
+        response = requests.get(f'{API_URL}/tournament', headers=headers)
 
         # DEBUG REMOVE
         st.write(st.session_state['jwt_token'])
