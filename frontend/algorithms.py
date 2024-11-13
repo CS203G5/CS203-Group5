@@ -27,10 +27,10 @@ def get_duels(tournament_id):
             return response.json()
         else:
             # Log the error and return an empty list if status code is not 200
-            st.error(f"Error fetching duels: {response.status_code} - {response.text}")
+            # st.error(f"Error fetching duels: {response.status_code} - {response.text}")
             return []
     except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching duels HERE: {e}")
+        st.error(f"Error fetching duels: {e}")
         return []
 
 def fetch_participants_by_tournament(tournament_id):
@@ -110,11 +110,11 @@ def post_matches(tournament_id, player1, player2, round_name, winner):
         headers = get_headers()
         response = requests.post(f"{DUEL_URL}", json=duel, headers=headers)
         response.raise_for_status()
-        # if response.status_code == 201:
-        #     return True
-        # else:
-        #     st.error(f"Failed to post duel: {response.status_code} - {response.text}")
-        #     return False
+        if response.status_code == 201:
+            return True
+        else:
+            st.error(f"Failed to post duel: {response.status_code} - {response.text}")
+            return False
     except requests.exceptions.RequestException as e:
         st.error(e)
         return False
