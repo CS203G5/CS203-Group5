@@ -61,8 +61,8 @@ def profile_page():
     st.text(f"Role: {role}")  # Display the role but don't allow editing
 
     with st.form("profile_form"):
-        username_input = st.text_input("Username", value=profile.get('username', ''))
-        email_input = st.text_input("Email", value=profile.get('email', ''))
+        username_input = st.text_input("Username", value=profile.get('username', ''), disabled=True)
+        email_input = st.text_input("Email", value=profile.get('email', ''), disabled=True)
         bio_input = st.text_area("Bio", value=profile.get('bio', ''))
         privacy_settings_input = st.selectbox(
             "Privacy Settings", 
