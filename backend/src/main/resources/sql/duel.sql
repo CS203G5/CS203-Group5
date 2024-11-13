@@ -38,17 +38,17 @@ DELIMITER $$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getDuelsByTournament`(IN p_tournament_id BIGINT)
 BEGIN
-	SELECT * FROM Duel WHERE tournament_id = p_tournament_id;
+	SELECT * FROM duel WHERE tournament_id = p_tournament_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getDuelsByRoundName`(IN p_round_name VARCHAR(255))
 BEGIN
-	SELECT * FROM Duel WHERE round_name = p_round_name;
+	SELECT * FROM duel WHERE round_name = p_round_name;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getDuelsByPlayer`(IN p_pid BIGINT)
 BEGIN
-    SELECT * FROM Duel WHERE pid1 = p_pid OR pid2 = p_pid;
+    SELECT * FROM duel WHERE pid1 = p_pid OR pid2 = p_pid;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `createDuel`(
@@ -65,7 +65,7 @@ BEGIN
     ELSE
         IF EXISTS (
             SELECT 1 
-            FROM Duel 
+            FROM duel 
             WHERE tournament_id = p_tid 
                 AND round_name = p_round_name 
                 AND pid1 = p_pid1 
@@ -83,7 +83,7 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteDuel`(IN p_duel_id BIGINT)
 BEGIN
-    DELETE FROM Duel WHERE duel_id = p_duel_id;
+    DELETE FROM duel WHERE duel_id = p_duel_id;
 END$$
 
 

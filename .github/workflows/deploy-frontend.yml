@@ -1,4 +1,3 @@
-
 name: Deploy Streamlit App to EC2
 
 on:
@@ -7,7 +6,7 @@ on:
       - main
       - ci-cd
   workflow_dispatch:
-    
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -28,30 +27,35 @@ jobs:
         ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_FRONTEND_HOST }} << 'EOF'
 
           # Export environment variables for use in the SSH session
-          export API_URL="$API_URL" 
+          export API_URL="$API_URL"
 
           # Update and install dependencies
           sudo apt update -y
           sudo apt install -y python3-pip python3-venv nginx
 
-          # Set up a virtual environment and install dependencies
+          # Navigate to the project directory and pull latest code
           cd ~/CS203-Group5
-          git checkout ci-cd             # testing
-          git pull origin ci-cd          # testing
-          # git pull origin main
-          source venv/bin/activate
-          pip install -r requirements.txt  
+          git checkout ci-cd             # testing branch
+          git pull origin ci-cd          # testing branch
+          # git pull origin main          # uncomment for main branch
 
-          # Run Streamlit frontend in the background
+          # Set up the virtual environment and install dependencies
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+          # Restart Streamlit via pm2 (pm2 will reload the process)
           cd ~/CS203-Group5/frontend
-          nohup streamlit run main.py --server.port 8501 --server.headless true &
+          pm2 restart streamlit || pm2 start "venv/bin/python3 -m streamlit run frontend/main.py --server.port 8501 --server.headless true" --name streamlit --cwd ~/CS203-Group5
 
           # Restart Nginx to apply changes
           sudo systemctl restart nginx
 
-          # Check if Nginx and Streamlit are running
+          # Confirm that services are running
           sudo systemctl status nginx
-          ps aux | grep streamlit  # Check that Streamlit is running
+          pm2 status streamlit  # Check Streamlit status in pm2
 
           exit
         EOF
