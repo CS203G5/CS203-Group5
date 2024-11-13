@@ -53,7 +53,7 @@ def profile_page():
     profile_id = st.session_state['profile_id']
     jwt_token = st.session_state['jwt_token']
 
-    profile = get_profile(profile_id, jwt_token)
+    profile = get_profile(profile_id)
     if not profile:
         return  
 
@@ -88,7 +88,7 @@ def profile_page():
             }
             if update_profile(profile_id, jwt_token, data):
                 # Optionally refresh the profile data after successful update
-                profile = get_profile(profile_id, jwt_token)
+                profile = get_profile(profile_id)
 
 # To run the profile page
 if __name__ == "__main__":
