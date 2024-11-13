@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
+      - ci-cd-integration
   pull_request:
-    branches:
-      - main
+    # branches:
+      # - main
 
 jobs:
   build:
