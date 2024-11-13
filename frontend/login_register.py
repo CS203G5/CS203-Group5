@@ -1,5 +1,5 @@
 import streamlit as st
-import os, boto3, requests
+import os, boto3, requests, pymysql
 from botocore.exceptions import ClientError
 import os
 from dotenv import load_dotenv
@@ -140,12 +140,26 @@ def register_user():
             st.success("Registration successful! Please check your email for verification.")
             st.session_state['username'] = username
             st.session_state['registered'] = True  
+            create_profile(username)
         except ClientError as e:
             st.error(f"Registration failed: {e.response['Error']['Message']}")
 
     if st.session_state.get('registered', False):
         confirm_registration()
 
+def create_profile(username):
+    connection = pymysql.connect(host='localhost',
+                                 user='root',
+                                 password='your_password',
+                                 database='cs203_db')
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('create_profile_with_defaults', (username,))
+            connection.commit()
+            st.success(f"Profile created for {username}")
+    finally:
+        connection.close()
 
 def confirm_registration():
     if 'username' in st.session_state:
