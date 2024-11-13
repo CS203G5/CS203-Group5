@@ -9,7 +9,7 @@ API_URL= os.getenv('API_URL')
 
 def get_profile(profile_id):
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.get(f"{API_URL}/{profile_id}", headers=headers)
+    response = requests.get(f"{API_URL}/profile/{profile_id}", headers=headers)
     if response.status_code == 200:
         return response.json()
     else:
@@ -25,7 +25,7 @@ def update_profile(username, email, bio, privacy_settings, role):
         "role": role  # Send the role back to the server even though users can't edit it
     }
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.put(f"{API_URL}/{st.session_state['profile_id']}", json=data, headers=headers)
+    response = requests.put(f"{API_URL}/profile/{st.session_state['profile_id']}", json=data, headers=headers)
     if response.status_code == 200:
         st.success("Profile updated successfully.")
         return True
