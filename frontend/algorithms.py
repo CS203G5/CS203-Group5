@@ -23,7 +23,6 @@ def get_duels(tournament_id):
     try:
         headers = get_headers()
         response = requests.get(f"{DUEL_URL}?tid={tournament_id}", headers=headers)
-        response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching duels HERE: {e}")
@@ -60,6 +59,7 @@ def randomly_pair_participants(participants):
 
 def get_next_round_name(tournament_id):
     duels = get_duels(tournament_id)
+    st.write(duels)
     if duels == []:
         return "1"
     else:
