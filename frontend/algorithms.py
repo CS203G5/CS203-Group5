@@ -23,7 +23,12 @@ def get_duels(tournament_id):
     try:
         headers = get_headers()
         response = requests.get(f"{DUEL_URL}?tid={tournament_id}", headers=headers)
-        return response.json()
+        if response.status_code == 200:
+            return response.json()
+        else:
+            # Log the error and return an empty list if status code is not 200
+            st.error(f"Error fetching duels: {response.status_code} - {response.text}")
+            return []
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching duels HERE: {e}")
         return []
