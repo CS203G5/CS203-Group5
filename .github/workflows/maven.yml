@@ -31,7 +31,7 @@ jobs:
           SSH_KEY: ${{ secrets.EC2_KEY }}
           BASTION_HOST: ${{ secrets.EC2_BACKEND_HOST }}
           MYSQL_PRIVATE_HOST: ${{ secrets.EC2_MYSQL_HOST }}
-          MYSQL_PORT: "3306"
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
         run: |
           echo "$SSH_KEY" > ssh_key
           chmod 600 ssh_key
@@ -46,6 +46,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
           # Run integration tests using Maven
+          cd ~/CS203-Group5/backend
           mvn -B verify -Dspring.datasource.url=$DB_URL \
                       -Dspring.datasource.username=$DB_USERNAME \
                       -Dspring.datasource.password=$DB_PASSWORD
