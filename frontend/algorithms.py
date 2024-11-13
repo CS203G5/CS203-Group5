@@ -26,7 +26,7 @@ def get_duels(tournament_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        # st.error(f"Error fetching duels: {e}")
+        st.error(f"Error fetching duels HERE: {e}")
         return []
 
 def fetch_participants_by_tournament(tournament_id):
