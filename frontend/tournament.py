@@ -10,6 +10,7 @@ import os
 
 load_dotenv()
 API_URL= os.getenv('API_URL')
+
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False
 if "show_update_form" not in st.session_state:
@@ -41,7 +42,7 @@ def fetch_tournaments_by_admin(organizer_id):
     try:
         url = f"{API_URL}/tournament/organizer/{organizer_id}"
         headers = get_headers()
-        response = requests.get(url, headers=headers)
+        response = requests.get(f"{API_URL}/tournament/organizer/{organizer_id}", headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -52,7 +53,7 @@ def fetch_tournament(tournament_id):
     try:
         url = f"{API_URL}/tournament/{tournament_id}"   
         headers = get_headers()
-        response = requests.get(url, headers=headers)
+        response = requests.get(f"{API_URL}/tournament/{tournament_id}", headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
