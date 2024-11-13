@@ -7,12 +7,12 @@ DELIMITER $$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE getParticipantsByUserId(IN userId BIGINT)
 BEGIN
-    SELECT * FROM Participant WHERE user_id = userId;
+    SELECT * FROM participant WHERE user_id = userId;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE getParticipantsByTournamentId(IN tournamentId BIGINT)
 BEGIN
-    SELECT * FROM Participant WHERE tournament_id = tournamentId;
+    SELECT * FROM participant WHERE tournament_id = tournamentId;
 END$$
 
 DELIMITER ;

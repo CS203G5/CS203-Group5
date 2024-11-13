@@ -6,6 +6,12 @@ import threading
 import pandas as pd
 import trueskill as ts
 from algorithms import matchmaking_afterwards, update_ratings
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_URL= os.getenv('API_URL')
+DUEL_URL = f"{API_URL}/api/duel"
 
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -29,7 +35,7 @@ def connect_ws():
 def update_duel_result(did, result_data):
     try: # Add error handling
         headers = get_headers()
-        url = f"http://localhost:8080/api/duel/{did}/result"
+        url = f"{DUEL_URL}/duel/{did}/result"
         response = requests.put(url, json=result_data, headers=headers)
         st.success(F"Duel result updated successfully. {result_data}")
     except requests.exceptions.RequestException as e:
@@ -38,7 +44,7 @@ def update_duel_result(did, result_data):
 # Function to fetch all duels
 def fetch_duels(tid):
     try: # Add error handling
-        url = f"http://localhost:8080/api/duel?tid={tid}"
+        url = f"{DUEL_URL}?tid={tid}"
         response = requests.get(url)
         return response.json() if response.status_code == 200 else []
     except requests.exceptions.RequestException as e:

@@ -29,7 +29,7 @@ def main():
             register_user()
     else:
         st.sidebar.success(f"Logged in as {st.session_state['username']}")
-            page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Available Tournaments", "Update Scoreboard", "AI Assistant", "Logout"])
+        page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Available Tournaments", "Update Scoreboard", "AI Assistant", "Logout"])
 
         if page_choice == "Profile":
             profile_page()

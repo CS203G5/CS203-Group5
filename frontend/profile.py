@@ -1,7 +1,12 @@
 import streamlit as st
 import requests
 
-PROFILE_URL = "http://localhost:8080/profile"
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_URL= os.getenv('API_URL')
+PROFILE_URL = f"{API_URL}/profile"
 
 def get_profile(profile_id):
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
