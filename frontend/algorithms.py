@@ -64,8 +64,7 @@ def randomly_pair_participants(participants):
 
 def get_next_round_name(tournament_id):
     duels = get_duels(tournament_id)
-    if duels == [] or duels["status"] == 500:
-        st.write(duels)
+    if duels == []:
         return "1"
     else:
         rounds = [duel["round_name"] for duel in duels if duel["winner"] not in (None, 0)]
