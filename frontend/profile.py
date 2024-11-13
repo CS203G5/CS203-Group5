@@ -9,7 +9,7 @@ API_URL= os.getenv('API_URL')
 
 def get_profile(profile_id):
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.get(f"{API_URL}/profile/{profile_id}", headers=headers)
+    response = requests.get(f"{API_URL}/profile/{profile_id}", headers=headers) #edited
     if response.status_code == 200:
         return response.json()
     else:
