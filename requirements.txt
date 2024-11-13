@@ -2,6 +2,7 @@ boto3
 botocore
 datetime
 pandas
+pymysql
 requests
 streamlit
 langchain
@@ -9,5 +10,5 @@ langchain-community
 faiss-cpu
 openai==0.28
 websocket-client
-# threading
 trueskill
+python-dotenv
