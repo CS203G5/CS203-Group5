@@ -1,23 +1,39 @@
-name: Integration Tests with MySQL
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
-      - ci-cd-integration
+      - ci-cd
   pull_request:
     branches:
       - main
+      - ci-cd
 
 jobs:
-  integration-test:
+  build:
     runs-on: ubuntu-latest
 
-    steps:
-      # Check out the code
-      - uses: actions/checkout@v4
+    services:
+      mysql:
+        image: mysql:latest
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
-      # Set up JDK 17
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -25,33 +41,21 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Set up SSH Tunnel to MySQL through Bastion Host
-      - name: Set up SSH tunnel to MySQL
-        env:
-          SSH_KEY: ${{ secrets.EC2_KEY }}
-          BASTION_HOST: ${{ secrets.EC2_BACKEND_HOST }}
-          MYSQL_PRIVATE_HOST: ${{ secrets.EC2_MYSQL_HOST }}
-          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
-          USER: ${{ secrets.EC2_GENERAL_USER }}
+      - name: Build with Maven
         run: |
-          echo "$SSH_KEY" > ssh_key
-          chmod 600 ssh_key
-          # Establish SSH tunnel
-          ssh -N -L 3306:$MYSQL_PRIVATE_HOST:$MYSQL_PORT -i ssh_key -o "StrictHostKeyChecking=no" $USER@$BASTION_HOST &
-          sleep 5 # Give the tunnel time to establish
+          cd backend
+          mvn -B package --file pom.xml -DskipTests
 
-      # Build Docker image
       - name: Build Docker Image
         run: |
-          cd backend # Adjust this path if needed based on your repository structure
+          cd backend
           docker build -t spring-boot-app .
 
-      # Run Docker container for Spring Boot application
       - name: Run Spring Boot Docker Container
         env:
-          DB_URL: ${{ secrets.MYSQL_URL }}
-          DB_USERNAME: ${{ secrets.MYSQL_USER }}
-          DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          DB_URL: jdbc:mysql://localhost:3306/test_db
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_password
         run: |
           docker run -d --name spring-boot-app \
             -e SPRING_DATASOURCE_URL=$DB_URL \
@@ -59,13 +63,14 @@ jobs:
             -e SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD \
             -p 8080:8080 spring-boot-app
 
-      # Run Integration Tests with Maven
+      - name: Wait for Spring Boot to start
+        run: sleep 30
+
       - name: Run Integration Tests with Maven
         run: |
-          cd backend # Adjust this path if needed based on your repository structure
+          cd backend
           mvn -B verify
-          
-      # Clean up Docker container
+
       - name: Clean up Docker Container
         run: |
           docker stop spring-boot-app
