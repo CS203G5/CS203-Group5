@@ -5,10 +5,9 @@ on:
     branches:
       - main
       - ci-cd
-  pull_request:
-    branches:
-      - main
-      - ci-cd
+  # pull_request:
+  #   branches:
+  #     - main
 
 jobs:
   build:
