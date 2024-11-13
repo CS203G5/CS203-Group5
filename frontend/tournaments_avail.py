@@ -18,7 +18,7 @@ def get_all_tournaments():
     # Fetch all tournaments data
     try:
         headers = get_headers()
-        response = requests.get('{API_URL}/tournament', headers=headers)
+        response = requests.get(f'{API_URL}/tournament', headers=headers)
         if response.status_code == 200:
             all_tournaments = response.json()
             return all_tournaments
