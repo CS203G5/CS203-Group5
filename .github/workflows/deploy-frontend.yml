@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - ci-cd
+      - ci-cd-integration
   workflow_dispatch:
 
 jobs:
@@ -37,8 +37,9 @@ jobs:
 
           # Navigate to the project directory and pull latest code
           cd ~/CS203-Group5
-          git checkout ci-cd             # testing branch
-          git pull origin ci-cd          # testing branch
+          git pull origin ci-cd-integration          # testing branch
+          git checkout ci-cd-integration             # testing branch
+          git pull origin ci-cd-integration          # testing branch
           # git pull origin main          # uncomment for main branch
 
           # Set up the virtual environment and install dependencies
