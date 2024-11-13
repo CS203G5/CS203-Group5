@@ -112,7 +112,7 @@ def post_matches(tournament_id, player1, player2, round_name, winner):
         #     st.error(f"Failed to post duel: {response.status_code} - {response.text}")
         #     return False
     except requests.exceptions.RequestException as e:
-        st.error(f"Error posting duel: {e}")
+        st.error(e)
         return False
 
 def matchmaking_afterwards():
