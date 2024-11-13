@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from datetime import datetime
+from scoreboard_websocket import live_scoreboard
 
 def get_headers():
     if 'jwt_token' in st.session_state:
@@ -107,3 +108,4 @@ def tournaments_avail_page():
                     st.warning("You have already signed up for this tournament")
             else:
                 st.warning("Sign-up are closed")
+            live_scoreboard(tournament['tournament_id'])

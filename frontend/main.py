@@ -3,7 +3,10 @@ from login_register import login_user, register_user
 from profile import profile_page
 from tournament import tournament_page
 from tournaments_avail import tournaments_avail_page
-from scoreboard_websocket import live_scoreboard, update_scoreboard
+from scoreboard_websocket import update_scoreboard
+
+#### DEBUGGING ####
+# to keep the files up to date
 
 from RAG import show_rag_assistant
 
@@ -29,7 +32,11 @@ def main():
             register_user()
     else:
         st.sidebar.success(f"Logged in as {st.session_state['username']}")
-            page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Available Tournaments", "Update Scoreboard", "AI Assistant", "Logout"])
+        # if st.session_state['role'] == "PLAYER":
+        #     page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Update Scoreboard", "AI Assistant", "Logout"])
+        # else:
+        #     page_choice = st.sidebar.radio("Choose an option", ["Profile", "Available Tournaments", "AI Assistant", "Logout"])
+        page_choice = st.sidebar.radio("Choose an option", ["Profile", "Tournament", "Available Tournaments", "Update Scoreboard", "AI Assistant", "Logout"])
 
         if page_choice == "Profile":
             profile_page()
