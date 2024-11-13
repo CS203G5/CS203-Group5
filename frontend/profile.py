@@ -8,9 +8,12 @@ load_dotenv()
 API_URL= os.getenv('API_URL')
 PROFILE_URL = f"{API_URL}/profile"
 
+# DEBUG: To Remove
+st.write(st.session_state['jwt_token'])
+
 def get_profile(profile_id):
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-    response = requests.get(f"{PROFILE_URL}/{st.session_state['profile_id']}", headers=headers)
+    response = requests.get(f"{PROFILE_URL}/{profile_id}", headers=headers)
     if response.status_code == 200:
         return response.json()
     else:
