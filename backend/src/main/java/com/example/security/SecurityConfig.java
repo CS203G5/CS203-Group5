@@ -2,12 +2,12 @@ package com.example.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -37,8 +37,10 @@ public class SecurityConfig {
             // Authorize HTTP requests using the new authorizeHttpRequests method
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
-                // .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
-                // .requestMatchers(ADMIN_MATCHERS).permitAll()   
+                .requestMatchers(new OrRequestMatcher(
+                    // Allow POST requests to /profile without authentication
+                    new AntPathRequestMatcher("/profile", "POST")
+                )).permitAll()
                 .requestMatchers("/api/duel/**").permitAll()
                 .anyRequest().authenticated()
             )
