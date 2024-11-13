@@ -22,12 +22,12 @@ jobs:
       - name: Copy SQL files to EC2 Bastion Host
         run: |
           # Copy SQL files to the Bastion Host (public EC2 instance)
-          scp -o StrictHostKeyChecking=no -r backend/src/main/resources/sql/*.sql ${{ secrets.EC2_GENERAL_USER }}@${{ secrets.EC2_FRONTEND_HOST }}:/tmp
+          scp -o StrictHostKeyChecking=no -r backend/src/main/resources/sql/*.sql ${{ secrets.EC2_USER }}@${{ secrets.EC2_FRONTEND_HOST }}:/tmp
 
       - name: Create Database and Execute SQL files on EC2 MySQL through Bastion Host
         run: |
           # SSH into the Bastion Host (public EC2 instance) and execute SQL files on the MySQL server
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_GENERAL_USER }}@${{ secrets.EC2_FRONTEND_HOST }} << EOF
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_FRONTEND_HOST }} << EOF
           
             # Create the database if it doesn't already exist
             echo "Creating database if not exists..."
