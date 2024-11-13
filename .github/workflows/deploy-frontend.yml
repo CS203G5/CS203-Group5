@@ -23,11 +23,13 @@ jobs:
     - name: Deploy to EC2
       env:
         API_URL: ${{ secrets.API_URL }}
+        # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_FRONTEND_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_FRONTEND_HOST }} << 'EOF'
 
           # Export environment variables for use in the SSH session
           export API_URL="$API_URL"
+          export OPENAI_API_KEY="$OPENAI_API_KEY"
 
           # Update and install dependencies
           sudo apt update -y
