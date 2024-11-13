@@ -27,7 +27,9 @@ public class SecurityConfig {
         "/tournament/sorted", 
         "/tournament/matching", 
         "/duel", 
-        "/duel/player/**"
+        "/duel/player/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html"
     };
     
     @Bean
@@ -37,6 +39,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints that don't require authentication
                 .requestMatchers(HttpMethod.POST, "/profile").permitAll()
+                .requestMatchers("/swagger-ui/**", 
+                               "/swagger-ui.html", 
+                               "/v3/api-docs/**", 
+                               "/api-docs/**").permitAll()
                 .requestMatchers("/auth/register", "/auth/login").permitAll()
                 // Allow GET requests to public endpoints
                 .requestMatchers(HttpMethod.GET, PERMIT_ALL_GETTERS).permitAll()
