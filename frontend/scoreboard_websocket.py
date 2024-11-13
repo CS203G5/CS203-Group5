@@ -63,12 +63,13 @@ def prepare_duel_data(duels):
                 "Duel ID": duel['duel_id'],
                 "Round": duel['roundName'],
                 "Player 1 Username": duel['pid1']['username'],
-                "Player 2 Username": duel['pid2']['username'],
+                "Player 2 Username": duel['pid2']['username'] if duel.get('pid2') and duel['pid2'].get('username') else "N/A",
                 "Player 1 Time (s)": player1Time_s,
                 "Player 2 Time (s)": player2Time_s,
                 "Winner": (
                     duel['pid1']['username'] if duel['winner'] == duel['pid1']['profileId']
-                    else duel['pid2']['username'] if duel['winner'] == duel['pid2']['profileId']
+                    # else duel['pid2']['username'] if duel['winner'] == duel['pid2']['profileId']
+                    else duel['pid2']['username'] if duel.get('pid2') and duel['pid2'].get('profileId') and duel['winner'] == duel['pid2']['profileId']
                     else "Not determined"
                 )
             }
@@ -122,24 +123,22 @@ def update_scoreboard():
         update_ratings(did, player1Time, player2Time)
         matchmaking_afterwards()
 
-def live_scoreboard():
+def live_scoreboard(tid):
     st.title("Live Duel Scoreboard")
 
     if 'duels' not in st.session_state:
-        st.session_state.duels = fetch_duels()
+        st.session_state.duels = fetch_duels(tid)
 
     duel_data = prepare_duel_data(st.session_state.duels)
 
-    # Refresh button
-    if st.button("Refresh Results"):
-        tid = 152
-        with st.spinner("Fetching latest results..."):
-            st.session_state.duels = fetch_duels(tid) 
-            duel_data = prepare_duel_data(st.session_state.duels) 
+    # if st.button("Refresh Results"):
+    with st.spinner("Fetching latest results..."):
+        st.session_state.duels = fetch_duels(tid) 
+        duel_data = prepare_duel_data(st.session_state.duels) 
 
-            # Update the cached table
-            display_duel_table(duel_data)
+        # Update the cached table
+        display_duel_table(duel_data)
 
-            # Check for errors after fetching
-            if not st.session_state.duels:
-                st.error("Failed to fetch duel results. Please try again.")
+        # Check for errors after fetching
+        if not st.session_state.duels:
+            st.error("Failed to fetch duel results. Please try again.")
