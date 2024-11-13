@@ -126,7 +126,7 @@ def register_profile(username, email):
         response = requests.post(f"{PROFILE_URL}", json=payload, headers=headers)
 
         # Check if the response was successful (status code 201 or 200)
-        if response.status_code == 201:
+        if response.status_code == 200:
             # If successful, return the response data (profile data in JSON format)
             st.success("Profile created successfully!")
             return response.json()
