@@ -38,7 +38,7 @@ public class ProfileServiceImpl implements ProfileService {
             existingProfile.setUsername(updatedProfile.getUsername());
             existingProfile.setEmail(updatedProfile.getEmail());
             existingProfile.setBio(updatedProfile.getBio());
-            existingProfile.setPrivacySettings(updatedProfile.getPrivacySettings());
+            // existingProfile.setPrivacySettings(updatedProfile.getPrivacySettings());
             return profileRepository.save(existingProfile);
         });
     }

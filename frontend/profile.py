@@ -81,7 +81,7 @@ def profile_page():
                 "username": username_input,
                 "email": email_input,
                 "bio": bio_input,
-                "privacy_settings": privacy_settings_input,
+                # "privacy_settings": privacy_settings_input,
                 "role": profile.get('role', 'PLAYER')
             }
             if update_profile(profile_id, jwt_token, data):

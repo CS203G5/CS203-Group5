@@ -25,9 +25,9 @@ public class Profile {
     @Size(max = 255)
     private String bio;
     
-    @NotNull
-    @Column(name = "privacy_settings")
-    private String privacy_settings;
+    // @NotNull
+    // @Column(name = "privacy_settings")
+    // private String privacy_settings;
 
     @Column(name = "rating", nullable = false, columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double rating = 0.0;
@@ -36,10 +36,10 @@ public class Profile {
     @NotNull(message = "Authorities should not be null")
     private String role;
 
-    public String getPrivacySettings() {
-        return this.privacy_settings;
-    }
-    public void setPrivacySettings(String privacy_settings) {
-        this.privacy_settings = privacy_settings;
-    }
+    // public String getPrivacySettings() {
+    //     return this.privacy_settings;
+    // }
+    // public void setPrivacySettings(String privacy_settings) {
+    //     this.privacy_settings = privacy_settings;
+    // }
 }
