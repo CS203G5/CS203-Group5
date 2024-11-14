@@ -42,7 +42,7 @@ jobs:
             #     exit 1
             #   fi
             # done
-            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < /tmp/sqldump.sql
+            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" < /tmp/sqldump.sql
           EOF
 
       - name: Notify success
