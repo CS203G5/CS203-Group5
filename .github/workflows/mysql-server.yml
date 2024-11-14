@@ -42,7 +42,12 @@ jobs:
             #     exit 1
             #   fi
             # done
+            echo "Executing main SQL dump file"
             mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" < /tmp/sqldump.sql
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to execute main SQL dump file"
+              exit 1
+            fi          
           EOF
 
       - name: Notify success
