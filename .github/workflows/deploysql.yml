@@ -1,0 +1,48 @@
+name: Deploy SQL to EC2 MySQL
+
+on:
+  push:
+    branches:
+      - main
+      - localhost-ci-cd
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.EC2_KEY }}
+
+      - name: Copy SQL files to EC2 Bastion Host
+        run: |
+          # Copy SQL files to the Bastion Host (public EC2 instance)
+          scp -o StrictHostKeyChecking=no -r backend/src/main/resources/sql/*.sql ${{ secrets.EC2_GENERAL_USER }}@54.169.3.59:/tmp
+
+      - name: Create Database and Execute SQL files on EC2 MySQL through Bastion Host
+        run: |
+          # SSH into the Bastion Host (public EC2 instance) and execute SQL files on the MySQL server
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_GENERAL_USER }}@54.169.3.59 << EOF
+          
+            # Create the database if it doesn't already exist
+            echo "Creating database if not exists..."
+            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h 54.169.3.59 -e "CREATE DATABASE IF NOT EXISTS \${{ secrets.MYSQL_DATABASE }}\"
+      
+            # Explicitly execute SQL files in the correct order
+            for file in /tmp/profile.sql /tmp/participant.sql /tmp/duel.sql /tmp/tournament.sql; do
+              echo "Executing \$file on '${{ secrets.MYSQL_DATABASE }}'"
+              mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < "\$file"
+              if [ $? -ne 0 ]; then
+                echo "Error: Failed to execute \$file"
+                exit 1
+              fi
+            done
+          EOF
+
+      - name: Notify success
+        run: echo "SQL Deployment Successful!"
