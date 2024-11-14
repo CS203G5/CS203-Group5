@@ -178,6 +178,7 @@ def register_user():
             st.session_state['username'] = username
             st.session_state['registered'] = True  
             # create_profile(username)
+            # create_profile(username)
         except ClientError as e:
             st.error(f"Registration failed: {e.response['Error']['Message']}")
 
@@ -190,6 +191,13 @@ def register_user():
 #                                 password=f'{MYSQL_PASSWORD}',
 #                                 database=f'{MYSQL_DATABASE}')
 
+#     try:
+#         with connection.cursor() as cursor:
+#             cursor.callproc('create_profile_with_defaults', (username,))
+#             connection.commit()
+#             st.success(f"Profile created for {username}")
+#     finally:
+#         connection.close()
 #     try:
 #         with connection.cursor() as cursor:
 #             cursor.callproc('create_profile_with_defaults', (username,))
