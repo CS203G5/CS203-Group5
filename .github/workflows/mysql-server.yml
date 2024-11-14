@@ -33,15 +33,16 @@ jobs:
             echo "Creating database if not exists..."
             mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -e "CREATE DATABASE IF NOT EXISTS /`${{ secrets.MYSQL_DATABASE }}\`"
       
-            # Explicitly execute SQL files in the correct order
-            for file in /tmp/profile.sql /tmp/participant.sql /tmp/duel.sql /tmp/tournament.sql; do
-              echo "Executing \$file on '${{ secrets.MYSQL_DATABASE }}'"
-              mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < "\$file"
-              if [ $? -ne 0 ]; then
-                echo "Error: Failed to execute \$file"
-                exit 1
-              fi
-            done
+            # # Explicitly execute SQL files in the correct order
+            # for file in /tmp/profile.sql /tmp/participant.sql /tmp/duel.sql /tmp/tournament.sql; do
+            #   echo "Executing \$file on '${{ secrets.MYSQL_DATABASE }}'"
+            #   mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < "\$file"
+            #   if [ $? -ne 0 ]; then
+            #     echo "Error: Failed to execute \$file"
+            #     exit 1
+            #   fi
+            # done
+            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < /tmp/sqldump.sql
           EOF
 
       - name: Notify success
