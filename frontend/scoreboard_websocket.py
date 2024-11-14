@@ -135,4 +135,4 @@ def live_scoreboard(tid):
 
         # Check for errors after fetching
         if not st.session_state.duels:
-            st.error("Failed to fetch duel results. Please try again.")
+            st.write()

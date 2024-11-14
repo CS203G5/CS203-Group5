@@ -77,6 +77,7 @@ def login_user():
                 token = response['AuthenticationResult']['IdToken']
                 st.session_state['jwt_token'] = token
                 st.session_state['username'] = username
+                st.session_state['role'] = profile_info['role']
                 st.success('Login successful.')
                 
                 make_authenticated_request()
@@ -176,12 +177,12 @@ def make_authenticated_request():
         response = requests.get('http://localhost:8080/tournament', headers=headers)
 
         # DEBUG REMOVE
-        st.write(st.session_state['jwt_token'])
+        # st.write(st.session_state['jwt_token'])
         
         # DEBUG - REMOVE
-        if response.status_code == 200:
-            st.write(response.json())  # Display the JSON response in the Streamlit app
-        else:
-            st.error(f"Request failed with status code: {response.status_code}")
+        # if response.status_code == 200:
+        #     st.write(response.json())  # Display the JSON response in the Streamlit app
+        # else:
+        #     st.error(f"Request failed with status code: {response.status_code}")
     else:
         st.warning('You must log in first to make an authenticated request.')

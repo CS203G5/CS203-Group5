@@ -7,6 +7,7 @@ import json
 DUEL_URL = "http://localhost:8080/api/duel"
 PARTICIPANT_URL = "http://localhost:8080/participants"
 PROFILE_URL = "http://localhost:8080/profile"
+TOURNAMENT_URL = "http://localhost:8080/tournament"
 
 # Initialize TrueSkill environment
 env = ts.TrueSkill()
