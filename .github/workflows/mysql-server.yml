@@ -42,12 +42,15 @@ jobs:
             #     exit 1
             #   fi
             # done
-            echo "Executing main SQL dump file"
-            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" < /tmp/sqldump.sql
+
+            # Execute the SQL dump file
+            echo "Executing /tmp/sqldump.sql on '${{ secrets
+            .MYSQL_DATABASE }}'"
+            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" < "/tmp/sqldump.sql"
             if [ $? -ne 0 ]; then
-              echo "Error: Failed to execute main SQL dump file"
+              echo "Error: Failed to execute /tmp/sqldump.sql"
               exit 1
-            fi          
+            fi
           EOF
 
       - name: Notify success
