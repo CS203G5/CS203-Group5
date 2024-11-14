@@ -177,26 +177,26 @@ def register_user():
             st.success("Registration successful! Please check your email for verification.")
             st.session_state['username'] = username
             st.session_state['registered'] = True  
-            create_profile(username)
+            # create_profile(username)
         except ClientError as e:
             st.error(f"Registration failed: {e.response['Error']['Message']}")
 
     if st.session_state.get('registered', False):
         confirm_registration()
 
-def create_profile(username):
-    connection = pymysql.connect(host='localhost',
-                                 user='root',
-                                 password='your_password',
-                                 database='cs203_db')
+# def create_profile(username):
+#     connection = pymysql.connect(host=f'{MYSQL_HOST}',
+#                                 user=f'{MYSQL_USER}',
+#                                 password=f'{MYSQL_PASSWORD}',
+#                                 database=f'{MYSQL_DATABASE}')
 
-    try:
-        with connection.cursor() as cursor:
-            cursor.callproc('create_profile_with_defaults', (username,))
-            connection.commit()
-            st.success(f"Profile created for {username}")
-    finally:
-        connection.close()
+#     try:
+#         with connection.cursor() as cursor:
+#             cursor.callproc('create_profile_with_defaults', (username,))
+#             connection.commit()
+#             st.success(f"Profile created for {username}")
+#     finally:
+#         connection.close()
 
 def confirm_registration():
     if 'username' in st.session_state:

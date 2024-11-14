@@ -12,6 +12,8 @@ import os
 load_dotenv()
 API_URL= os.getenv('API_URL')
 DUEL_URL = f"{API_URL}/api/duel"
+DUEL_WS_URL = os.getenv('WS_URL')
+
 
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -28,7 +30,7 @@ def on_message(ws, message):
 
 # Initialize WebSocket connection
 def connect_ws():
-    ws = websocket.WebSocketApp("ws://localhost:8080/ws", on_message=on_message)
+    ws = websocket.WebSocketApp(f"DUEL_WS_URL", on_message=on_message)
     ws.run_forever()
 
 # Function to update duel result

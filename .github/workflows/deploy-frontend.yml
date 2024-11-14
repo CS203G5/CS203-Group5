@@ -24,6 +24,10 @@ jobs:
       env:
         API_URL: ${{ secrets.API_URL }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        MYSQL_USER: ${{ secrets.MYSQL_USER }}
+        MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_FRONTEND_HOST }} << 'EOF'
 
