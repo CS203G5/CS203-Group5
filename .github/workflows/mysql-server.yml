@@ -27,25 +27,14 @@ jobs:
       - name: Create Database and Execute SQL files on EC2 MySQL through Bastion Host
         run: |
           # SSH into the Bastion Host (public EC2 instance) and execute SQL files on the MySQL server
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_GENERAL_USER }}@${{ secrets.EC2_BACKEND_HOST }} << EOF
-          
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_GENERAL_USER }}@${{ secrets.EC2_BACKEND_HOST }} << 'EOF'
             # Create the database if it doesn't already exist
-            # echo "Creating database if not exists..."
-            # mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -e "CREATE DATABASE IF NOT EXISTS /`${{ secrets.MYSQL_DATABASE }}\`"
-      
-            # # Explicitly execute SQL files in the correct order
-            # for file in /tmp/profile.sql /tmp/participant.sql /tmp/duel.sql /tmp/tournament.sql; do
-            #   echo "Executing \$file on '${{ secrets.MYSQL_DATABASE }}'"
-            #   mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < "\$file"
-            #   if [ $? -ne 0 ]; then
-            #     echo "Error: Failed to execute \$file"
-            #     exit 1
-            #   fi
-            # done
+            echo "Creating database if it does not exist..."
+            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}"
 
             # Execute the SQL dump file
-            echo "Executing /tmp/sqldump.sql on database"
-            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" < "/tmp/sqldump.sql"
+            echo "Executing /tmp/sqldump.sql on the database"
+            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < "/tmp/sqldump.sql"
             if [ $? -ne 0 ]; then
               echo "Error: Failed to execute /tmp/sqldump.sql"
               exit 1
@@ -54,4 +43,3 @@ jobs:
 
       - name: Notify success
         run: echo "SQL Deployment Successful!"
-    
