@@ -36,22 +36,22 @@ DROP PROCEDURE IF EXISTS deleteDuel;
 DELIMITER $$
 
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getDuelsByTournament`(IN p_tournament_id BIGINT)
+CREATE DEFINER=root@localhost PROCEDURE getDuelsByTournament(IN p_tournament_id BIGINT)
 BEGIN
-	SELECT * FROM duel WHERE tournament_id = p_tournament_id;
+ SELECT * FROM Duel WHERE tournament_id = p_tournament_id;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getDuelsByRoundName`(IN p_round_name VARCHAR(255))
+CREATE DEFINER=root@localhost PROCEDURE getDuelsByRoundName(IN p_round_name VARCHAR(255))
 BEGIN
-	SELECT * FROM duel WHERE round_name = p_round_name;
+ SELECT * FROM Duel WHERE round_name = p_round_name;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getDuelsByPlayer`(IN p_pid BIGINT)
+CREATE DEFINER=root@localhost PROCEDURE getDuelsByPlayer(IN p_pid BIGINT)
 BEGIN
-    SELECT * FROM duel WHERE pid1 = p_pid OR pid2 = p_pid;
+    SELECT * FROM Duel WHERE pid1 = p_pid OR pid2 = p_pid;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE createDuel(
+CREATE DEFINER=root@localhost PROCEDURE createDuel(
     IN p_tid BIGINT,
     IN p_round_name VARCHAR(255), 
     IN p_pid1 BIGINT, 
@@ -65,7 +65,7 @@ BEGIN
     ELSE
         IF EXISTS (
             SELECT 1 
-            FROM duel 
+            FROM Duel 
             WHERE tournament_id = p_tid 
                 AND round_name = p_round_name 
                 AND pid1 = p_pid1 
@@ -73,18 +73,18 @@ BEGIN
         ) THEN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A duel with the same players, round, and tournament already exists';
         ELSE
-            INSERT INTO duel (tournament_id, round_name, pid1, pid2, winner) 
+            INSERT INTO Duel (tournament_id, round_name, pid1, pid2, winner) 
             VALUES (p_tid, p_round_name, p_pid1, p_pid2, p_winner);
             SELECT 'Duel created successfully' AS message;
         END IF;
     END IF;
-END
+END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteDuel`(IN p_duel_id BIGINT)
+
+CREATE DEFINER=root@localhost PROCEDURE deleteDuel(IN p_duel_id BIGINT)
 BEGIN
-    DELETE FROM duel WHERE duel_id = p_duel_id;
+    DELETE FROM Duel WHERE duel_id = p_duel_id;
 END$$
 
 
 DELIMITER ;
-
