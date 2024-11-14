@@ -22,7 +22,7 @@ jobs:
       - name: Copy SQL files to EC2 Bastion Host
         run: |
           # Copy SQL files to the Bastion Host (public EC2 instance)
-          scp -o StrictHostKeyChecking=no -r backend\src\main\resources\sql\sqldump.sql ${{ secrets.EC2_GENERAL_USER }}@${{ secrets.EC2_BACKEND_HOST }}:/tmp
+          scp -o StrictHostKeyChecking=no -r backend/src/main/resources/sql/sqldump.sql ${{ secrets.EC2_GENERAL_USER }}@${{ secrets.EC2_BACKEND_HOST }}:/tmp
 
       - name: Create Database and Execute SQL files on EC2 MySQL through Bastion Host
         run: |
@@ -31,7 +31,7 @@ jobs:
           
             # Create the database if it doesn't already exist
             echo "Creating database if not exists..."
-            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -e "CREATE DATABASE IF NOT EXISTS \`${{ secrets.MYSQL_DATABASE }}\`"
+            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -e "CREATE DATABASE IF NOT EXISTS /`${{ secrets.MYSQL_DATABASE }}\`"
       
             # Explicitly execute SQL files in the correct order
             for file in /tmp/profile.sql /tmp/participant.sql /tmp/duel.sql /tmp/tournament.sql; do
