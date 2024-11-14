@@ -21,30 +21,28 @@ jobs:
 
       - name: Copy SQL files to EC2 Bastion Host
         run: |
-          # Copy the SQL dump file to the Bastion Host (public EC2 instance)
           echo "Copying SQL files to the Bastion Host..."
           scp -o StrictHostKeyChecking=no -r backend/src/main/resources/sql/sqldump.sql ${{ secrets.EC2_GENERAL_USER }}@${{ secrets.EC2_BACKEND_HOST }}:/tmp
 
       - name: Create Database and Execute SQL on MySQL via Bastion Host
         run: |
-          # SSH into the Bastion Host (public EC2 instance) and execute SQL on the MySQL server
           echo "Connecting to Bastion Host and executing SQL..."
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_GENERAL_USER }}@${{ secrets.EC2_BACKEND_HOST }} << 'EOF'
             set -e # Stop on error
 
-            # Check if the database exists, and create if it doesn't
+            # Check if the database exists, and create it if it doesn't
             echo "Checking if the database exists..."
-            DB_EXIST=$(mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" -e "SHOW DATABASES LIKE '${{ secrets.MYSQL_DATABASE }}';")
+            DB_EXIST=$(mysql -u "${{ secrets.MYSQL_USER }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" -e "SHOW DATABASES LIKE '${{ secrets.MYSQL_DATABASE }}';")
             if [ -z "$DB_EXIST" ]; then
               echo "Database does not exist, creating it..."
-              mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
+              mysql -u "${{ secrets.MYSQL_USER }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" -e "CREATE DATABASE IF NOT EXISTS \`${{ secrets.MYSQL_DATABASE }}\`;"
             else
               echo "Database ${MYSQL_DATABASE} already exists."
             fi
 
             # Execute the SQL dump file
             echo "Executing /tmp/sqldump.sql on the database..."
-            mysql -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < "/tmp/sqldump.sql"
+            mysql -u "${{ secrets.MYSQL_USER }}" -h "${{ secrets.EC2_MYSQL_HOST }}" -P "${{ secrets.MYSQL_PORT }}" "${{ secrets.MYSQL_DATABASE }}" < "/tmp/sqldump.sql"
             
             if [ $? -ne 0 ]; then
               echo "Error: Failed to execute SQL file."
