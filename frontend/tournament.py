@@ -30,7 +30,10 @@ if "jwt_token" not in st.session_state:
 # logged_in_user = get_logged_in_user()
 
 def get_headers():
-    return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
+    return {
+        "Authorization": f"Bearer {st.session_state['jwt_token']}",
+        "Content-Type": "application/json"
+    }
     
     
 def toggle_create_tournament():
