@@ -114,3 +114,4 @@ def tournaments_avail_page():
                     st.warning("You have already signed up for this tournament")
             else:
                 st.warning("Sign-up are closed")
+            live_scoreboard(tournament['tournament_id'])
