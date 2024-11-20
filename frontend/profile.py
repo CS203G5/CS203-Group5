@@ -1,7 +1,12 @@
 import streamlit as st
 import requests
 
-PROFILE_URL = "http://localhost:8080/profile"
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_URL= os.getenv('API_URL')
+PROFILE_URL = f"{API_URL}/profile"
 
 if "username" not in st.session_state:
         st.session_state["username"] = None
@@ -81,7 +86,7 @@ def profile_page():
                 "username": username_input,
                 "email": email_input,
                 "bio": bio_input,
-                "privacy_settings": privacy_settings_input,
+                # "privacy_settings": privacy_settings_input,
                 "role": profile.get('role', 'PLAYER')
             }
             if update_profile(profile_id, jwt_token, data):

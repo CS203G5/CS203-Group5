@@ -3,10 +3,15 @@ import requests
 import trueskill as ts
 import random
 import json
+from dotenv import load_dotenv
+import os
 
-DUEL_URL = "http://localhost:8080/api/duel"
-PARTICIPANT_URL = "http://localhost:8080/participants"
-PROFILE_URL = "http://localhost:8080/profile"
+load_dotenv()
+API_URL= os.getenv('API_URL')
+
+DUEL_URL = f"{API_URL}/api/duel"
+PARTICIPANT_URL = f"{API_URL}/participants"
+PROFILE_URL = f"{API_URL}/profile"
 
 # Initialize TrueSkill environment
 env = ts.TrueSkill()

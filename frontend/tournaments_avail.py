@@ -2,6 +2,14 @@ import streamlit as st
 import requests
 from datetime import datetime
 from scoreboard_websocket import live_scoreboard
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_URL= os.getenv('API_URL')
+TOURNAMENT_API = f"{API_URL}/tournament"
+PARTICIPANTS_URL = f"{API_URL}/participants"
+DUEL_API = f"{API_URL}/api/duel"
 
 def get_headers():
     if 'jwt_token' in st.session_state:
@@ -15,7 +23,7 @@ def get_all_tournaments():
     # Fetch all tournaments data
     try:
         headers = get_headers()
-        response = requests.get('http://localhost:8080/tournament', headers=headers)
+        response = requests.get('{TOURNAMENT_API}', headers=headers)
         if response.status_code == 200:
             all_tournaments = response.json()
             return all_tournaments
@@ -33,7 +41,7 @@ def is_sign_up_open(tournament_date):
 def is_participant_in_this_tournament(tournament_id,user_id):
     try:
         headers = get_headers()
-        participants = requests.get(f'http://localhost:8080/participants/tournament/{tournament_id}', headers=headers)
+        participants = requests.get(f'{PARTICIPANTS_URL}/tournament/{tournament_id}', headers=headers)
         if participants.status_code == 200:
             for participant in participants.json():
                 if participant['profile']['profileId'] == user_id:
@@ -48,7 +56,7 @@ def has_duels(tournament_id):
         return False
 
     try:
-        response = requests.get(f'http://localhost:8080/api/duel?tid={tournament_id}', headers=headers)
+        response = requests.get(f'{DUEL_API}?tid={tournament_id}', headers=headers)
         if response.status_code == 200:
             duels = response.json()
             return len(duels) > 0
@@ -97,7 +105,7 @@ def tournaments_avail_page():
 
                         try:
                             headers = get_headers()
-                            register_response = requests.post('http://localhost:8080/participants/register', json=payload, headers=headers)
+                            register_response = requests.post('{PARTICIPANTS_URL}/register', json=payload, headers=headers)
                             if register_response.status_code == 201:
                                 st.success(f"Signed up for {tournament['name']}!")
                             else:
