@@ -33,6 +33,7 @@ jobs:
           echo "AWS credentials set."
 
       - name: Build with Maven
+        working-directory: ./backend
         run: |
           mvn clean install -DskipTests
   
@@ -49,5 +50,6 @@ jobs:
       - name: Test with Maven
         env:
           JWT_TOKEN: ${{ env.JWT_TOKEN }}  # Pass the JWT token to the test environment
+        working-directory: ./backend
         run: |
           mvn clean test -Dspring.profiles.active=ci
