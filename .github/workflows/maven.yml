@@ -13,28 +13,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Check out code
-      uses: actions/checkout@v4
+      - name: Check out the code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: Set environment variables for database connection
-      env:
-        DB_URL: jdbc:mysql://${{ secrets.PUBLIC_MYSQL_HOST }}:${{ secrets.MYSQL_PORT }}/${{ secrets.MYSQL_DATABASE }}
-        DB_USER: ${{ secrets.MYSQL_USER }}
-        DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-      run: |
-        echo "Using external database at $DB_URL"
-    
-    - name: Build with Maven
-      run: mvn -B package --file backend/pom.xml
+      - name: Set database environment variables
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://${{ secrets.PUBLIC_MYSQL_HOST }}:${{ secrets.MYSQL_PORT }}/${{ secrets.MYSQL_DATABASE }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.MYSQL_DATABASE }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        run: echo "Database connection set via environment variables"
 
-    - name: Run tests
-      run: mvn test
+      - name: Build with Maven
+        run: mvn -B package --file backend/pom.xml
+      
+      - name: Run tests
+        run: mvn test
