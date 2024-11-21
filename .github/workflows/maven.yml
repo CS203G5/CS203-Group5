@@ -4,7 +4,8 @@ on:
   push:
     branches: 
       - main
-      - localhost-ci-cd
+      # - localhost-ci-cd
+      - ci
   pull_request:
     branches: 
       - main
