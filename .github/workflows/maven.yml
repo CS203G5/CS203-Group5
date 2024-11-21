@@ -26,8 +26,6 @@ jobs:
 
       - name: Build and Test with Maven
         working-directory: ./backend
-        env:
-          SPRING_PROFILES_ACTIVE: ci
         run: |
           mvn clean install -DskipTests  # Build the application
-          mvn test  # Run the tests
+          mvn clean test -Dspring.profiles.active=ci  # Run tests with the 'ci' profile
