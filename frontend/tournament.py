@@ -24,11 +24,6 @@ if "selected_tournament_id" not in st.session_state:
 if "jwt_token" not in st.session_state:
     st.session_state["jwt_token"] = None  # Initialize jwt_token
 
-# Mock logged in user
-# def get_logged_in_user():
-#     return {"name": "John Doe", "id": 1}
-# logged_in_user = get_logged_in_user()
-
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
     
