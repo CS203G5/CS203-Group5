@@ -178,7 +178,7 @@ def make_authenticated_request():
         response = requests.get(f'{API_URL}/tournament', headers=headers)
 
         # DEBUG REMOVE
-        # st.write(st.session_state['jwt_token'])
+        st.write(st.session_state['jwt_token'])
         
         # # DEBUG - REMOVE
         # if response.status_code == 200:
