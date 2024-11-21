@@ -13,6 +13,7 @@ load_dotenv()
 API_URL= os.getenv('API_URL')
 DUEL_URL = f"{API_URL}/api/duel"
 
+
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
 
@@ -35,9 +36,9 @@ def connect_ws():
 def update_duel_result(did, result_data):
     try: # Add error handling
         headers = get_headers()
-        url = f"{DUEL_URL}/duel/{did}/result"
+        url = f"{DUEL_URL}/{did}/result"
         response = requests.put(url, json=result_data, headers=headers)
-        st.success(F"Duel result updated successfully. {result_data}")
+        st.success("Duel result updated successfully.")
     except requests.exceptions.RequestException as e:
         st.warning({"error": "Failed to update duel result."})
 
@@ -45,7 +46,7 @@ def update_duel_result(did, result_data):
 def fetch_duels(tid):
     try: # Add error handling
         url = f"{DUEL_URL}?tid={tid}"
-        response = requests.get(url)
+        response = requests.get(url, headers=get_headers())
         return response.json() if response.status_code == 200 else []
     except requests.exceptions.RequestException as e:
         return []
@@ -58,7 +59,7 @@ def prepare_duel_data(duels):
             # Convert milliseconds to seconds
             player1Time_s = duel['result'].get('player1Time', None) / 1000 if duel['result'] and 'player1Time' in duel['result'] else "N/A"
             player2Time_s = duel['result'].get('player2Time', None) / 1000 if duel['result'] and 'player2Time' in duel['result'] else "N/A"
-
+            
             duel_info = {
                 "Duel ID": duel['duel_id'],
                 "Round": duel['roundName'],
@@ -67,9 +68,9 @@ def prepare_duel_data(duels):
                 "Player 1 Time (s)": player1Time_s,
                 "Player 2 Time (s)": player2Time_s,
                 "Winner": (
-                    duel['pid1']['username'] if duel['winner'] == duel['pid1']['profileId']
+                    duel['pid1']['username'] if duel['winner'] == 1 and duel['pid1'] is not None
                     # else duel['pid2']['username'] if duel['winner'] == duel['pid2']['profileId']
-                    else duel['pid2']['username'] if duel.get('pid2') and duel['pid2'].get('profileId') and duel['winner'] == duel['pid2']['profileId']
+                    else duel['pid2']['username'] if duel['winner'] == 2 and duel['pid2'] is not None
                     else "Not determined"
                 )
             }
@@ -83,7 +84,7 @@ def display_duel_table(duel_data):
         duel_df = pd.DataFrame(duel_data)
         st.dataframe(duel_df, hide_index=True)        
     else:
-        st.write("No duels found.")
+        st.write("No duels happening right now.")
 
 def update_scoreboard():
     # Start the WebSocket connection in a separate thread
@@ -140,5 +141,5 @@ def live_scoreboard(tid):
         display_duel_table(duel_data)
 
         # Check for errors after fetching
-        if not st.session_state.duels:
-            st.error("Failed to fetch duel results. Please try again.")
+        # if not st.session_state.duels:
+        #     st.error("Failed to fetch duel results. Please try again.")

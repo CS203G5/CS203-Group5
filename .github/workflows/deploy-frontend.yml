@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - ci-cd-integration
+      - localhost-ci-cd
   workflow_dispatch:
 
 jobs:
@@ -37,10 +37,8 @@ jobs:
 
           # Navigate to the project directory and pull latest code
           cd ~/CS203-Group5
-          git pull origin ci-cd-integration          # testing branch
-          git checkout ci-cd-integration             # testing branch
-          git pull origin ci-cd-integration          # testing branch
-          # git pull origin main          # uncomment for main branch
+          git checkout main
+          git pull origin main
 
           # Set up the virtual environment and install dependencies
           if [ ! -d "venv" ]; then

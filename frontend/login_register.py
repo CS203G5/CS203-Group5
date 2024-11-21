@@ -177,26 +177,11 @@ def register_user():
             st.success("Registration successful! Please check your email for verification.")
             st.session_state['username'] = username
             st.session_state['registered'] = True  
-            create_profile(username)
         except ClientError as e:
             st.error(f"Registration failed: {e.response['Error']['Message']}")
 
     if st.session_state.get('registered', False):
         confirm_registration()
-
-def create_profile(username):
-    connection = pymysql.connect(host='localhost',
-                                 user='root',
-                                 password='your_password',
-                                 database='cs203_db')
-
-    try:
-        with connection.cursor() as cursor:
-            cursor.callproc('create_profile_with_defaults', (username,))
-            connection.commit()
-            st.success(f"Profile created for {username}")
-    finally:
-        connection.close()
 
 def confirm_registration():
     if 'username' in st.session_state:
@@ -226,10 +211,5 @@ def make_authenticated_request():
         }
         response = requests.get(f'{API_URL}/tournament', headers=headers)
         
-        # DEBUG - REMOVE
-        if response.status_code == 200:
-            st.write(response.json())  # Display the JSON response in the Streamlit app
-        else:
-            st.error(f"Request failed with status code: {response.status_code}")
     else:
         st.warning('You must log in first to make an authenticated request.')

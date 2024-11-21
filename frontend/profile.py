@@ -8,6 +8,9 @@ load_dotenv()
 API_URL= os.getenv('API_URL')
 PROFILE_URL = f"{API_URL}/profile"
 
+if "username" not in st.session_state:
+        st.session_state["username"] = None
+
 def get_profile(profile_id):
     headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
     try:
@@ -72,18 +75,14 @@ def profile_page():
         username_input = st.text_input("Username", value=profile.get('username', ''), disabled=True)
         email_input = st.text_input("Email", value=profile.get('email', ''), disabled=True)
         bio_input = st.text_area("Bio", value=profile.get('bio', ''))
-        privacy_settings_input = st.selectbox(
-            "Privacy Settings", 
-            privacy_options, 
-            index=privacy_options.index(privacy_settings)
-        )
+
 
         if st.form_submit_button("Save"):
             data = {
                 "username": username_input,
                 "email": email_input,
                 "bio": bio_input,
-                "privacy_settings": privacy_settings_input,
+                "privacy_settings": "Public",
                 "role": profile.get('role', 'PLAYER')
             }
             if update_profile(profile_id, jwt_token, data):

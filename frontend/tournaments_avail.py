@@ -1,14 +1,15 @@
 import streamlit as st
 import requests
 from datetime import datetime
+from scoreboard_websocket import live_scoreboard
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 API_URL= os.getenv('API_URL')
-TOURNAMENT_URL = f"{API_URL}/tournament"
+TOURNAMENT_API = f"{API_URL}/tournament"
 PARTICIPANTS_URL = f"{API_URL}/participants"
-DUEL_URL = f"{API_URL}/api/duel"
+DUEL_API = f"{API_URL}/api/duel"
 
 def get_headers():
     if 'jwt_token' in st.session_state:
@@ -21,7 +22,7 @@ def get_all_tournaments():
     # Fetch all tournaments data
     try:
         headers = get_headers()
-        response = requests.get(f'{TOURNAMENT_URL}', headers=headers)
+        response = requests.get(f'{TOURNAMENT_API}', headers=headers)
         if response.status_code == 200:
             all_tournaments = response.json()
             return all_tournaments
@@ -54,7 +55,7 @@ def has_duels(tournament_id):
         return False
 
     try:
-        response = requests.get(f'{DUEL_URL}?tid={tournament_id}', headers=headers)
+        response = requests.get(f'{DUEL_API}?tid={tournament_id}', headers=headers)
         if response.status_code == 200:
             duels = response.json()
             return len(duels) > 0
@@ -114,3 +115,4 @@ def tournaments_avail_page():
                     st.warning("You have already signed up for this tournament")
             else:
                 st.warning("Sign-up are closed")
+            live_scoreboard(tournament['tournament_id'])
