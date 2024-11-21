@@ -70,7 +70,7 @@ def prepare_duel_data(duels):
                 "Winner": (
                     duel['pid1']['username'] if duel['winner'] == duel['pid1']['profileId']
                     # else duel['pid2']['username'] if duel['winner'] == duel['pid2']['profileId']
-                    else duel['pid2']['username'] if duel.get('pid2') and duel['pid2'].get('profileId') and duel['winner'] == duel['pid2']['profileId']
+                    else duel['pid2']['username'] if duel.get('pid2') and duel['pid2'].get('profileId') and duel['winner'] == 2
                     else "Not determined"
                 )
             }
@@ -129,9 +129,8 @@ def live_scoreboard(tid):
 
     if 'duels' not in st.session_state:
         st.session_state.duels = fetch_duels(tid)
-    st.write(st.session_state.duels)
+        
     duel_data = prepare_duel_data(st.session_state.duels)
-    st.write(duel_data)
 
     # if st.button("Refresh Results"):
     with st.spinner("Fetching latest results..."):
