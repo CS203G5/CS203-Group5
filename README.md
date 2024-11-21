@@ -4,6 +4,7 @@
 This is a full-stack web application developed by CS203-Group5, with a backend powered by Spring Boot and a frontend using Streamlit. The backend interacts with a MySQL database, and the frontend provides a user-friendly interface for interacting with the system.
 
 ## Setup Instructions (deployed version)
+NOTE: To prevent the AWS bill skyrocketing, the EC2 instances hosting the app have been stopped. If needed, contact the developers to start them up again.
 
 1. Access the web app via the link https://cs203group5-climbrank.com/
 2. To use the web app as a player, register and login using your own credentials.
