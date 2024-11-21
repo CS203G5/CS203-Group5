@@ -153,6 +153,7 @@ def matchmaking_afterwards():
                 # Ending here means the last duel winner is the whole tournament's winner
                 st.write()           
             elif len(winners) == len(latest_round_duels) and len(winners) > 1:
+                st.write(tournament["is_random"])
                 if tournament["is_random"] == 1:
                     pairs, unmatched = randomly_pair_participants(winners)
                 else:
@@ -229,8 +230,8 @@ def update_ratings(did, player1_time, player2_time):
         st.error(e)
 
     if winner_response.status_code == 201 or 200 and loser_response.status_code == 201 or 200:
-        st.success(f"player {winner_id['profileId']} has a rating of {winner_rating.mu}", icon="🎉")
-        st.success(f"Player {loser_id['profileId']} with rating {loser_rating.mu}", icon="😭")
+        st.success(f"Player {winner_id['profileId']} won the duel and now has a rating of {winner_rating.mu}", icon="🎉")
+        st.success(f"Player {loser_id['profileId']} lost the duel and now has a rating of {loser_rating.mu}", icon="😭")
     else:
         st.write(f"Error updating ratings: {winner_response.status_code}, {loser_response.status_code}")
 
