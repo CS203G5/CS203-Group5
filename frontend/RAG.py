@@ -81,7 +81,7 @@ def get_response(user_input, conversation_history):
             model=model,
             messages=messages,
             temperature=0,
-            top_p=0.3,
+            top_p=0.5,
             max_tokens=1024,
         )
         assistant_response = response.choices[0].message.content
