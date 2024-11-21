@@ -53,6 +53,7 @@ def fetch_tournament(tournament_id):
         url = f"{TOURNAMENT_URL}/{tournament_id}"   
         headers = get_headers()
         response = requests.get(url, headers=headers)
+        st.write(response)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -228,11 +229,10 @@ def tournament_page():
             # Randomize matches button
             if st.button("Match Participants"):
                 selected_tournament_id = selected_tournaments[0]
-                st.write(f"Selected Tournaments 0: {selected_tournaments[0]}")
-                st.write(f"Selected Tournaments: {selected_tournaments}")
-                st.write(f"Selected Tournament ID: {selected_tournament_id}")
-                tournament_data = fetch_tournament(selected_tournament_id)
-                if tournament_data:
+                # works
+                this_tournament_data = fetch_tournament(selected_tournament_id)
+                st.write(this_tournament_data)
+                if this_tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
                     response = requests.get(f"{DUEL_API}?tid={selected_tournament_id}", headers=headers)
@@ -241,7 +241,7 @@ def tournament_page():
                         st.write("No more matching can be done.")
                     else:
                         participants = fetch_participants_by_tournament(selected_tournament_id)
-                        if tournament_data["is_random"]:
+                        if this_tournament_data["is_random"]:
                             st.write("Randomizing matches...")
                             if not participants:
                                 st.write("No participants registered to match.")
