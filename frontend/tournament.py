@@ -232,9 +232,8 @@ def tournament_page():
                 if tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
-                    st.write(selected_tournaments[0])
+                    st.write(selected_tournaments)
                     response = requests.get(f"{DUEL_API}?tid={selected_tournament_id}", headers=headers)
-                    st.write(response)
 
                     if response.status_code == 200:
                         st.write("Matching was done, no more matching can be done.")
