@@ -236,6 +236,8 @@ def tournament_page():
 
                     if response.status_code == 200 or response.status_code == 404:
                         st.write("Matching was done, no more matching can be done.")
+                    elif response.status_code == 404:
+                        st.write("No participants found for this tournament.")
                     else:
                         participants = fetch_participants_by_tournament(selected_tournament_id)
                         if tournament_data["is_random"]:
