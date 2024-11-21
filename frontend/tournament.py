@@ -6,14 +6,14 @@ import random
 import trueskill as ts
 from algorithms import *
 from scoreboard_websocket import live_scoreboard
-
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 API_URL= os.getenv('API_URL')
 TOURNAMENT_URL = f"{API_URL}/tournament"
-DUEL_URL = f"{API_URL}/duel"
+PARTICIPANT_URL = f"{API_URL}/participant"
+DUEL_API = f"{API_URL}/match"
 
 if "show_create_form" not in st.session_state:
     st.session_state["show_create_form"] = False
@@ -23,11 +23,6 @@ if "selected_tournament_id" not in st.session_state:
     st.session_state["selected_tournament_id"] = None
 if "jwt_token" not in st.session_state:
     st.session_state["jwt_token"] = None  # Initialize jwt_token
-
-# Mock logged in user
-def get_logged_in_user():
-    return {"name": "John Doe", "id": 1}
-logged_in_user = get_logged_in_user()
 
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -44,8 +39,9 @@ def toggle_update_tournament(tournament_id):
 # API functions
 def fetch_tournaments_by_admin(organizer_id):
     try:
+        url = f"{TOURNAMENT_URL}/organizer/{organizer_id}"
         headers = get_headers()
-        response = requests.get(f"{TOURNAMENT_URL}/organizer/{organizer_id}", headers=headers)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -54,8 +50,9 @@ def fetch_tournaments_by_admin(organizer_id):
     
 def fetch_tournament(tournament_id):
     try:
+        url = f"{TOURNAMENT_URL}/{tournament_id}"   
         headers = get_headers()
-        response = requests.get(f"{TOURNAMENT_URL}/{tournament_id}", headers=headers)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -86,6 +83,7 @@ def delete_tournaments(tournament_ids):
     try:
         headers = get_headers()
         response = requests.delete(f"{TOURNAMENT_URL}", json=tournament_ids, headers=headers)
+        st.write(response.status_code)
         if response.status_code == 200:
             return True
     except requests.exceptions.RequestException as e:
@@ -120,7 +118,7 @@ def tournament_page():
                     "date": date.strftime("%Y-%m-%d"),
                     "time": time.strftime("%H:%M:%S"),
                     "location": location,
-                    "organizer_id": logged_in_user["id"],
+                    "organizer_id": st.session_state["profile_id"],
                     "description": description
                 }
 
@@ -131,7 +129,7 @@ def tournament_page():
     search_term = st.text_input("🔍 Enter tournament name or keyword", "", placeholder="Type to search...", label_visibility="collapsed")
     st.markdown("---")
 
-    tournament_data = fetch_tournaments_by_admin(organizer_id=logged_in_user["id"])
+    tournament_data = fetch_tournaments_by_admin(organizer_id= st.session_state["profile_id"])
     if tournament_data:
         df = pd.DataFrame(
             tournament_data, 
@@ -234,9 +232,9 @@ def tournament_page():
                 if tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
-                    response = requests.get(f"{DUEL_URL}?tid={selected_tournament_id}", headers=headers)
+                    response = requests.get(f"{DUEL_API}?tid={selected_tournament_id}", headers=headers)
 
-                    if response.status_code == 200:
+                    if response.status_code == 200 or response.status_code == 404:
                         st.write("Matching was done, no more matching can be done.")
                     else:
                         participants = fetch_participants_by_tournament(selected_tournament_id)
@@ -306,6 +304,7 @@ def tournament_page():
         if selected_count > 0 and not st.session_state["show_update_form"]:
             if st.button("Delete Selected Tournaments", type="primary"):
                 deleted = delete_tournaments(selected_tournaments)
+                st.write(deleted)
                 if deleted:
                     st.success("Selected tournaments deleted successfully! Please refresh to see the changes.")
 
@@ -334,7 +333,7 @@ def tournament_page():
                     "time": time.strftime("%H:%M:%S"),
                     "location": location,
                     "description": description,
-                    "organizer_id": logged_in_user["id"],
+                    "organizer_id": st.session_state["profile_id"],
                 }
 
                 if update_tournament(tournament_data["tournament_id"], payload):

@@ -10,8 +10,8 @@ API_URL= os.getenv('API_URL')
 
 DUEL_URL = f"{API_URL}/api/duel"
 PARTICIPANT_URL = f"{API_URL}/participants"
-PROFILE_URL = f"{API_URL}/profile"
 TOURNAMENT_URL = f"{API_URL}/tournament"
+PROFILE_URL = f"{API_URL}/profile"
 
 # Initialize TrueSkill environment
 env = ts.TrueSkill()
@@ -118,7 +118,8 @@ def post_matches(tournament_id, player1, player2, round_name, winner):
 def matchmaking_afterwards():
     try:
         headers = get_headers()
-        response = requests.get(f"{TOURNAMENT_URL}", headers=headers)
+        organizer_id = st.session_state["profile_id"]
+        response = requests.get(f"{TOURNAMENT_URL}/organizer/{organizer_id}", headers=headers)
         response.raise_for_status()
         tournaments = response.json()
         
@@ -200,13 +201,11 @@ def update_ratings(did, player1_time, player2_time):
     # Check if the rating is 0 and initialize accordingly
     if player1_profile['rating'] == 0:
         player1_rating = env.create_rating(0)
-        st.write(player1_rating)
     else:
         player1_rating = env.Rating(player1_profile['rating'], env.sigma)
     
     if player2_profile['rating'] == 0:
         player2_rating = env.create_rating(0)
-        st.write(player2_rating)
     else:
         player2_rating = env.Rating(player2_profile['rating'], env.sigma)
     
@@ -230,7 +229,8 @@ def update_ratings(did, player1_time, player2_time):
         st.error(e)
 
     if winner_response.status_code == 201 or 200 and loser_response.status_code == 201 or 200:
-        st.write(f"Ratings updated successfully for player {winner_id['profileId']} with rating {winner_rating.mu} and player {loser_id['profileId']} with rating {loser_rating.mu}")
+        st.success(f"Player {winner_id['profileId']} won the duel and now has a rating of {winner_rating.mu}", icon="🎉")
+        st.success(f"Player {loser_id['profileId']} lost the duel and now has a rating of {loser_rating.mu}", icon="😭")
     else:
         st.write(f"Error updating ratings: {winner_response.status_code}, {loser_response.status_code}")
 
@@ -254,7 +254,8 @@ def display_tournament_bracket(tid):
                 st.write(f"Player {player1} gets a buy into the next round")
             else:
                 player2 = duel["pid2"]["profileId"]
-                st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner if winner else 'TBD'}")
+                winner_name = player1 if winner == 1 else player2 if winner == 2 else 'TBD'
+                st.write(f"Match: Player {player1} vs Player {player2} - Winner: Player {winner_name}")
 
 def true_skill_pair_participants(participants):
     st.write(participants)

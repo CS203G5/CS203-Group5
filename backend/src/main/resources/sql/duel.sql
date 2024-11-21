@@ -73,7 +73,7 @@ BEGIN
         ) THEN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A duel with the same players, round, and tournament already exists';
         ELSE
-            INSERT INTO Duel (tournament_id, round_name, pid1, pid2, winner) 
+            INSERT INTO duel (tournament_id, round_name, pid1, pid2, winner) 
             VALUES (p_tid, p_round_name, p_pid1, p_pid2, p_winner);
             SELECT 'Duel created successfully' AS message;
         END IF;
