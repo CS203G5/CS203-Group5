@@ -14,7 +14,15 @@
 ## Project Overview
 This is a full-stack web application developed by CS203-Group5, with a backend powered by Spring Boot and a frontend using Streamlit. The backend interacts with a MySQL database, and the frontend provides a user-friendly interface for interacting with the system.
 
-## Setup Instructions
+## Setup Instructions (deployed)
+
+1. Access the web app via the link https://cs203group5-climbrank.com/
+2. To use the web app as a player, follow the regular sign-up and login flow.
+3. TO use the web app as an admin, use the following credentials:
+   - Username: huiii
+   - Password: Kuek12345!
+
+## Setup Instructions (localhost)
 
 ### Prerequisites
 Before you begin, make sure you have the following installed on your machine:
@@ -52,14 +60,14 @@ Before you begin, make sure you have the following installed on your machine:
        mvn spring-boot:run
        ```
 
-## Database Setup
+### Database Setup
 
 After the backend server is up and running, set up the necessary database procedures:
 
 1. Open MySQL Workbench or any other MySQL client.
 2. Run all SQL scripts located in the `backend/src/main/resources/sql` folder on your MySQL server. These scripts will set up the database tables and procedures required for the application.
 
-## Using the Application
+### Using the Application
 
 Once both the frontend and backend are running:
 - Leave both terminal windows open and ensure they stay active.
