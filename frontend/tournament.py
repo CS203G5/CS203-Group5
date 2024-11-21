@@ -25,9 +25,9 @@ if "jwt_token" not in st.session_state:
     st.session_state["jwt_token"] = None  # Initialize jwt_token
 
 # Mock logged in user
-def get_logged_in_user():
-    return {"name": "John Doe", "id": 1}
-logged_in_user = get_logged_in_user()
+# def get_logged_in_user():
+#     return {"name": "John Doe", "id": 1}
+# logged_in_user = get_logged_in_user()
 
 def get_headers():
     return {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
@@ -122,7 +122,7 @@ def tournament_page():
                     "date": date.strftime("%Y-%m-%d"),
                     "time": time.strftime("%H:%M:%S"),
                     "location": location,
-                    "organizer_id": logged_in_user["id"],
+                    "organizer_id": st.session_state["profile_id"],
                     "description": description
                 }
 
@@ -133,7 +133,7 @@ def tournament_page():
     search_term = st.text_input("🔍 Enter tournament name or keyword", "", placeholder="Type to search...", label_visibility="collapsed")
     st.markdown("---")
 
-    tournament_data = fetch_tournaments_by_admin(organizer_id=logged_in_user["id"])
+    tournament_data = fetch_tournaments_by_admin(organizer_id= st.session_state["profile_id"])
     if tournament_data:
         df = pd.DataFrame(
             tournament_data, 
@@ -336,7 +336,7 @@ def tournament_page():
                     "time": time.strftime("%H:%M:%S"),
                     "location": location,
                     "description": description,
-                    "organizer_id": logged_in_user["id"],
+                    "organizer_id": st.session_state["profile_id"],
                 }
 
                 if update_tournament(tournament_data["tournament_id"], payload):

@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import trueskill as ts
 import random
-import json
 from dotenv import load_dotenv
 import os
 
@@ -11,6 +10,7 @@ API_URL= os.getenv('API_URL')
 
 DUEL_URL = f"{API_URL}/api/duel"
 PARTICIPANT_URL = f"{API_URL}/participants"
+TOURNAMENT_URL = f"{API_URL}/tournament"
 PROFILE_URL = f"{API_URL}/profile"
 
 # Initialize TrueSkill environment
@@ -118,7 +118,8 @@ def post_matches(tournament_id, player1, player2, round_name, winner):
 def matchmaking_afterwards():
     try:
         headers = get_headers()
-        response = requests.get(f"{TOURNAMENT_URL}", headers=headers)
+        organizer_id = st.session_state["profile_id"]
+        response = requests.get(f"{TOURNAMENT_URL}/organizer/{organizer_id}", headers=headers)
         response.raise_for_status()
         tournaments = response.json()
         

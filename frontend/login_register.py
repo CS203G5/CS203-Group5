@@ -1,5 +1,5 @@
 import streamlit as st
-import os, boto3, requests
+import os, boto3, requests, pymysql
 from botocore.exceptions import ClientError
 import os
 from dotenv import load_dotenv
@@ -10,6 +10,7 @@ COGNITO_CLIENT_ID = os.getenv('AWS_COGNITO_CLIENT_ID')
 COGNITO_USER_POOL_ID = os.getenv('AWS_COGNITO_USER_POOL_ID') 
 AWS_REGION = os.getenv('AWS_REGION')
 API_URL= os.getenv('API_URL')
+PROFILE_URL = f"{API_URL}/profile"
 
 # Set up AWS Cognito client
 client = boto3.client('cognito-idp', region_name=AWS_REGION)
@@ -42,6 +43,7 @@ def login_user():
                 profile_info = fetch_profile_by_username(username)
                 if profile_info:
                     st.session_state['profile_id'] = profile_info['profileId']
+                    st.session_state['role'] = profile_info['role']
                     st.success(f"Welcome, {profile_info['username']}!")
                 else:
                     st.warning("Profile not found. Please create a profile.")
@@ -96,7 +98,7 @@ def get_headers():
 def fetch_profile_by_username(username):
     try:
         headers = get_headers()
-        response = requests.get(f"{API_URL}/profile/by-username/{username}", headers=headers)
+        response = requests.get(f"{PROFILE_URL}/by-username/{username}", headers=headers)
         if response.status_code == 200:
             return response.json()
         else:
@@ -106,6 +108,38 @@ def fetch_profile_by_username(username):
         st.error(f"Error fetching profile: {e}")
         return None
 
+def register_profile(username, email):
+    try:
+        headers = get_headers()
+
+        # Define the payload with the profile information to be sent in the POST request
+        payload = {
+            "username": username,
+            "email": email,
+            "bio": "",
+            "privacySettings": "Public",
+            "rating": 0.0,
+            "role": "PLAYER" # Set the role to "PLAYER" by default
+        }
+
+        # Send a POST request with the profile data
+        response = requests.post(f"{PROFILE_URL}", json=payload, headers=headers)
+
+        # Check if the response was successful (status code 201 or 200)
+        if response.status_code == 200:
+            # If successful, return the response data (profile data in JSON format)
+            st.success("Profile created successfully!")
+            return response.json()
+        else:
+            # If the request failed (non-200 status code), log the error and return None
+            st.error(f"Failed to create profile: {response.status_code} - {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        # Handle request exceptions (e.g., network issues, timeout, etc.)
+        st.error(f"Error creating profile: {e}")
+        return None
+
+    
 def register_user():
     st.title('Register')
 
@@ -139,6 +173,7 @@ def register_user():
                     {'Name': 'custom:country', 'Value': country} 
                 ]
             )
+            register_profile(username, email)
             st.success("Registration successful! Please check your email for verification.")
             st.session_state['username'] = username
             st.session_state['registered'] = True  
@@ -147,7 +182,6 @@ def register_user():
 
     if st.session_state.get('registered', False):
         confirm_registration()
-
 
 def confirm_registration():
     if 'username' in st.session_state:
@@ -180,7 +214,7 @@ def make_authenticated_request():
         # DEBUG REMOVE
         st.write(st.session_state['jwt_token'])
         
-        # # DEBUG - REMOVE
+        # DEBUG - REMOVE
         # if response.status_code == 200:
         #     st.write(response.json())  # Display the JSON response in the Streamlit app
         # else:
