@@ -255,7 +255,7 @@ def display_tournament_bracket(tid):
             else:
                 player2 = duel["pid2"]["profileId"]
                 winner_name = player1 if winner == 1 else player2 if winner == 2 else 'TBD'
-                st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner_name}")
+                st.write(f"Match: Player {player1} vs Player {player2} - Winner: Player {winner_name}")
 
 def true_skill_pair_participants(participants):
     st.write(participants)
