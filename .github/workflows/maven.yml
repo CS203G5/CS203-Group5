@@ -1,24 +1,21 @@
-name: Java CI with Maven and External Database for Testing
+name: Java CI with Maven and External Database
 
 on:
   push:
     branches: 
       - main
-      # - localhost-ci-cd
       - ci
   pull_request:
-    branches: 
+    branches:
       - main
-      - localhost-ci-cd
   workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Check out code
       uses: actions/checkout@v4
 
     - name: Set up JDK 17
@@ -30,23 +27,14 @@ jobs:
 
     - name: Set environment variables for database connection
       env:
-        DB_HOST: ${{ secrets.PUBLIC_MYSQL_HOST }}
-        DB_PORT: ${{ secrets.MYSQL_PORT }}
+        DB_URL: jdbc:mysql://${{ secrets.PUBLIC_MYSQL_HOST }}:${{ secrets.MYSQL_PORT }}/${{ secrets.MYSQL_DATABASE }}
         DB_USER: ${{ secrets.MYSQL_USER }}
         DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-        DB_NAME: ${{ secrets.MYSQL_DATABASE }}
       run: |
-        echo "Using external database at $DB_HOST:$DB_PORT"
-        echo "Database: $DB_NAME"
-
-    # Step 4: Build the Maven project
+        echo "Using external database at $DB_URL"
+    
     - name: Build with Maven
       run: mvn -B package --file backend/pom.xml
 
-    # Step 5: Run tests (Integration tests that connect to the external MySQL database)
-    - name: Run Tests with Maven
-      env:
-        SPRING_DATASOURCE_URL: jdbc:mysql://${{ secrets.PUBLIC_MYSQL_HOST }}:${{ secrets.MYSQL_PORT }}/${{ secrets.MYSQL_DATABASE }}
-        SPRING_DATASOURCE_USERNAME: ${{ secrets.MYSQL_USER }}
-        SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-      run: mvn test --file backend/pom.xml
+    - name: Run tests
+      run: mvn test
