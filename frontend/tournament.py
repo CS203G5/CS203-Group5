@@ -232,6 +232,7 @@ def tournament_page():
                 # works
                 this_tournament_data = fetch_tournament(selected_tournament_id)
                 st.write(this_tournament_data)
+                st.wirtes(selected_tournament_id)
                 if this_tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
