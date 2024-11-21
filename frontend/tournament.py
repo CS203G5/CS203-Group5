@@ -53,7 +53,6 @@ def fetch_tournament(tournament_id):
         url = f"{TOURNAMENT_URL}/{tournament_id}"   
         headers = get_headers()
         response = requests.get(url, headers=headers)
-        st.write(response)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
