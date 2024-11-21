@@ -1,20 +1,9 @@
 # CS203-Group5 Application
 
-## Table of Contents
-- [Project Overview](#project-overview)
-- [Setup Instructions](#setup-instructions)
-  - [Prerequisites](#prerequisites)
-  - [Step-by-Step Setup](#step-by-step-setup)
-- [Running the Application](#running-the-application)
-  - [Frontend](#frontend)
-  - [Backend](#backend)
-- [Database Setup](#database-setup)
-- [Using the Application](#using-the-application)
-
 ## Project Overview
 This is a full-stack web application developed by CS203-Group5, with a backend powered by Spring Boot and a frontend using Streamlit. The backend interacts with a MySQL database, and the frontend provides a user-friendly interface for interacting with the system.
 
-## Setup Instructions (deployed)
+## Setup Instructions (deployed version)
 
 1. Access the web app via the link https://cs203group5-climbrank.com/
 2. To use the web app as a player, follow the regular sign-up and login flow.
@@ -22,7 +11,7 @@ This is a full-stack web application developed by CS203-Group5, with a backend p
    - Username: huiii
    - Password: Kuek12345!
 
-## Setup Instructions (localhost)
+## Setup Instructions (localhost version)
 
 ### Prerequisites
 Before you begin, make sure you have the following installed on your machine:
