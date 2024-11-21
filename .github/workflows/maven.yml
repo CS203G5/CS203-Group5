@@ -25,13 +25,17 @@ jobs:
 
       - name: Set database environment variables
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://${{ secrets.PUBLIC_MYSQL_HOST }}:${{ secrets.MYSQL_PORT }}/${{ secrets.MYSQL_DATABASE }}
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.MYSQL_DATABASE }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-        run: echo "Database connection set via environment variables"
+          DB_URL: jdbc:mysql://${{ secrets.PUBLIC_MYSQL_HOST }}:${{ secrets.MYSQL_PORT }}/${{ secrets.MYSQL_DATABASE }}
+          DB_USERNAME: ${{ secrets.MYSQL_DATABASE }}
+          DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        run: |
+          echo "Database connection set via environment variables"
+          echo "DB_URL=${DB_URL}"
+          echo "DB_USERNAME=${DB_USERNAME}"
+          echo "DB_PASSWORD=${DB_PASSWORD}"
 
       - name: Build with Maven
         run: mvn -B package --file backend/pom.xml
-      
+
       - name: Run tests
         run: mvn test
