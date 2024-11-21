@@ -228,16 +228,17 @@ def tournament_page():
             # Randomize matches button
             if st.button("Match Participants"):
                 selected_tournament_id = selected_tournaments[0]
+                st.write(f"Selected Tournaments 0: {selected_tournaments[0]}")
+                st.write(f"Selected Tournaments: {selected_tournaments}")
+                st.write(f"Selected Tournament ID: {selected_tournament_id}")
                 tournament_data = fetch_tournament(selected_tournament_id)
                 if tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
                     response = requests.get(f"{DUEL_API}?tid={selected_tournament_id}", headers=headers)
 
-                    if response.status_code == 200:
-                        st.write("Matching was done, no more matching can be done.")
-                    elif response.status_code == 404:
-                        st.write("No participants found for this tournament.")
+                    if response.status_code == 200 or response.status_code == 404:
+                        st.write("No more matching can be done.")
                     else:
                         participants = fetch_participants_by_tournament(selected_tournament_id)
                         if tournament_data["is_random"]:
