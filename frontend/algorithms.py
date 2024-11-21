@@ -153,7 +153,8 @@ def matchmaking_afterwards():
                 # Ending here means the last duel winner is the whole tournament's winner
                 st.write()           
             elif len(winners) == len(latest_round_duels) and len(winners) > 1:
-                st.write(tournament["is_random"])
+                # st.write(tournament["is_random"])
+                st.write(tournament)
                 if tournament["is_random"] == 1:
                     pairs, unmatched = randomly_pair_participants(winners)
                 else:
