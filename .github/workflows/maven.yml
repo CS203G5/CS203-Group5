@@ -32,6 +32,16 @@ jobs:
         run: |
           echo "AWS credentials set."
 
+      - name: Generate JWT Token
+        run: |
+          # You can either call a script or execute a Java class to generate the JWT token.
+          # This assumes you have a Java class to generate the token in your project.
+          
+          # Example: Use a simple Java command to generate the token
+          export JWT_TOKEN=$(mvn exec:java -Dexec.mainClass="com.yourpackage.CognitoAuthUtils" -Dexec.args="khairyo Hello12.")
+          echo "JWT token generated: $JWT_TOKEN"
+          echo "JWT_TOKEN=$JWT_TOKEN" >> $GITHUB_ENV  # Save the token as an environment variable for later steps
+
       - name: Build and Test with Maven
         working-directory: ./backend
         run: |
