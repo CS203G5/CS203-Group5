@@ -153,8 +153,6 @@ def matchmaking_afterwards():
                 # Ending here means the last duel winner is the whole tournament's winner
                 st.write()           
             elif len(winners) == len(latest_round_duels) and len(winners) > 1:
-                # st.write(tournament["is_random"])
-                st.write(tournament)
                 if tournament["is_random"] == 1:
                     pairs, unmatched = randomly_pair_participants(winners)
                 else:
@@ -256,7 +254,8 @@ def display_tournament_bracket(tid):
                 st.write(f"Player {player1} gets a buy into the next round")
             else:
                 player2 = duel["pid2"]["profileId"]
-                st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner if winner else 'TBD'}")
+                winner_name = player1 if winner == 1 else player2 if winner == 2 else 'TBD'
+                st.write(f"Match: Player {player1} vs Player {player2} - Winner: {winner_name}")
 
 def true_skill_pair_participants(participants):
     st.write(participants)
