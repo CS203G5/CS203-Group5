@@ -229,7 +229,6 @@ def tournament_page():
             # Randomize matches button
             if st.button("Match Participants"):
                 selected_tournament_id = selected_tournaments[0]
-                # works
                 this_tournament_data = fetch_tournament(selected_tournament_id)
                 if this_tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels

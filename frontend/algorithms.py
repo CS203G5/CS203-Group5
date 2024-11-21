@@ -262,7 +262,6 @@ def display_tournament_bracket(tid):
                 st.write(f"Match: Player {player1} vs Player {player2} - Winner: Player {winner_name}")
 
 def true_skill_pair_participants(participants):
-    st.write(participants)
     if not participants:
         st.error("Participants list is empty or not initialized.")
         return [], None
