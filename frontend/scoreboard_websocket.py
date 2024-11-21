@@ -84,7 +84,7 @@ def display_duel_table(duel_data):
         duel_df = pd.DataFrame(duel_data)
         st.dataframe(duel_df, hide_index=True)        
     else:
-        st.write("No duels found.")
+        st.write("No duels happening right now.")
 
 def update_scoreboard():
     # Start the WebSocket connection in a separate thread
@@ -141,5 +141,5 @@ def live_scoreboard(tid):
         display_duel_table(duel_data)
 
         # Check for errors after fetching
-        if not st.session_state.duels:
-            st.error("Failed to fetch duel results. Please try again.")
+        # if not st.session_state.duels:
+        #     st.error("Failed to fetch duel results. Please try again.")
