@@ -92,6 +92,10 @@ def post_matches(tournament_id, player1, player2, round_name, winner):
     profile1 = get_player_profile(player1)
     profile2 = get_player_profile(player2)
     round_name = get_next_round_name(tournament_id)
+
+    if profile2 == {}:
+        winner = 1
+
     duel = {
         "tournament": {
             "tournament_id": tournament_id

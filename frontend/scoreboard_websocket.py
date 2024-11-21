@@ -68,9 +68,9 @@ def prepare_duel_data(duels):
                 "Player 1 Time (s)": player1Time_s,
                 "Player 2 Time (s)": player2Time_s,
                 "Winner": (
-                    duel['pid1']['username'] if duel['winner'] == 1
+                    duel['pid1']['username'] if duel['winner'] == 1 and duel['pid1'] is not None
                     # else duel['pid2']['username'] if duel['winner'] == duel['pid2']['profileId']
-                    else duel['pid2']['username'] if duel['winner'] == 2
+                    else duel['pid2']['username'] if duel['winner'] == 2 and duel['pid2'] is not None
                     else "Not determined"
                 )
             }
