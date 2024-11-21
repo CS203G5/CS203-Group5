@@ -26,8 +26,8 @@ def get_response(user_input, conversation_history):
     # Load or retrieve knowledge base
     if "knowledge_base" not in st.session_state or not isinstance(st.session_state.knowledge_base, FAISS):
         # Load the RAG.pdf file
-        pdf_path = "./RAG.pdf"
-        # pdf_path="/home/ubuntu/CS203-Group5/frontend/RAG.pdf"
+        # pdf_path = "./RAG.pdf"
+        pdf_path="/home/ubuntu/CS203-Group5/frontend/RAG.pdf"
         documents = []
 
         # Check if the file exists
