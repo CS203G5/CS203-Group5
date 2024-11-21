@@ -238,7 +238,7 @@ def tournament_page():
                     headers = get_headers()
                     response = requests.get(f"{DUEL_API}?tid={selected_tournament_id}", headers=headers)
                     st.write(response.status_code)
-                    if response.status_code == 200:
+                    if response.status_code == 200 or response.status_code == 404:
                         st.write("Matching was done, no more matching can be done.")
                     else:
                         participants = fetch_participants_by_tournament(selected_tournament_id)
