@@ -59,7 +59,9 @@ def prepare_duel_data(duels):
             # Convert milliseconds to seconds
             player1Time_s = duel['result'].get('player1Time', None) / 1000 if duel['result'] and 'player1Time' in duel['result'] else "N/A"
             player2Time_s = duel['result'].get('player2Time', None) / 1000 if duel['result'] and 'player2Time' in duel['result'] else "N/A"
-
+            st.write(duel['pid1']['username'])
+            st.write(duel['pid2']['username'])
+            st.write(duel['winner'])
             duel_info = {
                 "Duel ID": duel['duel_id'],
                 "Round": duel['roundName'],
@@ -68,9 +70,9 @@ def prepare_duel_data(duels):
                 "Player 1 Time (s)": player1Time_s,
                 "Player 2 Time (s)": player2Time_s,
                 "Winner": (
-                    duel['pid1']['username'] if duel['winner'] == duel['pid1']['profileId']
+                    duel['pid1']['username'] if duel['winner'] == 1
                     # else duel['pid2']['username'] if duel['winner'] == duel['pid2']['profileId']
-                    else duel['pid2']['username'] if duel.get('pid2') and duel['pid2'].get('profileId') and duel['winner'] == 2
+                    else duel['pid2']['username'] if duel['winner'] == 2
                     else "Not determined"
                 )
             }
@@ -129,7 +131,7 @@ def live_scoreboard(tid):
 
     if 'duels' not in st.session_state:
         st.session_state.duels = fetch_duels(tid)
-        
+
     duel_data = prepare_duel_data(st.session_state.duels)
 
     # if st.button("Refresh Results"):
