@@ -37,7 +37,7 @@ def login_user():
                 token = response['AuthenticationResult']['IdToken']
                 st.session_state['jwt_token'] = token
                 st.session_state['username'] = username
-                # st.success('Login successful.')
+                st.success('Login successful.')
                 
                 # Fetch user's profile information
                 profile_info = fetch_profile_by_username(username)
