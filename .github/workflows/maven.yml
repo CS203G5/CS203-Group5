@@ -25,7 +25,7 @@ jobs:
 
       - name: Set database environment variables
         env:
-          DB_URL: jdbc:mysql://${{ secrets.PUBLIC_MYSQL_HOST }}:${{ secrets.MYSQL_PORT }}/${{ secrets.MYSQL_DATABASE }}
+          DB_URL: ${{ secrets.TEST_MYSQL_URL}}
           DB_USERNAME: ${{ secrets.MYSQL_DATABASE }}
           DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
