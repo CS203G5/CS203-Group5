@@ -6,8 +6,8 @@ This is a full-stack web application developed by CS203-Group5, with a backend p
 ## Setup Instructions (deployed version)
 
 1. Access the web app via the link https://cs203group5-climbrank.com/
-2. To use the web app as a player, follow the regular sign-up and login flow.
-3. TO use the web app as an admin, use the following credentials:
+2. To use the web app as a player, register and login using your own credentials.
+3. To use the web app as an admin, use the following credentials:
    - Username: huiii
    - Password: Kuek12345!
 
