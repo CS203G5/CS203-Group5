@@ -105,7 +105,7 @@ def tournaments_avail_page():
 
                         try:
                             headers = get_headers()
-                            register_response = requests.post('{PARTICIPANTS_URL}/register', json=payload, headers=headers)
+                            register_response = requests.post(f'{PARTICIPANTS_URL}/register', json=payload, headers=headers)
                             if register_response.status_code == 201:
                                 st.success(f"Signed up for {tournament['name']}!")
                             else:
