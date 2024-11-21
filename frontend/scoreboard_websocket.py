@@ -59,9 +59,7 @@ def prepare_duel_data(duels):
             # Convert milliseconds to seconds
             player1Time_s = duel['result'].get('player1Time', None) / 1000 if duel['result'] and 'player1Time' in duel['result'] else "N/A"
             player2Time_s = duel['result'].get('player2Time', None) / 1000 if duel['result'] and 'player2Time' in duel['result'] else "N/A"
-            st.write(duel['pid1']['username'])
-            st.write(duel['pid2']['username'])
-            st.write(duel['winner'])
+            
             duel_info = {
                 "Duel ID": duel['duel_id'],
                 "Round": duel['roundName'],

@@ -88,6 +88,7 @@ def delete_tournaments(tournament_ids):
     try:
         headers = get_headers()
         response = requests.delete(f"{TOURNAMENT_URL}", json=tournament_ids, headers=headers)
+        st.write(response.status_code)
         if response.status_code == 200:
             return True
     except requests.exceptions.RequestException as e:
@@ -308,6 +309,7 @@ def tournament_page():
         if selected_count > 0 and not st.session_state["show_update_form"]:
             if st.button("Delete Selected Tournaments", type="primary"):
                 deleted = delete_tournaments(selected_tournaments)
+                st.write(deleted)
                 if deleted:
                     st.success("Selected tournaments deleted successfully! Please refresh to see the changes.")
 
