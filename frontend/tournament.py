@@ -304,7 +304,6 @@ def tournament_page():
         if selected_count > 0 and not st.session_state["show_update_form"]:
             if st.button("Delete Selected Tournaments", type="primary"):
                 deleted = delete_tournaments(selected_tournaments)
-                st.write(deleted)
                 if deleted:
                     st.success("Selected tournaments deleted successfully! Please refresh to see the changes.")
 
