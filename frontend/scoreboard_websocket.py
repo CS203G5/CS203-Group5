@@ -129,8 +129,9 @@ def live_scoreboard(tid):
 
     if 'duels' not in st.session_state:
         st.session_state.duels = fetch_duels(tid)
-
+    st.write("duels session: "+ st.session_state.duels)
     duel_data = prepare_duel_data(st.session_state.duels)
+    st.write("duel_data: "+ duel_data)
 
     # if st.button("Refresh Results"):
     with st.spinner("Fetching latest results..."):
