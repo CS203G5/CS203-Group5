@@ -46,7 +46,7 @@ def update_duel_result(did, result_data):
 def fetch_duels(tid):
     try: # Add error handling
         url = f"{DUEL_URL}?tid={tid}"
-        response = requests.get(url)
+        response = requests.get(url, headers=get_headers())
         return response.json() if response.status_code == 200 else []
     except requests.exceptions.RequestException as e:
         return []
