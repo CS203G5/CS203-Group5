@@ -12,3 +12,5 @@ openai==0.28
 websocket-client
 trueskill
 python-dotenv
+tiktoken
+pypdf
