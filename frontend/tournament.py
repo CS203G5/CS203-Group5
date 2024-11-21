@@ -231,14 +231,12 @@ def tournament_page():
                 selected_tournament_id = selected_tournaments[0]
                 # works
                 this_tournament_data = fetch_tournament(selected_tournament_id)
-                st.write(this_tournament_data)
-                st.write(selected_tournament_id)
                 if this_tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
                     response = requests.get(f"{DUEL_API}?tid={selected_tournament_id}", headers=headers)
 
-                    if response.status_code == 200 or response.status_code == 404:
+                    if response.status_code == 200:
                         st.write("No more matching can be done.")
                     else:
                         participants = fetch_participants_by_tournament(selected_tournament_id)
