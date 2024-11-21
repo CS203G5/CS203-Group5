@@ -37,7 +37,6 @@ jobs:
 
           # Navigate to the project directory and pull latest code
           cd ~/CS203-Group5
-          git pull origin ci-cd-integration          # testing branch
           git checkout localhost-ci-cd             # testing branch
           git pull origin localhost-ci-cd          # testing branch
           # git pull origin main          # uncomment for main branch
