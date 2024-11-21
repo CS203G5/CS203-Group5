@@ -227,12 +227,11 @@ def tournament_page():
         if selected_count == 1:
             # Randomize matches button
             if st.button("Match Participants"):
-                selected_tournament_id = selected_tournaments[0]
+                selected_tournament_id = selected_tournaments
                 tournament_data = fetch_tournament(selected_tournament_id)
                 if tournament_data:
                     # Fetch duels to check if the tournament ID is already in duels
                     headers = get_headers()
-                    st.write(selected_tournaments)
                     response = requests.get(f"{DUEL_API}?tid={selected_tournament_id}", headers=headers)
 
                     if response.status_code == 200:
