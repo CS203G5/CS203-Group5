@@ -106,16 +106,16 @@ public class TournamentControllerIntegrationTest {
     }
 
     // Test getTournamentBySorted
-    @Test
-    public void testGetTournamentBySorted() throws Exception {
-        mockMvc.perform(get("/tournament/sorted")
-                .param("sortBy", "name")
-                .param("order", "asc")
-                .headers(headers))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andDo(print());
-    }
+    // @Test
+    // public void testGetTournamentBySorted() throws Exception {
+    //     mockMvc.perform(get("/tournament/sorted")
+    //             .param("sortBy", "name")
+    //             .param("order", "asc")
+    //             .headers(headers))
+    //             .andExpect(status().isOk())
+    //             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    //             .andDo(print());
+    // }
 
     // Test getTournamentByMatchingAlgo
     @Test

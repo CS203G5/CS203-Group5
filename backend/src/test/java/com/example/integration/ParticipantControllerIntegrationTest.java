@@ -5,7 +5,6 @@ import com.example.participant.ParticipantController;
 import com.example.participant.ParticipantId;
 import com.example.participant.ParticipantService;
 
-import com.example.integration.CognitoAuthUtils;
 import com.example.profile.Profile; // Add this import statement
 import com.example.tournament.Tournament;
 import com.example.tournament.TournamentService;
@@ -14,14 +13,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Collections;
@@ -85,13 +82,11 @@ public class ParticipantControllerIntegrationTest {
     @Test
     void testGetParticipantsByTournamentId() throws Exception {
         Long tournamentId = 1L;
-        when(participantService.getParticipantsByTournamentId(tournamentId)).thenReturn(Collections.emptyList());
-
         mockMvc.perform(MockMvcRequestBuilders.get("/participants/tournament/{tournament_id}", tournamentId)
                 .headers(headers)  // Use the prepared headers with JWT token
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test

@@ -19,7 +19,6 @@ public class ParticipantController {
     TournamentService tournamentService;
     DuelService duelService;
 
-    @Autowired
     public ParticipantController(ParticipantService participantService, TournamentService tournamentService, DuelService duelService) {
         this.participantService = participantService;
         this.tournamentService = tournamentService;
@@ -38,7 +37,6 @@ public class ParticipantController {
 
     @GetMapping("/user/{userId}")
     public List<Participant> getParticipantsByUserId(@PathVariable Long user_id) {
-        // return participantService.getParticipantsByUserId(userId);
         return participantService.getParticipantsByUserId(user_id);
     }
 

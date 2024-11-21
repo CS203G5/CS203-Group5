@@ -1,18 +1,15 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Java CI with Maven
+name: Java CI with Maven and External Database for Testing
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - main
+      - localhost-ci-cd
   pull_request:
-    branches: [ "main" ]
+    branches: 
+      - main
+      - localhost-ci-cd
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,12 +17,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
+    - name: Set environment variables for database connection
+      env:
+        DB_HOST: ${{ secrets.PUBLIC_MYSQL_HOST }}
+        DB_PORT: ${{ secrets.MYSQL_PORT }}
+        DB_USER: ${{ secrets.MYSQL_USER }}
+        DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        DB_NAME: ${{ secrets.MYSQL_DATABASE }}
+      run: |
+        echo "Using external database at $DB_HOST:$DB_PORT"
+        echo "Database: $DB_NAME"
+
+    # Step 4: Build the Maven project
     - name: Build with Maven
       run: mvn -B package --file backend/pom.xml
+
+    # Step 5: Run tests (Integration tests that connect to the external MySQL database)
+    - name: Run Tests with Maven
+      env:
+        SPRING_DATASOURCE_URL: jdbc:mysql://${{ secrets.PUBLIC_MYSQL_HOST }}:${{ secrets.MYSQL_PORT }}/${{ secrets.MYSQL_DATABASE }}
+        SPRING_DATASOURCE_USERNAME: ${{ secrets.MYSQL_USER }}
+        SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      run: mvn test --file backend/pom.xml
