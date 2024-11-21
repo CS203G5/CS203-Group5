@@ -24,19 +24,10 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Set MySQL Connection Environment Variables
+      - name: Build and Test with Maven
+        working-directory: ./backend
         env:
-          DB_URL: ${{ secrets.TEST_MYSQL_URL }}
-          DB_USERNAME: ${{ secrets.MYSQL_USER }}
-          DB_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-        run: echo "Environment variables for MySQL set"
-
-      - name: Build with Maven
-        working-directory: ./backend  # Specify the backend folder
+          SPRING_PROFILES_ACTIVE: ci
         run: |
           mvn clean install -DskipTests  # Build the application
-
-      - name: Test with Maven
-        working-directory: ./backend  # Specify the backend folder
-        run: |
           mvn test  # Run the tests

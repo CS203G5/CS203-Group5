@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main  # Trigger deployment only on pushes to the main branch
-      - localhost-ci-cd  # Also trigger deployment on pushes to the ci-cd-integration branch for testing purposes
+      - ci-test  # Also trigger deployment on pushes to the ci-cd-integration branch for testing purposes
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -27,6 +27,7 @@ jobs:
           mvn -B package --file backend/pom.xml -DskipTests
           mkdir artifacts && cp backend/target/*.jar artifacts
           cd artifacts && ls
+      
       - name: Save artifact
         uses: actions/upload-artifact@v4
         with:
