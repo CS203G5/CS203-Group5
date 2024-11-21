@@ -201,13 +201,11 @@ def update_ratings(did, player1_time, player2_time):
     # Check if the rating is 0 and initialize accordingly
     if player1_profile['rating'] == 0:
         player1_rating = env.create_rating(0)
-        st.write(player1_rating)
     else:
         player1_rating = env.Rating(player1_profile['rating'], env.sigma)
     
     if player2_profile['rating'] == 0:
         player2_rating = env.create_rating(0)
-        st.write(player2_rating)
     else:
         player2_rating = env.Rating(player2_profile['rating'], env.sigma)
     
@@ -231,7 +229,8 @@ def update_ratings(did, player1_time, player2_time):
         st.error(e)
 
     if winner_response.status_code == 201 or 200 and loser_response.status_code == 201 or 200:
-        st.write(f"Ratings updated successfully for player {winner_id['profileId']} with rating {winner_rating.mu} and player {loser_id['profileId']} with rating {loser_rating.mu}")
+        st.success(f"player {winner_id['profileId']} has a rating of {winner_rating.mu}", icon="🎉")
+        st.success(f"Player {loser_id['profileId']} with rating {loser_rating.mu}", icon="😭")
     else:
         st.write(f"Error updating ratings: {winner_response.status_code}, {loser_response.status_code}")
 

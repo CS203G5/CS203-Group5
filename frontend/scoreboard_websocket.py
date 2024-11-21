@@ -38,7 +38,7 @@ def update_duel_result(did, result_data):
         headers = get_headers()
         url = f"{DUEL_URL}/{did}/result"
         response = requests.put(url, json=result_data, headers=headers)
-        st.success(F"Duel result updated successfully. {result_data}")
+        st.success("Duel result updated successfully.")
     except requests.exceptions.RequestException as e:
         st.warning({"error": "Failed to update duel result."})
 
