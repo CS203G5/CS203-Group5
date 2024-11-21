@@ -32,6 +32,10 @@ jobs:
         run: |
           echo "AWS credentials set."
 
+      - name: Build with Maven
+        run: |
+          mvn clean install -DskipTests
+  
       - name: Generate JWT Token
         run: |
           # You can either call a script or execute a Java class to generate the JWT token.
@@ -41,9 +45,9 @@ jobs:
           export JWT_TOKEN=$(mvn exec:java -Dexec.mainClass="com.yourpackage.CognitoAuthUtils" -Dexec.args="khairyo Hello12.")
           echo "JWT token generated: $JWT_TOKEN"
           echo "JWT_TOKEN=$JWT_TOKEN" >> $GITHUB_ENV  # Save the token as an environment variable for later steps
-
-      - name: Build and Test with Maven
-        working-directory: ./backend
+  
+      - name: Test with Maven
+        env:
+          JWT_TOKEN: ${{ env.JWT_TOKEN }}  # Pass the JWT token to the test environment
         run: |
-          mvn clean install -DskipTests  # Build the application
-          mvn clean test -Dspring.profiles.active=ci  # Run tests with the 'ci' profile
+          mvn clean test -Dspring.profiles.active=ci
