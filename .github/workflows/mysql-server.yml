@@ -3,8 +3,8 @@ name: Deploy SQL to EC2 MySQL
 on:
   push:
     branches:
-      - main
-      # - localhost-ci-cd
+      # - main
+      - ci-cd-integration
 
 jobs:
   deploy:

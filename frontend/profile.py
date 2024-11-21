@@ -75,11 +75,7 @@ def profile_page():
         username_input = st.text_input("Username", value=profile.get('username', ''), disabled=True)
         email_input = st.text_input("Email", value=profile.get('email', ''), disabled=True)
         bio_input = st.text_area("Bio", value=profile.get('bio', ''))
-        # privacy_settings_input = st.selectbox(
-        #     "Privacy Settings", 
-        #     privacy_options, 
-        #     index=privacy_options.index(privacy_settings)
-        # )
+
 
         if st.form_submit_button("Save"):
             data = {

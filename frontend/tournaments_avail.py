@@ -19,7 +19,6 @@ def get_headers():
         return {}
 
 def get_all_tournaments():
-
     # Fetch all tournaments data
     try:
         headers = get_headers()
